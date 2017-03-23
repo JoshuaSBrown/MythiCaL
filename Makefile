@@ -1,8 +1,8 @@
 CC=g++
-CFLAGS = -Wall -Wextra -std=c++11 -pedantic -g 
+CXXFLAGS = -Wall -Wextra -std=c++11 -pedantic -g
 
-PROG = testCluster.cpp
-SRC = $(PROG).c libCluster.cpp
+PROG = testCluster
+SRC = $(PROG).cpp libCluster.cpp
 HDR = cluster.h
 OBJ = $(SRC:.c=.o)
 
@@ -11,6 +11,9 @@ $(OBJ): $(HDR)
 TAGS: $(SRC) $(HDR)
 	etags &^
 
+
 .PHONY: clean
 clean:
-	$(RM) $(PROG) $(OBJ) 
+	$(RM) $(OBJ)
+
+

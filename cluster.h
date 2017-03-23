@@ -8,7 +8,7 @@ struct site{
 	int visitFreq;
 
 	site(){};//default constructor
-	
+
 	//constructor
 	site(int sId, double* nRates, int* nId, int sizenId, int vFreq){
 		//error handling?
@@ -24,7 +24,7 @@ struct site{
 
 class cluster {
 	public:
-		cluster(int siteId1, double * neighRates1, int * neighId1, int sizenId1, int visitFreq1, int siteId2, double * neighRates2, int * neighId2, int sizenId2, int visitFreq2); //constructor  passed certain values? site ids the rates
+		cluster(int siteId1, int * neighIds1,double * neighRates1, int sizeNeighId1,int visitFreq1, int siteId2, int * neighIds2,double * neighRates2, int sizenId2, int visitFreq2); //constructor  passed certain values? site ids the rates
 		~cluster(); //deconstructor
 		// test function and simulation fuction
 
@@ -34,29 +34,27 @@ class cluster {
 
 	private:
 		int clusterId;
-		int thresh;
 		int visitFreqCluster;
 		//all other funtions
-		
-		site * siteInCluster;
-		int potentialCluster(int visitFreq1, int visitFreq2, int thresh);
+		site siteInCluster[100];
+//		int potentialCluster(int visitFreq1, int visitFreq2, int thresh);
 //INPUT: the visitation frequency of site 1 and of site 2 and the threshold of what determines a cluster
 //OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
 
-		int clusterOrSite(int clusterId1, int clusterId2);
+//		int clusterOrSite(int clusterId1, int clusterId2);
 //INPUT: the cluster Id of one site, the cluster Id of another site
 //OUTPUT: -1 if mal-input or error, 1 if site to site interaction, 2 if site-cluster, 3 if cluster-cluster
 
-		int neighSiteCluster(int * neighIds1, int * neighIds2, int * neighCluster);
-//INPUT: neighbors ids of sites 1 and 2, an array to write all the neighbors to 
-//OUTPUT: -1 if mal-input or error, 1 if successful 
+//		int neighSiteCluster(int * neighIds1, int * neighIds2, int * neighCluster);
+//INPUT: neighbors ids of sites 1 and 2, an array to write all the neighbors to
+//OUTPUT: -1 if mal-input or error, 1 if successful
 
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster
 //pass maybe cluster struct and return array of site ratios of the sites hop off/hop on see matlab file
 //
-//fn 2 determine sites in cluster and return list of id sites in cluster, 
+//fn 2 determine sites in cluster and return list of id sites in cluster,
 //
-//struct cluster of 2 lsits ids in cluster and neighbors, int id of cluster, int # of sites in cluster, int # of neighbors 
+//struct cluster of 2 lsits ids in cluster and neighbors, int id of cluster, int # of sites in cluster, int # of neighbors
 //
 //create a repository and error handeling
 //
@@ -116,14 +114,14 @@ class cluster {
 // with arrays or linked lists  first elemetn cluster id
 //
 //time off(tprob off), id which it jumps to
-};	
+};
 
-int setThresh(int n);   
+int setThresh(int n);
 // sets thresh as a static for all functions, not in class cluster
 
 // test function and simulation fuction
 
-int testCluster(void);
+//int testCluster(void);
 //runs all test cases of every function, prints out correct output and what the function prints like such f: (correct) real
 //any errors will be reported in the error stream with the funciton call
 
