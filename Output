@@ -1,5 +1,0 @@
-g++ -Wall -Wextra -std=c++11 -pedantic -g    testCluster.cpp libCluster.cpp   -o testCluster
-testCluster.cpp: In function ‘int main()’:
-testCluster.cpp:18:6: warning: unused variable ‘site’ [-Wunused-variable]
-  int site;
-      ^

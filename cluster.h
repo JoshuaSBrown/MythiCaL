@@ -36,8 +36,8 @@ class cluster {
 		int clusterId;
 		int visitFreqCluster;
 		//all other funtions
-		site siteInCluster[100];
-//		int potentialCluster(int visitFreq1, int visitFreq2, int thresh);
+		site * siteInCluster[100];
+		int potentialCluster(int visitFreq1, int visitFreq2);
 //INPUT: the visitation frequency of site 1 and of site 2 and the threshold of what determines a cluster
 //OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
 

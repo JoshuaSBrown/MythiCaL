@@ -1,7 +1,14 @@
-#include <stdio.h>
-#include<stdlib.h>
+#include <iostream>
 
 #include "cluster.h"
+
+using namespace std;
+
+#ifdef _T_
+#define Var 1
+#else
+#define Var 0
+#endif
 /*
 int testCluster(cluster * c){
 	printf("potentialCluster(10,-10,10): (-1) %d\n",c->potentialCluster(10,-10));
@@ -12,9 +19,11 @@ int testCluster(cluster * c){
 	printf("clusterOrSite(1,-1): (2) %d\n",c->clusterOrSite(1,-1));
 	printf("clusterOrSite(1,1): (3) %d\n",c->clusterOrSite(1,1));
 	return 0;
-}*/
-
+}
+*/
 int main(void){
-	int site;
-	return 0;
+    if(Var==1) cout<<"Yes"<<endl;
+    else cout<<"No"<<endl;
+    setThresh(10);
+    return 0;
 }
