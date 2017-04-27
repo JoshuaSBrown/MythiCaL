@@ -35,9 +35,8 @@ int main(void){
     int neighId2[]={1,-1};
     cluster test = cluster(siteId1,neighId1,neighRates,size,visitFreq,siteId2,neighId2,neighRates,size,visitFreq);
     cout<<test.getClusterId()<<endl;
-   //doesnt work, might not be needed, think about how to access clusters, gui? interface? direct pointers? should cluster still be a class?
-   // site ** sites=test.getSitesInCluster();
-   // cout<<(*sites)->siteId<<endl;
+    site ** sites=test.getSitesInCluster();
+    cout<<(*sites)->siteId<<endl;
    // cout<<site[1]->siteId<<endl;
     return 0;
 }

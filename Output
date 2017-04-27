@@ -1,0 +1,17 @@
+g++ -Wall -Wextra -std=c++11 -pedantic -g  -D _E_ -c libCluster.cpp
+In file included from libCluster.cpp:5:0:
+cluster.h:6:20: warning: ISO C++ forbids zero-size array ‘neighRates’ [-Wpedantic]
+  double neighRates[];
+                    ^
+cluster.h:7:15: warning: ISO C++ forbids zero-size array ‘neighIds’ [-Wpedantic]
+  int neighIds[];
+               ^
+g++    -c -o testCluster.o testCluster.cpp
+g++ -Wall -Wextra -std=c++11 -pedantic -g  -D _E_ -o testCluster libCluster.o testCluster.cpp
+In file included from testCluster.cpp:3:0:
+cluster.h:6:20: warning: ISO C++ forbids zero-size array ‘neighRates’ [-Wpedantic]
+  double neighRates[];
+                    ^
+cluster.h:7:15: warning: ISO C++ forbids zero-size array ‘neighIds’ [-Wpedantic]
+  int neighIds[];
+               ^

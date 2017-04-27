@@ -3,8 +3,8 @@
 
 struct site{
 	int siteId;
-	double neighRates[];
-	int neighIds[];
+	double * neighRates;
+	int * neighIds;
 	int visitFreq;
 
 	site(){};//default constructor
@@ -15,8 +15,8 @@ struct site{
 		siteId=sId;
 		visitFreq=vFreq;
 		for(int i =0;i<sizenId;i++){
-			neighRates[i]=nRates[i];
-			neighIds[i]=nId[i];
+		//	neighRates[i]=nRates[i];
+		//	neighIds[i]=nId[i];
 			i++;
 		}
 	}

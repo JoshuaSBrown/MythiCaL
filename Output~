@@ -1,0 +1,52 @@
+g++    -c -o testCluster.o testCluster.cpp
+testCluster.cpp: In function ‘int main()’:
+testCluster.cpp:30:21: error: expected identifier before numeric constant
+     int neighId1[]=[2,-1];
+                     ^
+testCluster.cpp:30:22: error: expected ‘]’ before ‘,’ token
+     int neighId1[]=[2,-1];
+                      ^
+testCluster.cpp: In lambda function:
+testCluster.cpp:30:22: error: expected ‘{’ before ‘,’ token
+testCluster.cpp: In function ‘int main()’:
+testCluster.cpp:30:22: warning: lambda expressions only available with -std=c++11 or -std=gnu++11 [enabled by default]
+testCluster.cpp:30:22: error: initializer fails to determine size of ‘neighId1’
+testCluster.cpp:30:22: error: array must be initialized with a brace-enclosed initializer
+testCluster.cpp:30:23: error: expected unqualified-id before ‘-’ token
+     int neighId1[]=[2,-1];
+                       ^
+testCluster.cpp:31:26: error: expected identifier before numeric constant
+     double neighRates[]=[1.0,1.0];
+                          ^
+testCluster.cpp:31:29: error: expected ‘]’ before ‘,’ token
+     double neighRates[]=[1.0,1.0];
+                             ^
+testCluster.cpp: In lambda function:
+testCluster.cpp:31:29: error: expected ‘{’ before ‘,’ token
+testCluster.cpp: In function ‘int main()’:
+testCluster.cpp:31:29: warning: lambda expressions only available with -std=c++11 or -std=gnu++11 [enabled by default]
+testCluster.cpp:31:29: error: initializer fails to determine size of ‘neighRates’
+testCluster.cpp:31:29: error: array must be initialized with a brace-enclosed initializer
+testCluster.cpp:31:30: error: expected unqualified-id before numeric constant
+     double neighRates[]=[1.0,1.0];
+                              ^
+testCluster.cpp:35:20: error: expected identifier before numeric constant
+     int neightId2=[1,-1];
+                    ^
+testCluster.cpp:35:21: error: expected ‘]’ before ‘,’ token
+     int neightId2=[1,-1];
+                     ^
+testCluster.cpp: In lambda function:
+testCluster.cpp:35:21: error: expected ‘{’ before ‘,’ token
+testCluster.cpp: In function ‘int main()’:
+testCluster.cpp:35:21: warning: lambda expressions only available with -std=c++11 or -std=gnu++11 [enabled by default]
+testCluster.cpp:35:21: error: invalid user-defined conversion from ‘main()::__lambda2’ to ‘int’ [-fpermissive]
+testCluster.cpp:35:21: note: candidate is: main()::__lambda2::operator void (*)()() const <near match>
+testCluster.cpp:35:21: note:   no known conversion for implicit ‘this’ parameter from ‘void (*)()’ to ‘int’
+testCluster.cpp:35:22: error: expected unqualified-id before ‘-’ token
+     int neightId2=[1,-1];
+                      ^
+testCluster.cpp:36:79: error: ‘neighId2’ was not declared in this scope
+     cluster test = cluster(siteId1,neighId1,neighRates,size,visitFreq,siteId2,neighId2,neighRates,size,visitFreq);
+                                                                               ^
+make: *** [testCluster.o] Error 1
