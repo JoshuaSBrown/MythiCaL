@@ -28,6 +28,7 @@ class cluster {
 		~cluster(); //deconstructor
 		int getClusterId();
 		site ** getSitesInCluster();
+		int printClusterInfo();
 		// test function and simulation fuction
 
 //		int testCluster(void);

@@ -33,10 +33,16 @@ cluster::cluster(int siteId1,int * neighId1, double * neighRates1, int sizen1, i
 	site  * tmp=new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
 	site * tmp2= new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
 	cout<<"B"<<endl;
+	/*
 	if(potentialCluster(tmp,tmp2)){
 			siteInCluster[0]= tmp;
+			cout<<tmp<<endl;
 			siteInCluster[1]= tmp2;
+			cout<<tmp2<<endl;
                         }
+	*/
+	siteInCluster[0]=tmp;
+	siteInCluster[1]=tmp2;	
 }
 
 cluster::~cluster(){
@@ -63,6 +69,20 @@ int testCluster(){
 }
 
 */
+
+int cluster::printClusterInfo(){
+	cout<<"Cluster ID: "<<clusterId<<endl;
+	cout<<"Visit Frequency to Cluster: "<< visitFreqCluster<<endl;
+	cout<<"Sites in Cluster: "<<endl;
+	int i=0;
+	while(siteInCluster[i]!=NULL){
+		cout<<siteInCluster[i]<<endl;
+		cout<<"Site Id: "<<siteInCluster[i]->siteId<<"Visit Frequency: "<<siteInCluster[i]->visitFreq<<endl;
+		i++;
+	}
+	return 1;
+}
+
 
 int cluster::potentialCluster(site * site1, site * site2){
 	if(site1->visitFreq<0||site2->visitFreq<0||thresh<0){
@@ -92,9 +112,11 @@ int cluster::neighSiteCluster(site * site1, site * site2, int * neighCluster){
 	}
 	while(site1->neighIds[i]!=-1){ //Use -1 as a terminator
 		neighCluster[i]=site1->neighIds[i];
+		i++;
 	}
 	while(site2->neighIds[j]!=-1){
 		neighCluster[i+j]=site2->neighIds[j];
+		j++;
 	}
 	return 1;
 }

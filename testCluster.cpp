@@ -39,5 +39,8 @@ int main(void){
    // site ** sites=test.getSitesInCluster();
    // cout<<(*sites)->siteId<<endl;
    // cout<<site[1]->siteId<<endl;
+   
+    test.printClusterInfo();
+
     return 0;
 }

@@ -1,0 +1,18 @@
+OPV Coarse Grain
+Riley Hadjis
+
+
+Note use:
+	make VAR="-D _E_" 
+to enalbe error outut to the error stream. 
+
+Note use:
+	make &>Output
+to output all warnings and errors to text file Output
+
+___________________Update Log_________________________
+
+6/12
+
+
+
