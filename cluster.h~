@@ -24,16 +24,7 @@ struct site{
 
 class cluster {
 	public:
-		cluster(int      siteId1
-			int *    neighIds1
-			double * neighRates1
-			int      sizeNeighId1
-			int      visitFreq1
-			int      siteId2
-			int *    neighIds2
-			double * neighRates2
-			int      sizenId2
-			int      visitFreq2); //constructor  passed certain values? site ids the rates
+		cluster(int siteId1, int * neighIds1,double * neighRates1, int sizeNeighId1,int visitFreq1, int siteId2, int * neighIds2,double * neighRates2, int sizenId2, int visitFreq2); //constructor  passed certain values? site ids the rates
 		~cluster(); //deconstructor
 		int getClusterId();
 		site ** getSitesInCluster();
@@ -50,11 +41,11 @@ class cluster {
 		site * siteInCluster[100];
 
 		//all other funtions
-		int potentialCluster(visitFreq1,visitFreq2);
+		int potentialCluster(site * site1, site * site2);
 			//INPUT: the visitation frequency of site 1 and of site 2
 			//OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
 
-		int clusterOrSite(int siteId1, int siteId2);
+		int clusterOrSite(int clusterId1, int clusterId2);
 			//INPUT: the cluster Id of one site, the cluster Id of another site
 			//OUTPUT: -1 if mal-input or error, 1 if site to site interaction, 2 if site-cluster, 3 if cluster-cluster
 

@@ -26,20 +26,13 @@ int setThresh(int n){
     }
 }
 
-cluster::cluster(int     siteId1
-		int *    neighId1
-		double * neighRates1
-		int      sizen1
-		int      visitFreq1
-		int      siteId2
-		int *    neighId2
-		double * neighRates2
-		int      sizen2
-		int      visitFreq2){
+cluster::cluster(int siteId1,int * neighId1, double * neighRates1, int sizen1, int visitFreq1, int siteId2, int * neighId2, double * neighRates2, int sizen2, int visitFreq2){
+	cout<<"A"<<endl;
 	clusterId=clusterIdCounter;
 	clusterIdCounter++;
 	site  * tmp=new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
 	site * tmp2= new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
+	cout<<"B"<<endl;
 	/*
 	if(potentialCluster(tmp,tmp2)){
 			siteInCluster[0]= tmp;
@@ -91,12 +84,12 @@ int cluster::printClusterInfo(){
 }
 
 
-int cluster::potentialCluster(int visitFreq1, int visitFreq2){
-	if(visitFreq1<0||visitFreq2<0||thresh<0){
+int cluster::potentialCluster(site * site1, site * site2){
+	if(site1->visitFreq<0||site2->visitFreq<0||thresh<0){
 		fprintf(stderr,"ERROR in potentialCluster\n");//find a way to turn off in preprocessor
 		return -1;
 	}
-	if((visitFreq1 > thresh) && (visitFreq2 > thresh))
+	if((site1->visitFreq > thresh) && (site2->visitFreq > thresh))
 		return 1;
 	return 0;
 }

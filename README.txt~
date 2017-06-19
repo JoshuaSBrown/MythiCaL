@@ -13,6 +13,17 @@ to output all warnings and errors to text file Output
 ___________________Update Log_________________________
 
 6/12
+Additions:
+	started to fix some issues in the data struct, it still needs work
+	wrote print info function to use in testind
+To do:
+	clean up testing flags in cluster contructer
+	clean up constructer, both site and cluster
+	find way around siteInCluster capped at 100 or a fixed value linked list?
+	write a more fluid test function
+	potentialCluster doesnt work
+	figure EXACTLY which functions need to be public and which could be private
 
-
+6/18
+Additions:
 

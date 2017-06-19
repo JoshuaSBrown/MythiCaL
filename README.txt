@@ -24,3 +24,17 @@ To do:
 	potentialCluster doesnt work
 	figure EXACTLY which functions need to be public and which could be private
 
+6/18
+Additions:
+	fixed the readability of some of the fuctions
+	started to tix the potential cluster and cluster or site functions
+	cleaned up error handeling a little
+	thought and diagramed what the overall hierarchy of the code should look like:
+				
+				User---package opv class---clusters using vector wrapper--- site struct
+
+To do:
+	Implement the above heirarchy, starting with reconrstructin the site struct
+	replace all arrays with vectors
+	clean up test code
+
