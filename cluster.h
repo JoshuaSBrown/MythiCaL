@@ -1,10 +1,12 @@
 #ifndef CLUSTER_H_
 #define CLUSTER_H_
 
+using namespace std;
+
 struct site{
 	int siteId;
 	double neighRates[];
-	int neighIds[];
+	int neighIds[]; //fix this use vector
 	int visitFreq;
 
 	site(){};//default constructor
@@ -22,6 +24,7 @@ struct site{
 	}
 };
 
+
 class cluster {
 	public:
 		cluster(int      siteId1
@@ -36,31 +39,22 @@ class cluster {
 			int      visitFreq2); //constructor  passed certain values? site ids the rates
 		~cluster(); //deconstructor
 		int getClusterId();
-		site ** getSitesInCluster();
+		//isite ** getSitesInCluster();
 		int printClusterInfo();
 		// test function and simulation fuction
+		double dwellTime();
+		//returns 1/sum of rates to neighbors in the cluster
 
 //		int testCluster(void);
 //runs all test cases of every function, prints out correct output and what the function prints like such f: (correct) real
 //any errors will be reported in the error stream with the funciton call
 
 	private:
-		int clusterId;
+		int clusterId; //should also be included in site struct
 		int visitFreqCluster;
-		site * siteInCluster[100];
-
-		//all other funtions
-		int potentialCluster(visitFreq1,visitFreq2);
-			//INPUT: the visitation frequency of site 1 and of site 2
-			//OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
-
-		int clusterOrSite(int siteId1, int siteId2);
-			//INPUT: the cluster Id of one site, the cluster Id of another site
-			//OUTPUT: -1 if mal-input or error, 1 if site to site interaction, 2 if site-cluster, 3 if cluster-cluster
-
-		int neighSiteCluster(site * site1, site * site2, int * neighCluster);
-			//INPUT: neighbors ids of sites 1 and 2, an array to write all the neighbors to
-			//OUTPUT: -1 if mal-input or error, 1 if successful
+		vector<site *> sitesInCluster;
+		//add list of neighbors, number of neighbors
+		//include an add to cluster funtion to add neighbors of site
 
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster
 //pass maybe cluster struct and return array of site ratios of the sites hop off/hop on see matlab file
@@ -88,6 +82,8 @@ class cluster {
 //calculate total prob off cluster to a given neighbor n
 //	1. sum hop rates off the cluster
 //	2. calc prob hop to neigh off cluster ex for neigh1 prob neigh=dwellofsite(1)/sum(dwell + probonsite1*(rate from site1 to neigh1/tot    tot =sum of hop rates off
+//
+//is site(1) above refer to as the cluster or a sight in the cluster?
 //
 //note: if charge is within cluster, most likeyl on which cluster, where most likely to jump off cluster to which site?, dwell time on cluster as single site
 //
@@ -131,6 +127,21 @@ class cluster {
 
 int setThresh(int n);
 // sets thresh as a static for all functions, not in class cluster
+
+
+//all other funtions
+int potentialCluster(int visitFreq1,int visitFreq2);
+	//INPUT: the visitation frequency of site 1 and of site 2
+	//OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
+
+int clusterOrSite(int siteId1, int siteId2);
+	//INPUT: the cluster Id of one site, the cluster Id of another site
+	//OUTPUT: -1 if mal-input or error, 1 if site to site interaction, 2 if site-cluster, 3 if cluster-cluster
+
+//int neighSiteCluster(site * site1, site * site2, int * neighCluster);
+	//INPUT: neighbors ids of sites 1 and 2, an array to write all the neighbors to
+	//OUTPUT: -1 if mal-input or error, 1 if successful
+
 
 // test function and simulation fuction
 

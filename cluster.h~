@@ -1,6 +1,8 @@
 #ifndef CLUSTER_H_
 #define CLUSTER_H_
 
+using namespace std;
+
 struct site{
 	int siteId;
 	double neighRates[];
@@ -22,12 +24,22 @@ struct site{
 	}
 };
 
+
 class cluster {
 	public:
-		cluster(int siteId1, int * neighIds1,double * neighRates1, int sizeNeighId1,int visitFreq1, int siteId2, int * neighIds2,double * neighRates2, int sizenId2, int visitFreq2); //constructor  passed certain values? site ids the rates
+		cluster(int      siteId1
+			int *    neighIds1
+			double * neighRates1
+			int      sizeNeighId1
+			int      visitFreq1
+			int      siteId2
+			int *    neighIds2
+			double * neighRates2
+			int      sizenId2
+			int      visitFreq2); //constructor  passed certain values? site ids the rates
 		~cluster(); //deconstructor
 		int getClusterId();
-		site ** getSitesInCluster();
+		//isite ** getSitesInCluster();
 		int printClusterInfo();
 		// test function and simulation fuction
 
@@ -38,20 +50,7 @@ class cluster {
 	private:
 		int clusterId;
 		int visitFreqCluster;
-		site * siteInCluster[100];
-
-		//all other funtions
-		int potentialCluster(site * site1, site * site2);
-			//INPUT: the visitation frequency of site 1 and of site 2
-			//OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
-
-		int clusterOrSite(int clusterId1, int clusterId2);
-			//INPUT: the cluster Id of one site, the cluster Id of another site
-			//OUTPUT: -1 if mal-input or error, 1 if site to site interaction, 2 if site-cluster, 3 if cluster-cluster
-
-		int neighSiteCluster(site * site1, site * site2, int * neighCluster);
-			//INPUT: neighbors ids of sites 1 and 2, an array to write all the neighbors to
-			//OUTPUT: -1 if mal-input or error, 1 if successful
+		vector<site *> sitesInCluster;
 
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster
 //pass maybe cluster struct and return array of site ratios of the sites hop off/hop on see matlab file
@@ -122,6 +121,21 @@ class cluster {
 
 int setThresh(int n);
 // sets thresh as a static for all functions, not in class cluster
+
+
+//all other funtions
+int potentialCluster(int visitFreq1,int visitFreq2);
+	//INPUT: the visitation frequency of site 1 and of site 2
+	//OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
+
+int clusterOrSite(int siteId1, int siteId2);
+	//INPUT: the cluster Id of one site, the cluster Id of another site
+	//OUTPUT: -1 if mal-input or error, 1 if site to site interaction, 2 if site-cluster, 3 if cluster-cluster
+
+//int neighSiteCluster(site * site1, site * site2, int * neighCluster);
+	//INPUT: neighbors ids of sites 1 and 2, an array to write all the neighbors to
+	//OUTPUT: -1 if mal-input or error, 1 if successful
+
 
 // test function and simulation fuction
 

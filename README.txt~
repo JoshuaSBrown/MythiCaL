@@ -12,6 +12,14 @@ to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
 
+7/24
+Additions:
+	reworked the cluster class and implemented vector use
+To do:
+	squash bugs (pushback -> push_back, remove cluster::)
+	write test code
+	start on real functions
+
 6/12
 Additions:
 	started to fix some issues in the data struct, it still needs work
@@ -26,4 +34,15 @@ To do:
 
 6/18
 Additions:
+	fixed the readability of some of the fuctions
+	started to tix the potential cluster and cluster or site functions
+	cleaned up error handeling a little
+	thought and diagramed what the overall hierarchy of the code should look like:
+				
+				User---package opv class---clusters using vector wrapper--- site struct
+
+To do:
+	Implement the above heirarchy, starting with reconrstructin the site struct
+	replace all arrays with vectors
+	clean up test code
 

@@ -11,6 +11,32 @@ Note use:
 to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
+7/25
+Additions:
+	Finished the cluster class
+	Wrote the dwell time function
+	began Pval function
+To do:
+	test code
+	squash bugs
+	make clusterId apart of site
+	add to cluster function
+	functions have the following dependencies
+
+Name:         | Dwell time | Pvals for neighbors | P hop to neigh      | 
+Dependencies: | none       | none                | Dwell time and Pval |
+
+Name:         | Prob off cluster    | Convergence     | Escape Time | escape cluster |
+Dependencies: | Dwell time and Pval | Pvals and Phops | Phops       | escapeTime     |  
+	
+
+7/24
+Additions:
+	reworked the cluster class and implemented vector use
+To do:
+	squash bugs (pushback -> push_back, remove cluster::)
+	write test code
+	start on real functions
 
 6/12
 Additions:

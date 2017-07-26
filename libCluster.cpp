@@ -48,8 +48,8 @@ cluster::cluster(int     siteId1
 			cout<<tmp2<<endl;
                         }
 	*/
-	siteInCluster[0]=tmp;
-	siteInCluster[1]=tmp2;	
+	sitesInCluster.pushback(tmp);
+	sitesInCluster.pushback(tmp2);	
 }
 
 cluster::~cluster(){
@@ -59,9 +59,12 @@ int cluster::getClusterId(){
 	return clusterId;
 }
 
+/*
 site ** cluster::getSitesInCluster(){
 	return siteInCluster;
 }
+
+*/
 
 /*
 int testCluster(){
@@ -81,11 +84,9 @@ int cluster::printClusterInfo(){
 	cout<<"Cluster ID: "<<clusterId<<endl;
 	cout<<"Visit Frequency to Cluster: "<< visitFreqCluster<<endl;
 	cout<<"Sites in Cluster: "<<endl;
-	int i=0;
-	while(siteInCluster[i]!=NULL){
+	for(int i = 0;i < siteInCluster.size(); i++){
 		cout<<siteInCluster[i]<<endl;
 		cout<<"Site Id: "<<siteInCluster[i]->siteId<<"Visit Frequency: "<<siteInCluster[i]->visitFreq<<endl;
-		i++;
 	}
 	return 1;
 }
@@ -111,6 +112,7 @@ int cluster::clusterOrSite(int clusterId1, int clusterId2){
 	return 3;
 }
 
+/*
 int cluster::neighSiteCluster(site * site1, site * site2, int * neighCluster){
 	int i=0, j=0;
 	if(site1 ==NULL ||site2==NULL||neighCluster==NULL){
@@ -127,4 +129,21 @@ int cluster::neighSiteCluster(site * site1, site * site2, int * neighCluster){
 	}
 	return 1;
 }
+*/
+
+double cluster::dwellTime(){
+	site * tmp;
+	double sum;
+	for(int i =0; i < sitesInCluster; i++){
+		tmp=sitesInCluster[i];
+		for(int j =0; j < tmp->sizenId; j++){
+			sum =+ neighRates[j];
+		}
+	}
+	return (1/sum);
+}
+
+double * cluster::pVals(){
+	//cluster Id part of site?
+
 
