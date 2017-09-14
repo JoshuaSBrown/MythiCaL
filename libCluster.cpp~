@@ -130,3 +130,50 @@ int cluster::neighSiteCluster(site * site1, site * site2, int * neighCluster){
 	return 1;
 }
 */
+
+double cluster::dwellTime(){
+	site * tmp;
+	double sum;
+	for(int i =0; i < sitesInCluster; i++){
+		tmp=sitesInCluster[i];
+		for(int j =0; j < tmp->sizenId; j++){
+			sum =+ neighRates[j];
+		}
+	}
+	return (1/sum);
+}
+
+double cluster::probHop(site * shipping, site * recieving){ //return an array?
+	for(int i = 0; i++; i< SitesInCluster.size()){ //check
+		site * tmp = SitesIncluser.pop();
+		if(tmp == recieving){
+			if(Err) cout<<"Target not conencted to cluster"<<endl;
+			return -1;
+		}
+	}
+	for(int i = 0; i++;i<shipping->sizenId){ //combine all for loops
+		if(recieving->sId==shipping->nId[i]) int count = i;
+	}
+	int totalRates;
+	for(int i =0; i++; i<shipping->sizenId){
+		totalRates+=shipping->nRates[i];
+	}
+	return shipping->nRates[count]/totalRates;
+}
+
+double cluster::hopOffCluster(site * target){
+	site * tmp;
+	int totalRates=0;
+	for(int i =0;i++;i<SitesInCluster.size()){ //figure out pops, pushbacks, and .size() thing
+		tmp=SitesInCluster.pop(); 
+		for(int j =0; j++; j< sizen){
+			totalRates+=nRates[i]; //could calculate at instantation?
+		}
+	}
+	//find way to get target to cluster rate
+	return targetToCluster/totalRates
+}
+
+double cluster::escapeTime(site * jail){
+
+

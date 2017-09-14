@@ -68,12 +68,25 @@ class cluster {
 //dwell time 1/sum of rates; list of neighbor rates; return double
 //
 //calculate pvals for site rate(#)/sum of rates site #; list of neighbor hop rates, out put an array
+//do for all sites in and out the cluster
 //
 //calculate p hop off given lisst of neigh rates for a site, output an array
 //
 //
+//Look here 
+//dwell time = 1/(sum of rates to neighbors)
+//site prob hop = rate to specific site / (sum of rates to all neighbors)
+//prob to hop off cluster = rate to hop to neighbor from cluster / (sum of rates to all neighbors to cluster)
+//NOTE: prob hop off cluster to site in cluster is 0
+//prob on site INITIALLY is 1/number of sites in cluster
+//run convergence to fix prob on site in cluster
+//t escape = 1/(rates to escape from site out of cluster)
+//prob off cluster on neighbor = prob on site in cluster * (dwell time of site in cluster/total dwell time of all sites in cluster) * (rate off to neighbor from site/ total rate off cluster to neighbors)
+//
+//Return prob on site in cluster prob off cluster on neighbor
+//
 //convergence
-//	1. prob on site is 1/(number of sites in cluster)
+//	1. prob on site is 1/(number of sites in cluster) (only intially)
 //	2. site 1 eg (prob hope to site 1)*(prob on site 2)+(prob hppe to site 1)(prob on site 5)
 //	3.Total (new site prob)     total=site1prob+site2prob...
 //	4.probsite1=site1prob/total + probsite1 ....

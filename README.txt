@@ -11,6 +11,16 @@ Note use:
 to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
+9/13
+Additions:
+	Prob hop function
+	Prob hop off function
+	started escape time
+To do:
+	consolidate functions that are actually needed
+	refresh the data struct and class go over old code and notes of how to
+	fix shit ton of bugs
+
 7/25
 Additions:
 	Finished the cluster class
@@ -27,7 +37,7 @@ Name:         | Dwell time | Pvals for neighbors | P hop to neigh      |
 Dependencies: | none       | none                | Dwell time and Pval |
 
 Name:         | Prob off cluster    | Convergence     | Escape Time | escape cluster |
-Dependencies: | Dwell time and Pval | Pvals and Phops | Phops       | escapeTime     |  
+Dependencies: | Dwell time and Pval | Pvals and Phops | Phops       |escapeTime     |  
 	
 
 7/24
