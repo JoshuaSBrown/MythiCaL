@@ -12,6 +12,14 @@ to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
 9/13
+Additions:
+	Prob hop function
+	Prob hop off function
+	started escape time
+To do:
+	consolidate functions that are actually needed
+	refresh the data struct and class go over old code and notes of how to
+	fix shit ton of bugs
 
 7/25
 Additions:

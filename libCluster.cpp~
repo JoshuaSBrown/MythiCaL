@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <vector> 2
 
 #include "cluster.h"
-
+ 
 using namespace std;
 
 #ifdef _E_
@@ -15,41 +16,35 @@ using namespace std;
 static int clusterIdCounter = 0;
 static int thresh = 0;
 
-int setThresh(int n){
+int setT 2hresh(int n){
     if(n>0){
         thresh=n;
-        if(Err==1) cout<<"Thresh hold is: "<<thresh<<endl;
+        if 2(Err==1) cout<<"Thresh hold is: "<<thresh<<endl;
         return 1;
     }else{
         if(Err==1) cerr<<"ERROR in setThresh"<<endl;
         return 0;
     }
-}
+} 
 
 cluster::cluster(int     siteId1
-		int *    neighId1
+ 		int *    neighId1
 		double * neighRates1
 		int      sizen1
-		int      visitFreq1
+ 		int      visitFreq1
 		int      siteId2
 		int *    neighId2
-		double * neighRates2
+ 		double * neighRates2
 		int      sizen2
 		int      visitFreq2){
-	clusterId=clusterIdCounter;
+ 		clusterId=clusterIdCounter;
 	clusterIdCounter++;
-	site  * tmp=new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
-	site * tmp2= new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
-	/*
-	if(potentialCluster(tmp,tmp2)){
-			siteInCluster[0]= tmp;
-			cout<<tmp<<endl;
-			siteInCluster[1]= tmp2;
-			cout<<tmp2<<endl;
-                        }
-	*/
-	sitesInCluster.pushback(tmp);
-	sitesInCluster.pushback(tmp2);	
+	site  * tmp = new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
+	site * tmp2 = new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
+	shared_ptr<site> tmp = site(
+	//create cluster then add
+	sitesInCluster.push_back(tmp);
+	sitesInCluster.push_back(tmp2);	
 }
 
 cluster::~cluster(){

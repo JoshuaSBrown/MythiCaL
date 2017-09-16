@@ -3,6 +3,10 @@
 
 using namespace std;
 
+//functions needed:
+//dwell time
+//prob hop off to 
+
 struct site{
 	int siteId;
 	double neighRates[];
