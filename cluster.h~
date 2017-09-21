@@ -1,6 +1,9 @@
 #ifndef CLUSTER_H_
 #define CLUSTER_H_
 
+#include <vector>
+#include <memory>
+
 using namespace std;
 
 //functions needed:
@@ -9,39 +12,40 @@ using namespace std;
 
 struct site{
 	int siteId;
-	double neighRates[];
-	int neighIds[]; //fix this use vector
+	vector<double> neighRates;
+	vector<int> neighIds; 
 	int visitFreq;
 
 	site(){};//default constructor
 
 	//constructor
-	site(int sId, double* nRates, int* nId, int sizenId, int vFreq){
+	site(int sId, vector<double> nRates, vector<int> nId, int vFreq){
 		//error handling?
 		siteId=sId;
 		visitFreq=vFreq;
-		for(int i =0;i<sizenId;i++){
-			neighRates[i]=nRates[i];
-			neighIds[i]=nId[i];
-			i++;
-		}
+		/*
+		for(int i; i<nId.size(); i++){
+			neighRates.push_back(nRates[i])
+			neighIds.push_back(nId[i]);
+		} */
+		neighRates.swap(nRates);
+		neighIds.swap(nId);
 	}
 };
 
 
 class cluster {
 	public:
-		cluster(int      siteId1
-			int *    neighIds1
-			double * neighRates1
-			int      sizeNeighId1
-			int      visitFreq1
-			int      siteId2
-			int *    neighIds2
-			double * neighRates2
-			int      sizenId2
-			int      visitFreq2); //constructor  passed certain values? site ids the rates
+		cluster(int            siteId1
+			vector<int>    neighIds1
+			vector<double> neighRates1
+			int            visitFreq1
+			int            siteId2
+			vector<int>    neighIds2
+			vecotr<double> neighRates2
+			int            visitFreq2); //constructor  passed certain values? site ids the rates
 		~cluster(); //deconstructor
+		//add site to cluster function
 		int getClusterId();
 		//isite ** getSitesInCluster();
 		int printClusterInfo();
@@ -56,7 +60,7 @@ class cluster {
 	private:
 		int clusterId; //should also be included in site struct
 		int visitFreqCluster;
-		vector<site *> sitesInCluster;
+		vector<shared_ptr<site>> sitesInCluster;
 		//add list of neighbors, number of neighbors
 		//include an add to cluster funtion to add neighbors of site
 

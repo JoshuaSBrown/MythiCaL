@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <vector> 2
+#include <vector>
+#include <memory>
 
 #include "cluster.h"
  
@@ -16,10 +17,10 @@ using namespace std;
 static int clusterIdCounter = 0;
 static int thresh = 0;
 
-int setT 2hresh(int n){
+int setThresh(int n){
     if(n>0){
         thresh=n;
-        if 2(Err==1) cout<<"Thresh hold is: "<<thresh<<endl;
+        if(Err==1) cout<<"Thresh hold is: "<<thresh<<endl;
         return 1;
     }else{
         if(Err==1) cerr<<"ERROR in setThresh"<<endl;
@@ -27,21 +28,21 @@ int setT 2hresh(int n){
     }
 } 
 
-cluster::cluster(int     siteId1
- 		int *    neighId1
-		double * neighRates1
-		int      sizen1
- 		int      visitFreq1
-		int      siteId2
-		int *    neighId2
- 		double * neighRates2
-		int      sizen2
-		int      visitFreq2){
- 		clusterId=clusterIdCounter;
+cluster::cluster(int            siteId1  //simpler constructer and use an add function
+ 		 vector<int>    neighId1
+		 vector<double> neighRates1
+		 int            sizen1
+ 		 int            visitFreq1
+		 int            siteId2
+		 vector<int>    neighId2
+ 		 vector<double> neighRates2
+		 int            sizen2
+		 int            visitFreq2){
+ 	clusterId=clusterIdCounter;
 	clusterIdCounter++;
-	site  * tmp = new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
-	site * tmp2 = new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
-	shared_ptr<site> tmp = site(
+	//site  * tmp = new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
+	//site * tmp2 = new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
+	shared_ptr<site> tmp = site(siteId1,vector<double> neighRates,vector<int> neighId1,visitFreq1);
 	//create cluster then add
 	sitesInCluster.push_back(tmp);
 	sitesInCluster.push_back(tmp2);	
@@ -79,7 +80,7 @@ int cluster::printClusterInfo(){
 	cout<<"Cluster ID: "<<clusterId<<endl;
 	cout<<"Visit Frequency to Cluster: "<< visitFreqCluster<<endl;
 	cout<<"Sites in Cluster: "<<endl;
-	for(int i = 0;i < siteInCluster.size(); i++){
+	for(int i = 0; i < siteInCluster.size(); i++){
 		cout<<siteInCluster[i]<<endl;
 		cout<<"Site Id: "<<siteInCluster[i]->siteId<<"Visit Frequency: "<<siteInCluster[i]->visitFreq<<endl;
 	}

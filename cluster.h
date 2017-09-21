@@ -23,6 +23,7 @@ struct site{
 		//error handling?
 		siteId=sId;
 		visitFreq=vFreq;
+		//optional way of handeling it
 		/*
 		for(int i; i<nId.size(); i++){
 			neighRates.push_back(nRates[i])
@@ -46,6 +47,7 @@ class cluster {
 			int            visitFreq2); //constructor  passed certain values? site ids the rates
 		~cluster(); //deconstructor
 		//add site to cluster function
+		int addSite(shared_ptr<site>);
 		int getClusterId();
 		//isite ** getSitesInCluster();
 		int printClusterInfo();

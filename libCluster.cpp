@@ -51,6 +51,11 @@ cluster::cluster(int            siteId1  //simpler constructer and use an add fu
 cluster::~cluster(){
 }
 
+int cluster::addSite(shared_ptr<site> newSite){
+	sitesInCluster.push_back(newSite);
+	return 1;
+}
+
 int cluster::getClusterId(){
 	return clusterId;
 }

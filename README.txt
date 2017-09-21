@@ -11,6 +11,19 @@ Note use:
 to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
+9/21
+Additions:
+	Created the add site function
+To do: 
+	debug constructos
+
+9/16
+Additions:
+	Fixed the data struct
+	Implemented with vectors
+To do:
+	Integrate functions to new struct
+
 9/13
 Additions:
 	Prob hop function
