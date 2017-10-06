@@ -11,11 +11,14 @@ Note use:
 to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
+9/29
+
+
 9/21
 Additions:
 	Created the add site function
 To do: 
-	debug constructos
+	debug constructors
 
 9/16
 Additions:

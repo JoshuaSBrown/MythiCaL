@@ -5,9 +5,8 @@
 #include <memory>
 
 #include "cluster.h"
- 
 using namespace std;
-
+/*
 #ifdef _E_
 #define Err 1
 #else
@@ -26,8 +25,12 @@ int setThresh(int n){
         if(Err==1) cerr<<"ERROR in setThresh"<<endl;
         return 0;
     }
-} 
+}
 
+int getThresh(){
+	return thresh;
+}
+/*
 cluster::cluster(int            siteId1  //simpler constructer and use an add function
  		 vector<int>    neighId1
 		 vector<double> neighRates1
@@ -38,17 +41,25 @@ cluster::cluster(int            siteId1  //simpler constructer and use an add fu
  		 vector<double> neighRates2
 		 int            sizen2
 		 int            visitFreq2){
- 	clusterId=clusterIdCounter;
+		 
+cluster::cluster(){
+	clusterId=clusterIdCounter;
 	clusterIdCounter++;
 	//site  * tmp = new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
 	//site * tmp2 = new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
-	shared_ptr<site> tmp = site(siteId1,vector<double> neighRates,vector<int> neighId1,visitFreq1);
+//	shared_ptr<site> tmp = site(siteId1,vector<double> neighRates,vector<int> neighId1,visitFreq1);
 	//create cluster then add
-	sitesInCluster.push_back(tmp);
-	sitesInCluster.push_back(tmp2);	
+//	sitesInCluster.push_back(tmp);
+//	sitesInCluster.push_back(tmp2);	
 }
 
 cluster::~cluster(){
+}
+
+int cluster::addSite(shared_ptr<site> newSite){ //call potential cluster in add
+	//potentialCluster(
+	sitesInCluster.push_back(newSite);
+	return 1;
 }
 
 int cluster::getClusterId(){
@@ -74,21 +85,20 @@ int testCluster(){
 	return 0;
 }
 
-*/
+
 
 int cluster::printClusterInfo(){
 	cout<<"Cluster ID: "<<clusterId<<endl;
 	cout<<"Visit Frequency to Cluster: "<< visitFreqCluster<<endl;
 	cout<<"Sites in Cluster: "<<endl;
-	for(int i = 0; i < siteInCluster.size(); i++){
-		cout<<siteInCluster[i]<<endl;
-		cout<<"Site Id: "<<siteInCluster[i]->siteId<<"Visit Frequency: "<<siteInCluster[i]->visitFreq<<endl;
+	for(int i = 0; i < sitesInCluster.size(); i++){
+		cout<<"Site Id: "<<sitesInCluster[i]->siteId<<"Visit Frequency: "<<sitesInCluster[i]->visitFreq<<endl;
 	}
 	return 1;
 }
 
 
-int cluster::potentialCluster(int visitFreq1, int visitFreq2){
+int potentialCluster(int visitFreq1, int visitFreq2){
 	if(visitFreq1<0||visitFreq2<0||thresh<0){
 		fprintf(stderr,"ERROR in potentialCluster\n");//find a way to turn off in preprocessor
 		return -1;
@@ -98,7 +108,7 @@ int cluster::potentialCluster(int visitFreq1, int visitFreq2){
 	return 0;
 }
 
-int cluster::clusterOrSite(int clusterId1, int clusterId2){
+int clusterOrSite(int clusterId1, int clusterId2){
 	if(clusterId1<-1||clusterId2<-1)
 		return -1;
 	if(clusterId1 == -1 && clusterId2 == -1)
@@ -126,11 +136,11 @@ int cluster::neighSiteCluster(site * site1, site * site2, int * neighCluster){
 	return 1;
 }
 */
-
+/*
 double cluster::dwellTime(){
 	site * tmp;
 	double sum;
-	for(int i =0; i < sitesInCluster; i++){
+	for(int i =0; i < sitesInCluster.size(); i++){
 		tmp=sitesInCluster[i];
 		for(int j =0; j < tmp->sizenId; j++){
 			sum =+ neighRates[j];
@@ -171,5 +181,5 @@ double cluster::hopOffCluster(site * target){
 }
 
 double cluster::escapeTime(site * jail){
-
+*/
 
