@@ -6,7 +6,7 @@
 
 #include "cluster.h"
 using namespace std;
-/*
+
 #ifdef _E_
 #define Err 1
 #else
@@ -30,15 +30,15 @@ int setThresh(int n){
 int getThresh(){
 	return thresh;
 }
-/*
+
 cluster::cluster(int            siteId1  //simpler constructer and use an add function
- 		 vector<int>    neighId1
+		 vector<int>    neighId1
 		 vector<double> neighRates1
 		 int            sizen1
- 		 int            visitFreq1
+		 int            visitFreq1
 		 int            siteId2
 		 vector<int>    neighId2
- 		 vector<double> neighRates2
+		 vector<double> neighRates2
 		 int            sizen2
 		 int            visitFreq2){
 		 
@@ -55,7 +55,7 @@ cluster::cluster(){
 
 cluster::~cluster(){
 }
-
+/*
 int cluster::addSite(shared_ptr<site> newSite){ //call potential cluster in add
 	//potentialCluster(
 	sitesInCluster.push_back(newSite);
