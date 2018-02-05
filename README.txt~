@@ -4,7 +4,7 @@ Riley Hadjis
 
 Note use:
 	make VAR="-D _E_" 
-to enalbe error outut to the error stream. 
+to enable error outut to the error stream 
 
 Note use:
 	make &>Output

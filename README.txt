@@ -4,15 +4,19 @@ Riley Hadjis
 
 Note use:
 	make VAR="-D _E_" 
-to enalbe error outut to the error stream. 
+to enable error outut to the error stream 
 
 Note use:
 	make &>Output
 to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
-9/29
-
+12/20
+Additions:
+	Finished the add site function
+To do:
+	finish prob hop 
+	start convergence
 
 9/21
 Additions:

@@ -5,7 +5,6 @@
 #include <memory>
 
 //functions needed:
-//dwell time
 //prob hop off to 
 
 
@@ -14,6 +13,7 @@ struct site{
 	std::vector<double> neighRates;
 	std::vector<int> neighIds; 
 	int visitFreq;
+	int clustTag;
 
 	site(){};//default constructor
 
@@ -22,6 +22,7 @@ struct site{
 		//error handling?
 		siteId=sId;
 		visitFreq=vFreq;
+		clustTag = -1;
 		//optional way of handeling it
 		/*
 		for(int i; i<nId.size(); i++){
@@ -47,24 +48,20 @@ class cluster {
 		*/			
 		cluster();
 		~cluster(); //deconstructor
-		int addSite(std::shared_ptr<site>); //addSites to cluster
+		int addSite(std::shared_ptr<site> siteToAdd); //addSites to cluster
 		int getClusterId();
-		//isite ** getSitesInCluster();
+		std::vector<std::shared_ptr<site>> getSitesInCluster();
 		int printClusterInfo();
 		// test function and simulation fuction
 		double dwellTime();
 		//returns 1/sum of rates to neighbors in the cluster
-
-//		int testCluster(void);
-//runs all test cases of every function, prints out correct output and what the function prints like such f: (correct) real
-//any errors will be reported in the error stream with the funciton call
+		double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
 
 	private:
 		int clusterId; //should also be included in site struct
 		int visitFreqCluster;
-//		std::vector<std::shared_ptr<site>> sitesInCluster;
-		//add list of neighbors, number of neighbors
-		//include an add to cluster funtion to add neighbors of site
+		std::vector<std::shared_ptr<site>> sitesInCluster;
+		std::vector<int> neighIdsCluster;
 
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster
 //pass maybe cluster struct and return array of site ratios of the sites hop off/hop on see matlab file
@@ -99,6 +96,8 @@ class cluster {
 //	1. prob on site is 1/(number of sites in cluster) (only intially)
 //	2. site 1 eg (prob hope to site 1)*(prob on site 2)+(prob hppe to site 1)(prob on site 5)
 //	3.Total (new site prob)     total=site1prob+site2prob...
+//	3. normalize
+//	4. Average (site1oldProb + site1newProb)/2
 //	4.probsite1=site1prob/total + probsite1 ....
 //	5.normalise probonsite1=probonsite1/sum(probs on site #)
 //
@@ -148,11 +147,14 @@ class cluster {
 //time off(tprob off), id which it jumps to
 };
 
-/*
+
 int setThresh(int n);
 // sets thresh as a static for all functions, not in class cluster
 
+int getThresh();
+//returns the threshold
 
+/*
 //all other funtions
 int potentialCluster(int visitFreq1,int visitFreq2);
 	//INPUT: the visitation frequency of site 1 and of site 2
