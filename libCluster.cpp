@@ -168,7 +168,12 @@ double cluster::dwellTime(){
 }
 
 
-double cluster::probHop(sitePtr shipping, sitePtr receiving){ //return an array?
+double cluster::probHop(sitePtr shipping, sitePtr receiving){ 
+	if(shipping->clustTag != receiving ->clustTag){
+		if(Err) cerr<<"IN probHop: shipping and recieving dont belong to the same cluster."<<endl;
+		return -1
+	}
+
 	int errFlag = 0;
 	for(int i = 0; i< (int)sitesInCluster.size(); i++){ //check
 		int tmp = sitesInCluster[i]->siteId;
@@ -180,8 +185,10 @@ double cluster::probHop(sitePtr shipping, sitePtr receiving){ //return an array?
 		if(Err)	cerr<<"Target not conencted to cluster"<<endl;
 		return -1;
 	}
+
 	int index = -1;
-	for(int i = 0; i<(int)shipping->neighIds.size(); i++){ //combine all for loops
+	for(int i = 0; i<(int)shipping->neighIds.size(); i++){ 
+	//Improvement: combine all for loops
 		if(receiving->siteId==shipping->neighIds[i]) index = i;
 	}
 	int totalRates =0;
@@ -207,4 +214,28 @@ double cluster::hopOffCluster(site * target){
 
 double cluster::escapeTime(site * jail){
 */
+
+int cluster::intializeProbOnSite(){
+	for(int i =0; i < (int) sitesInCluster.size(); i++){
+		sitesInCluster[i]->probOnSite = 1/( (int) sitesInCluster.size());
+	}
+	if(Err) cout<<"Intializing Probs On site"<<endl;
+	return 1;
+}
+
+int cluster::clusterConvergence(long interations){
+	/*intialize probabilities
+	 * for every interation..,
+	 * for every site in the cluster
+	 * find all neighboring sites of that site that are also in the cluster
+	 * use prob hop function to get new prod on site
+	 * normalize new prob on site -> new prob on site / sum of all new prob on site
+	 * average new prob on site with old
+	 */
+
+	assert(itializeProbOnSite());
+	for(long i = 0; i < interations){
+		for(int j = 0; j < sitesInCluster.size(); i++>){
+			
+}
 

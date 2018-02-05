@@ -4,16 +4,13 @@
 #include <vector>
 #include <memory>
 
-//functions needed:
-//prob hop off to 
-
-
 struct site{
 	int siteId;
 	std::vector<double> neighRates;
 	std::vector<int> neighIds; 
 	int visitFreq;
 	int clustTag;
+	double ProbOnSite;
 
 	site(){};//default constructor
 
@@ -23,6 +20,7 @@ struct site{
 		siteId=sId;
 		visitFreq=vFreq;
 		clustTag = -1;
+		ProbOnSite = 0.0;
 		//optional way of handeling it
 		/*
 		for(int i; i<nId.size(); i++){
@@ -55,13 +53,17 @@ class cluster {
 		// test function and simulation fuction
 		double dwellTime();
 		//returns 1/sum of rates to neighbors in the cluster
-		double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
+
+		int cluster::clusterConvergence(long interations);
 
 	private:
 		int clusterId; //should also be included in site struct
 		int visitFreqCluster;
 		std::vector<std::shared_ptr<site>> sitesInCluster;
 		std::vector<int> neighIdsCluster;
+		double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
+		int cluster::intializeProbOnSite()
+		//returns 0 if failure
 
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster
 //pass maybe cluster struct and return array of site ratios of the sites hop off/hop on see matlab file
