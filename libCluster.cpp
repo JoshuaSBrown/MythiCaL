@@ -13,6 +13,8 @@ using namespace std;
 #define Err 0
 #endif
 
+namespace Cluster{
+
 typedef shared_ptr<site> sitePtr;
 
 static int clusterIdCounter = 0;
@@ -241,4 +243,4 @@ int cluster::intializeProbOnSite(){
 
 			
 }*/
-
+}
