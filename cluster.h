@@ -53,16 +53,16 @@ class cluster {
 		// test function and simulation fuction
 		double dwellTime();
 		//returns 1/sum of rates to neighbors in the cluster
-
-		int cluster::clusterConvergence(long interations);
+		double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
+		int clusterConvergence(long interations);
 
 	private:
 		int clusterId; //should also be included in site struct
 		int visitFreqCluster;
 		std::vector<std::shared_ptr<site>> sitesInCluster;
 		std::vector<int> neighIdsCluster;
-		double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
-		int cluster::intializeProbOnSite()
+		//double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
+		int intializeProbOnSite();
 		//returns 0 if failure
 
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster

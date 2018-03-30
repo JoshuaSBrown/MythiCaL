@@ -11,6 +11,14 @@ Note use:
 to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
+
+2/5
+Additions:
+	updated prob hop
+	started convergence
+To do:
+	finish convergence
+
 12/20
 Additions:
 	Finished the add site function

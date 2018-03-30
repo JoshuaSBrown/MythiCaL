@@ -171,7 +171,7 @@ double cluster::dwellTime(){
 double cluster::probHop(sitePtr shipping, sitePtr receiving){ 
 	if(shipping->clustTag != receiving ->clustTag){
 		if(Err) cerr<<"IN probHop: shipping and recieving dont belong to the same cluster."<<endl;
-		return -1
+		return -1;
 	}
 
 	int errFlag = 0;
@@ -223,7 +223,22 @@ int cluster::intializeProbOnSite(){
 	return 1;
 }
 
-int cluster::clusterConvergence(long interations){
+//int cluster::clusterConvergence(long interations){
+	/*intialize probabilities
+	 * for every interation..,
+	 * for every site in the cluster
+	 * find all neighboring sites of that site that are also in the cluster
+	 * use prob hop function to get new prod on site
+	 * normalize new prob on site -> new prob on site / sum of all new prob on site
+	 * average new prob on site with old
+	 */
+/*
 	assert(itializeProbOnSite());
-}
+	for(long i = 0; i < interations){
+		for(int j = 0; j < sitesInCluster.size(); i++>){
+		}
+	}
+
+			
+}*/
 
