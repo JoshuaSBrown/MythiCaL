@@ -171,7 +171,7 @@ double cluster::dwellTime(){
 double cluster::probHop(sitePtr shipping, sitePtr receiving){ 
 	if(shipping->clustTag != receiving ->clustTag){
 		if(Err) cerr<<"IN probHop: shipping and recieving dont belong to the same cluster."<<endl;
-		return -1
+		return -1;
 	}
 
 	int errFlag = 0;
@@ -217,13 +217,13 @@ double cluster::escapeTime(site * jail){
 
 int cluster::intializeProbOnSite(){
 	for(int i =0; i < (int) sitesInCluster.size(); i++){
-		sitesInCluster[i]->probOnSite = 1/( (int) sitesInCluster.size());
+		sitesInCluster[i]->ProbOnSite = 1/( (int) sitesInCluster.size());
 	}
 	if(Err) cout<<"Intializing Probs On site"<<endl;
 	return 1;
 }
 
-int cluster::clusterConvergence(long interations){
+//int cluster::clusterConvergence(long interations){
 	/*intialize probabilities
 	 * for every interation..,
 	 * for every site in the cluster
@@ -232,10 +232,13 @@ int cluster::clusterConvergence(long interations){
 	 * normalize new prob on site -> new prob on site / sum of all new prob on site
 	 * average new prob on site with old
 	 */
-
+/*
 	assert(itializeProbOnSite());
 	for(long i = 0; i < interations){
 		for(int j = 0; j < sitesInCluster.size(); i++>){
+		}
+	}
+
 			
-}
+}*/
 
