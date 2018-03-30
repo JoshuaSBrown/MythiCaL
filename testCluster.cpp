@@ -6,6 +6,7 @@
 #include "cluster.h"
 
 using namespace std;
+using namespace Cluster;
 
 #ifdef _E_
 #define Err 1

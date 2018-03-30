@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 
+namespace Cluster{
+
 struct site{
 	int siteId;
 	std::vector<double> neighRates;
@@ -178,4 +180,5 @@ int clusterOrSite(int siteId1, int siteId2);
 //any errors will be reported in the error stream with the funciton call
 
 */
+}
 #endif
