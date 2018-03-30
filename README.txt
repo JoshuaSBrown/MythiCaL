@@ -12,6 +12,8 @@ to output all warnings and errors to text file Output
 
 ___________________Update Log_________________________
 
+Blah blah
+
 2/5
 Additions:
 	updated prob hop
