@@ -1,40 +1,17 @@
-#ifndef CLUSTER_H_
-#define CLUSTER_H_
+#ifndef KMCCOURSEGRAIN_CLUSTER_H_
+#define KMCCOURSEGRAIN_CLUSTER_H_
 
+#include <kmccoursegrain/identity.hpp>
+
+#include <list>
 #include <vector>
 #include <memory>
 
-namespace Cluster{
+namespace kmccoursegrain{
 
-struct site{
-	int siteId;
-	std::vector<double> neighRates;
-	std::vector<int> neighIds; 
-	int visitFreq;
-	int clustTag;
-	double ProbOnSite;
+class Site;
 
-	site(){};//default constructor
-
-	//constructor
-	site(int sId, std::vector<double> nRates, std::vector<int> nId, int vFreq){
-		//error handling?
-		siteId=sId;
-		visitFreq=vFreq;
-		clustTag = -1;
-		ProbOnSite = 0.0;
-		//optional way of handeling it
-		/*
-		for(int i; i<nId.size(); i++){
-			neighRates.push_back(nRates[i])
-			neighIds.push_back(nId[i]);
-			}*/
-		neighRates.swap(nRates);
-		neighIds.swap(nId);
-	}
-};
-
-class cluster {
+class Cluster : public Identity {
 	public:
 		/*
 		cluster(int            siteId1
@@ -46,27 +23,26 @@ class cluster {
 			vecotr<double> neighRates2
 			int            visitFreq2); //constructor  passed certain values? site ids the rates
 		*/			
-		cluster();
-		~cluster(); //deconstructor
-		int addSite(std::shared_ptr<site> siteToAdd); //addSites to cluster
-		int getClusterId();
-		std::vector<std::shared_ptr<site>> getSitesInCluster();
+		Cluster() {};
+		~Cluster() {}; //deconstructor
+/*		int addSite(std::shared_ptr<Site> siteToAdd); //addSites to cluster
+		std::vector<std::shared_ptr<Site>> getSitesInCluster();
 		int printClusterInfo();
 		// test function and simulation fuction
 		double dwellTime();
 		//returns 1/sum of rates to neighbors in the cluster
-		double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
+		double probHop(std::shared_ptr<Site> shippingSite, std::shared_ptr<Site> receivingSite);
 		int clusterConvergence(long interations);
-
+*/
 	private:
-		int clusterId; //should also be included in site struct
+    std::list<int> sitesInCluster_;
 		int visitFreqCluster;
-		std::vector<std::shared_ptr<site>> sitesInCluster;
+/*		std::vector<std::shared_ptr<Site>> sitesInCluster;
 		std::vector<int> neighIdsCluster;
 		//double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
 		int intializeProbOnSite();
 		//returns 0 if failure
-
+*/
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster
 //pass maybe cluster struct and return array of site ratios of the sites hop off/hop on see matlab file
 //
@@ -152,12 +128,15 @@ class cluster {
 };
 
 
-int setThresh(int n);
 // sets thresh as a static for all functions, not in class cluster
+static int setThresh(int n);
 
-int getThresh();
 //returns the threshold
+static int getThresh();
 
+static bool siteAboveThreshold(int siteId, int frequency_visitation);
+
+Cluster generateCluster(int clusterId);
 /*
 //all other funtions
 int potentialCluster(int visitFreq1,int visitFreq2);
@@ -181,4 +160,4 @@ int clusterOrSite(int siteId1, int siteId2);
 
 */
 }
-#endif
+#endif // KMCCOURSEGRAIN_CLUSTER_H_

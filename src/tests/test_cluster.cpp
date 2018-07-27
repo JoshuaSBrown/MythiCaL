@@ -3,20 +3,41 @@
 #include <vector>
 #include <memory>
 
-#include "cluster.h"
+#include <kmccoursegrain/cluster.hpp>
 
 using namespace std;
-using namespace Cluster;
-
-#ifdef _E_
-#define Err 1
-#else
-#define Err 0
-#endif
+using namespace kmccoursegrain;
 
 int main(void){
+
+  cout << "Testing: Cluster constructor" << endl;
+  {
+    Cluster cl;
+
+  }
 	
-	if(Err==1) cout<<"Error Reporting On"<<endl;
+  cout << "Testing: Cluster identity setter" << endl;
+  {
+    Cluster cl;
+    cl.setId(0);
+  }
+
+  cout << "Testing: Cluster identity getter" << endl;
+  {
+    Cluster cl;
+    cl.setId(0);
+    assert(cl.getId()==0);
+
+    bool fail = false;
+    Identity cl2;
+    try {
+      cl2.getId();
+    }catch(...){
+      fail = true;
+    }
+    assert(fail);
+  }
+/*	if(Err==1) cout<<"Error Reporting On"<<endl;
 	//Testing the Threshold Setter
 	{
 		cout<<"Testing Thresh"<<endl;
@@ -46,6 +67,6 @@ int main(void){
 		tmp->printClusterInfo();
 		cout<<"Dwell Time: "<<tmp->dwellTime()<<endl;
 		cout<<"Prob Hop from site 1 to site 2: "<<tmp->probHop(site1,site2)<<endl;
-	}
+	}*/
 	return 0;
 }
