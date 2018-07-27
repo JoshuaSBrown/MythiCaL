@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/kmccoursegrain/cluster.hpp
+kmccoursegrain/identity.hpp
+-
+vector
+-
+memory
+-
+
+../include/kmccoursegrain/identity.hpp
+exception
+-
+
+/home/joshbro42867/Documents/OPV_CourseGrainSites/src/tests/test_cluster.cpp
+iostream
+-
+cassert
+-
+vector
+-
+memory
+-
+kmccoursegrain/cluster.hpp
+-
+
