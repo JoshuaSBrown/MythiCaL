@@ -8,15 +8,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-##########################
-# Check if testing is on #
-##########################
-option(BUILD_SHARED_LIBS "Build shared libs" ON)
-option(ENABLE_TESTING "Build and enable testing stuff" OFF)
-if(ENABLE_TESTING)
-  enable_testing()
-endif(ENABLE_TESTING)
-
 ########################################################
 # Basic system tests (standard libraries, headers etc) #
 ########################################################
@@ -47,14 +38,23 @@ foreach(FUNC sqrt)
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
 
-file(GLOB HEADERS include/kmcoursegrain/*.hpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/kmcoursegrain/*.hpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 install(FILES ${HEADERS} DESTINATION include/kmccoursegrain)
 
-file(GLOB SOURCES src/libkmccoursegrain/*.cpp)
-add_library(kmc_course_grain src/libkmccoursegrain)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/libkmccoursegrain/*.cpp)
+add_library(kmc_course_grain ${SOURCES})
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
 set_target_properties(kmc_course_grain PROPERTIES LINKER_LANGUAGE CXX)
 
-add_subdirectory(src/tests)
+##########################
+# Check if testing is on #
+##########################
+option(BUILD_SHARED_LIBS "Build shared libs" ON)
+option(ENABLE_TESTING "Build and enable testing stuff" OFF)
+if(ENABLE_TESTING)
+  enable_testing()
+  add_subdirectory(src/tests)
+endif(ENABLE_TESTING)
+

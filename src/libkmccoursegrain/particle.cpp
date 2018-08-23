@@ -1,5 +1,5 @@
-
 #include <stdexcept>
+#include <cassert>
 
 #include <kmccoursegrain/particle.hpp>
 
@@ -46,7 +46,7 @@ void Particle::createNewMemory_(int siteId){
  * External Methods
  ******************************************************************************/
 
-void Particle::setMemoryCapacity(size_t numberSitesToRemember){
+void Particle::setMemoryCapacity(unsigned int numberSitesToRemember){
   
   if(numberSitesToRemember==1){
     string err = "It does not make sense to have a memory of 1 because a "
@@ -58,19 +58,21 @@ void Particle::setMemoryCapacity(size_t numberSitesToRemember){
               static_cast<int>(memoryQueue_.size());
 
   if(delta>0){
-    for(int i=0;i<delta;++i) memoryQueue_.push_back(pair<int,int>(-1,0));
+    for(int i=0;i<delta;++i) {
+      memoryQueue_.push_back(pair<int,int>(unassignedSiteId_,0));
+    }
   }else{
     delta = delta*-1;
     for(int i=0;i<delta;++i) memoryQueue_.pop_back();
   }
 }
 
-size_t Particle::getMemoryCapacity(){
-  return memoryQueue_.size();
+unsigned int Particle::getMemoryCapacity(){
+  return static_cast<unsigned int>(memoryQueue_.size());
 }
 
 void Particle::occupySite(int siteId){
-
+  assert(siteId!=unassignedSiteId_);
   if(rememberSite_(siteId)){
     refreshMemory_(siteId);
   }else{
@@ -78,7 +80,8 @@ void Particle::occupySite(int siteId){
   }
 }
 
-void Particle::getVisitationFrequencyOfCurrentlyOccupiedSite(){
+int Particle::getVisitationFrequencyOfCurrentlyOccupiedSite(){
+  assert(memoryQueue_.size()>0);
   return memoryQueue_.begin()->second;
 }
 
