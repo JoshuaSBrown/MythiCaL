@@ -11,7 +11,7 @@ namespace kmccoursegrain{
 
 class Site;
 
-class Cluster : public Identity {
+class Cluster : public virtual Identity {
 	public:
 		/*
 		cluster(int            siteId1

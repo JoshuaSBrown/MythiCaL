@@ -1,38 +1,29 @@
-#ifndef KMCCOURSEGRAIN_CLUSTER_H_
-#define KMCCOURSEGRAIN_CLUSTER_H_
+#ifndef KMCCOURSEGRAIN_SITE_H_
+#define KMCCOURSEGRAIN_SITE_H_
 
 #include <vector>
 #include <memory>
+#include "identity.hpp"
 
 namespace kmccoursegrain{
 
-struct Site{
-	int siteId;
-	std::vector<double> neighRates;
-	std::vector<int> neighIds; 
-	int visitFreq;
-	int clustTag;
-	double ProbOnSite;
+class Cluster;
 
-	site(){};//default constructor
+class Site : public Identity {
+  public:
+    Site() : probabilitySet_(false), clusterId_(-1), visitFreq(0),
+      cluster_ptr_(nullptr) {};
+    void setRatesToNeighbors(std::map<int,double *> neighRates);
+    void setCluster(Cluster * cluster);
+  private:
 
-	//constructor
-	site(int sId, std::vector<double> nRates, std::vector<int> nId, int vFreq){
-		//error handling?
-		siteId=sId;
-		visitFreq=vFreq;
-		clustTag = -1;
-		ProbOnSite = 0.0;
-		//optional way of handeling it
-		/*
-		for(int i; i<nId.size(); i++){
-			neighRates.push_back(nRates[i])
-			neighIds.push_back(nId[i]);
-			}*/
-		neighRates.swap(nRates);
-		neighIds.swap(nId);
-	}
+    int visitFreq_;
+    Cluster * cluster_ptr_;
+    double courseGrainedSiteProb_;
+    bool probabilitySet_;
+    std::map<int,double*> neighRates_;
+
 };
 
 }
-#endif // KMCCOURSEGRAIN_CLUSTER_H_
+#endif // KMCCOURSEGRAIN_SITE_H_
