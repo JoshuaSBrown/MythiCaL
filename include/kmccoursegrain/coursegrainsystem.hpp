@@ -7,6 +7,8 @@
 namespace kmccoursegrain{
 
 class Site;
+class Particle;
+//class Cluster;
 
 class CourseGrainSystem{
 
@@ -22,11 +24,11 @@ class CourseGrainSystem{
     // double * - pointer to rate going from i->j
     //
     void initializeSystem(
-        std::map<int,std::map<int,double *>> rates_of_all_sites);
+        std::map<int,std::map<int const,double &>> ratesOfAllSites);
 
     void visitSite(Particle & particle,int siteId);
 
-    void setCourseGrainingThreshold(int threshold);
+    void setCourseGrainThreshold(int threshold);
     // This will update the internals when the rates vary by the set tolerance 
     void setTheUpdateRateToleranceThreshold(double tolerance);
   private:
@@ -35,7 +37,7 @@ class CourseGrainSystem{
     int courseGrainingThreshold_;
     double tolerance_;
     std::map<int,std::unique_ptr<Site>> sites_;    
-    std::map<int,std::unique_ptr<Cluster>> clusters_;
+//    std::map<int,std::unique_ptr<Cluster>> clusters_;
 };
 
 }

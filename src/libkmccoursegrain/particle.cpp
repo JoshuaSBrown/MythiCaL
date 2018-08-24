@@ -12,7 +12,7 @@ using namespace kmccoursegrain;
  ******************************************************************************/
 
 bool Particle::rememberSite_(int siteId){
-  for(auto siteVisit : memoryQueue){
+  for(auto siteVisit : memoryQueue_){
     if( siteVisit.first == siteId) return true;
   }
   return false;
@@ -30,16 +30,16 @@ list<pair<int,int>>::iterator Particle::getMemoryIterator_(int siteId){
 void Particle::refreshMemory_(int siteId){
   auto it = getMemoryIterator_(siteId);
   ++(it->second);
-  memoryQueue.splice(memoryQueue.begin(),memoryQueue,it);
+  memoryQueue_.splice(memoryQueue_.begin(),memoryQueue_,it);
 }
 
 void Particle::createNewMemory_(int siteId){
-  auto it = memoryQueue.end();
+  auto it = memoryQueue_.end();
 
   it->first = siteId;
   it->second = 1;
 
-  memoryQueue.splice(memoryQueue.begin(), memoryQueue,it);
+  memoryQueue_.splice(memoryQueue_.begin(), memoryQueue_,it);
 }
 
 /******************************************************************************
