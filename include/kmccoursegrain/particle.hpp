@@ -13,9 +13,7 @@ class Particle{
   public: 
     Particle() {};
     void setMemoryCapacity(unsigned int numberSitesToRemember);
-    unsigned int getMemoryCapacity();// {
-//      return static_cast<unsigned int>(memoryQueue_.size()); 
-//    }
+    unsigned int getMemoryCapacity();
     void occupySite(int siteId);
     int getVisitationFrequencyOfCurrentlyOccupiedSite();
     std::list<std::pair<int,int>> getMemory();
