@@ -1,48 +1,63 @@
-#ifndef KMCCOURSEGRAIN_CLUSTER_H_
-#define KMCCOURSEGRAIN_CLUSTER_H_
+#ifndef CLUSTER_H_
+#define CLUSTER_H_
 
-#include <kmccoursegrain/identity.hpp>
-
-#include <list>
+#include <iostream>
 #include <vector>
+#include <map>
 #include <memory>
+#include <math.h>
 
-namespace kmccoursegrain{
+//All functions return 1 if success, 0 or nan if failure as well as cerr printing
+struct site{
+	friend class cluster;
 
-class Site;
+	protected:
+		int siteId;
+		std::vector<std::shared_ptr<site>> neighSites;
+		std::map<int, double> neighs;
+		int visitFreq;
+		int clustTag;
+		double probOnSite;
+	public:	
+		site(){};
+		//Two ways to create a site object
+		//Creates site with list of sites and rates as neighbors
+		site(int sId, int vFreq, std::map<std::shared_ptr<site>,double> nSites);
+		//Just creates site
+		site(int sId, int vFreq);
+		//Two ways to call probHop hop is from shipping to receivingSite
+		double probHop(std::shared_ptr<site> receivingSite);
+		double probHop(int receivingSiteId);
+		int addNeighbors(std::map<std::shared_ptr<site>, double>);
+		void printInfo();
+		double getProbOnSite();
+		int mergeSites();//FIXME
+};
 
-class Cluster : public virtual Identity {
-	public:
-		/*
-		cluster(int            siteId1
-			vector<int>    neighIds1
-			vector<double> neighRates1
-			int            visitFreq1
-			int            siteId2
-			vector<int>    neighIds2
-			vecotr<double> neighRates2
-			int            visitFreq2); //constructor  passed certain values? site ids the rates
-		*/			
-		Cluster() {};
-		~Cluster() {}; //deconstructor
-/*		int addSite(std::shared_ptr<Site> siteToAdd); //addSites to cluster
-		std::vector<std::shared_ptr<Site>> getSitesInCluster();
-		int printClusterInfo();
-		// test function and simulation fuction
+class cluster: public site {
+	public:		
+		cluster();
+		~cluster();
+		int addSite(std::shared_ptr<site> siteToAdd);
+		int getClusterId();
+		std::vector<std::shared_ptr<site>> getSitesInCluster();
+		//Overloaded function from Site, prints cluster info
+		void printInfo(); 
 		double dwellTime();
-		//returns 1/sum of rates to neighbors in the cluster
-		double probHop(std::shared_ptr<Site> shippingSite, std::shared_ptr<Site> receivingSite);
-		int clusterConvergence(long interations);
-*/
+		int convergence(long iterations);
+		//Two ways of calling probHopOff, target is target site it leaves the cluster
+		double probHopOff(std::shared_ptr<site> target, long interations);
+		double probHopOff(int targetId, long interations);
+
 	private:
-    std::list<int> sitesInCluster_;
-		int visitFreqCluster;
-/*		std::vector<std::shared_ptr<Site>> sitesInCluster;
-		std::vector<int> neighIdsCluster;
-		//double probHop(std::shared_ptr<site> shippingSite, std::shared_ptr<site> receivingSite);
-		int intializeProbOnSite();
-		//returns 0 if failure
-*/
+		std::vector<std::shared_ptr<site>> sitesInCluster;
+		void initProbOnSite(); 
+//Notes:
+//Stuff to do not in matlab
+//smoosh sites together if below thresh
+//store probilties and data somewhere
+//Prob hops to a ceritain neighbor site off cluster, using probality from cluster convergence
+		
 //calculate site ratio given hop rates off site, need list of neighbors for that site, hop rates to the neigh form site, list of sites Ids in cluster
 //pass maybe cluster struct and return array of site ratios of the sites hop off/hop on see matlab file
 //
@@ -99,65 +114,13 @@ class Cluster : public virtual Identity {
 //	escape time = site1hop off time * hop off site 1+...
 //
 //Tprob_off cluster or escape cluster = tescapsesite1*probhopoffsite1+...
-//
-//write sample simluation, see test case in matlab
-//look at time for maximum efficiency time.h, finde standard deviation and overlap run for multiple interations and find average function time
-//
-//site pval on and off cluster see matlab code
-//
-//resolution = arbitray (20)
-//
-//simluation set up, return time(see matlab), what site it jumped to
-//
-//
-//write test function in library
-//
-//See matlab code for details
-//look to simpligy the equations
-//
-//pvals internal,
-//
-//Must id sites, neighbor rates, neighbor ids
-//
-//also passed visitation freqs and thresh
-//
-//class data struct sites in cluster (arrays) uses static
-// with arrays or linked lists  first elemetn cluster id
-//
-//time off(tprob off), id which it jumps to
 };
 
 
+int setThresh(int n);
 // sets thresh as a static for all functions, not in class cluster
-static int setThresh(int n);
 
+int getThresh();
 //returns the threshold
-static int getThresh();
 
-static bool siteAboveThreshold(int siteId, int frequency_visitation);
-
-Cluster generateCluster(int clusterId);
-/*
-//all other funtions
-int potentialCluster(int visitFreq1,int visitFreq2);
-	//INPUT: the visitation frequency of site 1 and of site 2
-	//OUTPUT: -1 if mal-input or error, 0 if not a cluster, 1 if a cluster
-
-int clusterOrSite(int siteId1, int siteId2);
-	//INPUT: the cluster Id of one site, the cluster Id of another site
-	//OUTPUT: -1 if mal-input or error, 1 if site to site interaction, 2 if site-cluster, 3 if cluster-cluster
-
-//int neighSiteCluster(site * site1, site * site2, int * neighCluster);
-	//INPUT: neighbors ids of sites 1 and 2, an array to write all the neighbors to
-	//OUTPUT: -1 if mal-input or error, 1 if successful
-
-
-// test function and simulation fuction
-
-//int testCluster(void);
-//runs all test cases of every function, prints out correct output and what the function prints like such f: (correct) real
-//any errors will be reported in the error stream with the funciton call
-
-*/
-}
-#endif // KMCCOURSEGRAIN_CLUSTER_H_
+#endif
