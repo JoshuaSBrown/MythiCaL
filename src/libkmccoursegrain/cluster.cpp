@@ -4,13 +4,6 @@
 using namespace std;
 using namespace kmccoursegrain;
 
-#ifdef _E_
-#define Err 1
-#else
-#define Err 0
-#endif
-
-
 //typedef shared_ptr<site> sitePtr;
 
 static int clusterIdCounter = 0;
