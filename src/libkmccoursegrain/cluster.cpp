@@ -1,237 +1,291 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <vector>
-#include <memory>
 
 #include <kmccoursegrain/cluster.hpp>
 
 using namespace std;
-
 using namespace kmccoursegrain;
 
+#ifdef _E_
+#define Err 1
+#else
+#define Err 0
+#endif
+
+
 //typedef shared_ptr<site> sitePtr;
-//
+
 static int clusterIdCounter = 0;
 static int thresh = 0;
-//
-//int setThresh(int n){
-//    if(n>0){
-//        thresh=n;
-//        if(Err) cout<<"Thresh hold is: "<<thresh<<endl;
-//        return 1;
-//    }else{
-//        if(Err) cerr<<"ERROR in setThresh"<<endl;
-//        return 0;
-//    }
-//}
-//
-//int getThresh(){
-//	return thresh;
-//}
-///*
-//cluster::cluster(int            siteId1,  //simpler constructer and use an add function
-//		 vector<int>    neighId1,
-//		 vector<double> neighRates1,
-//		 int            sizen1,
-//		 int            visitFreq1,
-//		 int            siteId2,
-//		 vector<int>    neighId2,
-//		 vector<double> neighRates2,
-//		 int            sizen2,
-//		 int            visitFreq2){
-//*/		 
-//Cluster::Cluster(){
-  //	clusterId=clusterIdCounter;
-  //	clusterIdCounter++;
-  //	//site  * tmp = new site(siteId1,neighRates1,neighId1,sizen1,visitFreq1);
-  //	//site * tmp2 = new site(siteId2,neighRates2,neighId2,sizen2,visitFreq2);
-  ////	shared_ptr<site> tmp = site(siteId1,vector<double> neighRates,vector<int> neighId1,visitFreq1);
-  //	//create cluster then add
-  ////	sitesInCluster.push_back(tmp);
-  ////	sitesInCluster.push_back(tmp2);	
-//}
-//
-//int cluster::addSite(sitePtr newSite){ //call potential cluster in add
-//	/* add site to vector
-//	 * assign cluster Id to site
-//	 * remove site from neighbor list
-//	 * add unqiue neighbors to list 
-//	 */
-//
-//	if(newSite == NULL){
-//		if(Err) cerr<<"Adding Null site"<<endl;
-//		return 0;
-//	}
-//
-//	newSite->clustTag = clusterId;
-//
-//	sitesInCluster.push_back(newSite);
-//	
-//	int addFlag;
-//	for(int i = 0; i < (int) newSite->neighIds.size(); i++){
-//		addFlag = 1;
-//		for(int j = 0; j < (int) neighIdsCluster.size(); j++){
-//			if(neighIdsCluster[j] == newSite->siteId){
-//				neighIdsCluster.erase(neighIdsCluster.begin() + j);
-//			}
-//			if(newSite->neighIds[i] == neighIdsCluster[j]){
-//				addFlag = 0;
-//			}
-//		}
-//		if(addFlag){
-//			neighIdsCluster.push_back(newSite->neighIds[i]);
-//		}
-//	}
-//	return 1;
-//}
-//
-//int cluster::getClusterId(){
-//	return clusterId;
-//}
-//
-//
-//vector<sitePtr> cluster::getSitesInCluster(){
-//	return sitesInCluster;
-//}
-//
-//
-//int cluster::printClusterInfo(){
-//	cout<<"Cluster ID: "<<clusterId<<endl;
-//	cout<<"Visit Frequency to Cluster: "<< visitFreqCluster<<endl;
-//	cout<<"Sites in Cluster: "<<endl;
-//	for(int i = 0; i < (int)sitesInCluster.size(); i++){
-//		cout<<"Site Id: "<<sitesInCluster[i]->siteId<<" Visit Frequency: "<<sitesInCluster[i]->visitFreq<<endl;
-//	}
-//	return 1;
-//}
-//
-///*
-//int potentialCluster(int visitFreq1, int visitFreq2){
-//	if(visitFreq1<0||visitFreq2<0||thresh<0){
-//		fprintf(stderr,"ERROR in potentialCluster\n");//find a way to turn off in preprocessor
-//		return -1;
-//	}
-//	if((visitFreq1 > thresh) && (visitFreq2 > thresh))
-//		return 1;
-//	return 0;
-//}
-//
-//int clusterOrSite(int clusterId1, int clusterId2){
-//	if(clusterId1<-1||clusterId2<-1)
-//		return -1;
-//	if(clusterId1 == -1 && clusterId2 == -1)
-//		return 1;
-//	if(clusterId1 == -1 || clusterId2 == -1)
-//		return 2;
-//	return 3;
-//}
-//*/
-//
-///*
-//int cluster::neighSiteCluster(site * site1, site * site2, int * neighCluster){
-//	int i=0, j=0;
-//	if(site1 ==NULL ||site2==NULL||neighCluster==NULL){
-//		if(Err) cerr<<"ERROR in neighSiteCluster"<<endl;
-//		return -1;
-//	}
-//	while(site1->neighIds[i]!=-1){ //Use -1 as a terminator
-//		neighCluster[i]=site1->neighIds[i];
-//		i++;
-//	}
-//	while(site2->neighIds[j]!=-1){
-//		neighCluster[i+j]=site2->neighIds[j];
-//		j++;
-//	}
-//	return 1;
-//}
-//*/
-//
-//
-//double cluster::dwellTime(){
-//	sitePtr tmp;
-//	double sum;
-//	for(int i =0; i < (int)sitesInCluster.size(); i++){
-//		tmp=sitesInCluster[i];
-//		for(int j =0; j < (int)tmp->neighRates.size(); j++){
-//			sum += tmp->neighRates[j];
-//		}
-//	}
-//	cout<<"Sum of Cluster rates:"<<sum<<endl;
-//	return (1/sum);
-//}
-//
-//
-//double cluster::probHop(sitePtr shipping, sitePtr receiving){ 
-//	if(shipping->clustTag != receiving ->clustTag){
-//		if(Err) cerr<<"IN probHop: shipping and recieving dont belong to the same cluster."<<endl;
-//		return -1;
-//	}
-//
-//	int errFlag = 0;
-//	for(int i = 0; i< (int)sitesInCluster.size(); i++){ //check
-//		int tmp = sitesInCluster[i]->siteId;
-//		if(tmp == receiving->siteId){
-//		       	errFlag = 1;
-//		}
-//	}
-//	if(errFlag==0){
-//		if(Err)	cerr<<"Target not conencted to cluster"<<endl;
-//		return -1;
-//	}
-//
-//	int index = -1;
-//	for(int i = 0; i<(int)shipping->neighIds.size(); i++){ 
-//	//Improvement: combine all for loops
-//		if(receiving->siteId==shipping->neighIds[i]) index = i;
-//	}
-//	int totalRates =0;
-//	for(int i =0; i<(int)shipping->neighRates.size(); i++){
-//		totalRates+=shipping->neighRates[i];
-//	}
-//	return shipping->neighRates[index]/totalRates;
-//}
-//
-///*
-//double cluster::hopOffCluster(site * target){
-//	site * tmp;
-//	int totalRates=0;
-//	for(int i =0;i++;i<SitesInCluster.size()){ //figure out pops, pushbacks, and .size() thing
-//		tmp=SitesInCluster.pop(); 
-//		for(int j =0; j++; j< sizen){
-//			totalRates+=nRates[i]; //could calculate at instantation?
-//		}
-//	}
-//	//find way to get target to cluster rate
-//	return targetToCluster/totalRates
-//}
-//
-//double cluster::escapeTime(site * jail){
-//*/
-//
-//int cluster::intializeProbOnSite(){
-//	for(int i =0; i < (int) sitesInCluster.size(); i++){
-//		sitesInCluster[i]->ProbOnSite = 1/( (int) sitesInCluster.size());
-//	}
-//	if(Err) cout<<"Intializing Probs On site"<<endl;
-//	return 1;
-//}
 
-//int cluster::clusterConvergence(long interations){
-	/*intialize probabilities
-	 * for every interation..,
-	 * for every site in the cluster
-	 * find all neighboring sites of that site that are also in the cluster
-	 * use prob hop function to get new prod on site
-	 * normalize new prob on site -> new prob on site / sum of all new prob on site
-	 * average new prob on site with old
-	 */
+int setThresh(int n){
+    if(n>0){
+        thresh=n;
+        if(Err) cout<<"Thresh hold is: "<<thresh<<endl;
+        return 1;
+    }else{
+        if(Err) cerr<<"ERROR in setThresh: threshold is negative"<<endl;
+        return 0;
+    }
+}
+
+int getThresh(){
+	return thresh;
+}
+
 /*
-	assert(itializeProbOnSite());
-	for(long i = 0; i < interations){
-		for(int j = 0; j < sitesInCluster.size(); i++>){
+int site::addNeighbors(map<sitePtr, double> addSites){
+	int found;
+
+	for(auto it = addSites.cbegin(); it != addSites.cend(); ++it){
+		if(it->first == NULL){
+			if(Err) cerr<<"ERROR in addNeighbors: adding a null site"<<endl;
+			return 0;
 		}
+		if(it->first->siteId == this->siteId) continue;
+		found = 0;
+		for(int j = 0; j < (int) neighSites.size(); j++){
+			if(neighSites[j]->siteId == it->first->siteId) found = 1;
+		}
+		
+		if(!found) neighSites.push_back(it->first);
+		neighs[it->first->siteId] = it->second;
+
+		found = 0;
+		for(int j = 0; j < (int) it->first->neighSites.size(); j++){
+			if(it->first->neighSites[j]->siteId == this->siteId) found = 1;
+		}
+		if(!found) it->first->neighSites.push_back(sitePtr(this));
+		it->first->neighs[siteId] = it->second;
+	}
+	return 1;
+}
+*/
+
+/*
+cluster::cluster(){
+	clustTag=clusterIdCounter;
+	clusterIdCounter++;
+}
+
+cluster::~cluster(){
+}
+
+int cluster::addSite(sitePtr newSite){
+	if(newSite == NULL){
+		if(Err) cerr<<"ERROR in addSite: adding a null site"<<endl;
+		return 0;
 	}
 
-			
+	newSite->clustTag = clustTag;
+
+	sitesInCluster.push_back(newSite);
+	
+	int addFlag;
+	for(auto it = newSite->neighs.cbegin(); it != newSite->neighs.cend(); ++it){
+		addFlag = 1;
+		for(auto jt = neighs.cbegin(); jt != neighs.cend(); ++jt){
+			if(jt->first == newSite->siteId){
+				neighs.erase(jt);
+			}
+			if(it == jt){
+				addFlag = 0;
+			}
+		}
+		if(addFlag){
+			neighs.insert(it, pair<int, double>(it->first,it->second));
+		}
+	}
+	return 1;
+}
+
+int cluster::getClusterId(){
+	return clustTag;
+}
+
+
+vector<sitePtr> cluster::getSitesInCluster(){
+	return sitesInCluster;
+}
+
+
+void cluster::printInfo(){
+	cout<<"Cluster ID: "<<clustTag<<endl;
+	cout<<"Visit Frequency to Cluster: "<< visitFreq<<endl;
+	cout<<"Sites in Cluster: "<<sitesInCluster.size()<<endl;
+	for(int i = 0; i < (int)sitesInCluster.size(); i++){
+		cout<<"Site Id: "<<sitesInCluster[i]->siteId<<" Visit Frequency: "<<sitesInCluster[i]->visitFreq<<endl;
+	}
+	std::map<int, double> neighbors;
+	cout<<"Rates: "<<endl;
+	for(int i = 0; i < (int)sitesInCluster.size(); i++){
+		cout<<"\tSite: "<<sitesInCluster[i]->siteId<<endl;
+		neighbors = sitesInCluster[i]->neighs;
+		cout<<"\t\tNeighbor:Rate"<<endl;
+		for(auto it = neighbors.cbegin(); it != neighbors.cend(); ++it){
+			cout<<"\t\t"<<it->first<<":"<<it->second<<endl;
+		}
+	}
+	return;
+}
+
+double cluster::dwellTime(){
+	sitePtr tmp;
+	double sum;
+	for(int i =0; i < (int)sitesInCluster.size(); i++){
+		tmp=sitesInCluster[i];
+		for(auto it = tmp->neighs.cbegin(); it != tmp->neighs.cend(); ++it){
+			sum += it->second;
+		}
+	}
+	return (1/sum);
+}
+
+//Overload the probHop function
+double site::probHop(int receiving){
+	bool errFlag = true;
+	double totalRates = 0.0;
+
+	for(auto it = neighs.cbegin(); it != neighs.cend(); ++it){
+	       if(it->first == receiving) errFlag = false;
+	       totalRates += it->second;
+	}
+
+	if(errFlag){
+		if(Err) cerr<<"ERROR in probHop: receiving site not a neighbor of shipping site"<<endl;
+		return 0;
+	}
+	return (neighs[receiving]/totalRates);
+}
+
+double site::probHop(sitePtr receiving){ 
+	bool errFlag = true;
+	double totalRates = 0.0;
+
+	for(auto it = neighs.cbegin(); it != neighs.cend(); ++it){
+	       if(it->first == receiving->siteId) errFlag = false;
+	       totalRates += it->second;
+	}
+
+	if(errFlag){
+		if(Err) cerr<<"ERROR in probHop: receiving site not a neighbor of shipping site"<<endl;
+		return 0;
+	}
+	return (neighs[receiving->siteId]/totalRates);
+}
+
+
+double cluster::probHopOff(sitePtr target, long iterations){
+	if(iterations <= 0){
+		if(Err) cerr<<"ERROR in probHopOff: iterations is not valid"<<endl;
+		return nan("");
+	}		
+	convergence(iterations);
+	double interSum = 0.0;
+	double sum = 0.0;
+	double targetSum = 0.0;
+	double tmpInter = 0.0;
+	
+	if(target == NULL){
+		if(Err) cerr<<"ERROR in probHopOff: targeting a null site"<<endl;
+		return 0;
+	}
+
+	int found = 1;
+	for(int i = 0; i < (int) sitesInCluster.size(); i++){
+		for(int j = 0; j < (int) sitesInCluster[i]->neighSites.size(); j++){
+			if(sitesInCluster[i]->neighSites[j]->clustTag != clustTag){
+				tmpInter = sitesInCluster[i]->probHop(sitesInCluster[i]->neighSites[j]);
+				interSum += tmpInter;
+				if(sitesInCluster[i]->neighSites[j]->siteId == target->siteId){
+					found = 0;
+					targetSum = tmpInter * sitesInCluster[i]->probOnSite;
+				}
+			}
+		}
+		interSum *= sitesInCluster[i]->probOnSite;
+		sum += interSum;
+		interSum = 0.0;
+	}
+	if(!found){
+		if(Err) cerr<<"ERROR in probHopOff: target not connected to cluster"<<endl;
+		return nan("");
+	}
+	return(targetSum/sum); 
+}
+
+//Overload probHopOff
+double cluster::probHopOff(int target, long iterations){
+	if(iterations <= 0){
+		if(Err) cerr<<"ERROR in probHopOff: iterations is not valid"<<endl;
+		return nan("");
+	}
+	convergence(iterations);
+	double interSum = 0.0;
+	double sum = 0.0;
+	double targetSum = 0.0;
+	double tmpInter = 0.0;
+	
+	int found = 1;
+	for(int i = 0; i < (int) sitesInCluster.size(); i++){
+		for(int j = 0; j < (int) sitesInCluster[i]->neighSites.size(); j++){
+			if(sitesInCluster[i]->neighSites[j]->clustTag != clustTag){
+				tmpInter = sitesInCluster[i]->probHop(sitesInCluster[i]->neighSites[j]);
+				interSum += tmpInter;
+				if(sitesInCluster[i]->neighSites[j]->siteId == target){
+					targetSum = tmpInter * sitesInCluster[i]->probOnSite;
+				}
+			}
+		}
+		interSum *= sitesInCluster[i]->probOnSite;
+		sum += interSum;
+		interSum = 0.0;
+	}
+	if(!found){
+		if(Err) cerr<<"ERROR in probHopOff: target not connected to cluster"<<endl;
+		return nan("");
+	}
+	return(targetSum/sum); 
+}
+
+void cluster::initProbOnSite(){
+	for(int i =0; i < (int) sitesInCluster.size(); i++){
+		sitesInCluster[i]->probOnSite = 1.0/((double) sitesInCluster.size());
+	}
+	if(Err) cout<<"Intializing Probs On site"<<endl;
+	return;
+}
+
+int cluster::convergence(long iterations){
+	vector<double> interProbs(sitesInCluster.size());
+	double total = 0;
+	double norm = 0;
+	initProbOnSite();
+	
+	if(iterations <= 0){
+		if(Err) cerr<<"ERROR in convergence: iterations is not valid"<<endl;
+		return 0;
+	}
+	for(long i = 0; i < iterations; i++){
+		fill(interProbs.begin(),interProbs.end(), 0);
+		for(int j = 0; j < (int)sitesInCluster.size(); j++){
+			for(int k = 0; k < (int)sitesInCluster[j]->neighSites.size(); k++){
+				if(sitesInCluster[j]->neighSites[k]->clustTag == clustTag){
+					interProbs[j] += sitesInCluster[j]->neighSites[k]->probOnSite * 
+						sitesInCluster[j]->neighSites[k]->probHop(sitesInCluster[j]);
+				}
+			}
+			total += interProbs[j];	
+		}
+		for(int j = 0; j < (int) sitesInCluster.size(); j++){
+			sitesInCluster[j]->probOnSite = ((sitesInCluster[j]->probOnSite + 
+				(interProbs[j]/total)) / 2);
+			norm += sitesInCluster[j]->probOnSite;
+		}
+		for(int j = 0; j < (int) sitesInCluster.size(); j++){
+			sitesInCluster[j]->probOnSite = (sitesInCluster[j]->probOnSite / norm);
+		}
+		total = 0;
+		norm = 0;
+	}
+	return 1;		
 }*/
+
