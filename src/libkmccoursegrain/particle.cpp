@@ -4,7 +4,6 @@
 #include <kmccoursegrain/particle.hpp>
 
 using namespace std;
-
 using namespace kmccoursegrain;
 
 /******************************************************************************
@@ -35,10 +34,9 @@ void Particle::refreshMemory_(int siteId){
 
 void Particle::createNewMemory_(int siteId){
   auto it = memoryQueue_.end();
-
+  --it;
   it->first = siteId;
   it->second = 1;
-
   memoryQueue_.splice(memoryQueue_.begin(), memoryQueue_,it);
 }
 
@@ -82,7 +80,12 @@ void Particle::occupySite(int siteId){
 
 int Particle::getVisitationFrequencyOfCurrentlyOccupiedSite(){
   assert(memoryQueue_.size()>0);
-  return memoryQueue_.begin()->second;
+  for( auto memory : memoryQueue_ ){
+    if(memory.first != unassignedSiteId_) return memory.second;
+  }
+  string err = "ERROR you cannot get the visitation frequency of the "
+    "unoccupied site at this moment, as no sites have yet been occupied.\n";
+  throw runtime_error(err);
 }
 
 list<pair<int,int>> Particle::getMemory(){
