@@ -1,11 +1,15 @@
 #ifndef KMCCOURSEGRAIN_CLUSTER_H_
 #define KMCCOURSEGRAIN_CLUSTER_H_
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <memory>
-#include <math.h>
+//#include <iostream>
+//#include <vector>
+//#include <map>
+//#include <memory>
+//#include <math.h>
+
+#include <list>
+
+#include "identity.hpp"
 
 //All functions return 1 if success, 0 or nan if failure as well as cerr printing
 namespace kmccoursegrain{
@@ -96,7 +100,7 @@ namespace kmccoursegrain{
   };
 
 
-  static int setThresh(const int n);
+  static void setThresh(const int n);
   // sets thresh as a static for all functions, not in class cluster
 
   static int getThresh();

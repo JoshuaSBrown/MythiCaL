@@ -27,7 +27,7 @@ int main(void){
     
     bool fail = false;
     try {
-      particle.setMemoryCapacity(2);
+      particle.setMemoryCapacity(1);
     }catch(...){
       fail = true;
     }
@@ -46,6 +46,7 @@ int main(void){
     Particle particle;
     particle.setMemoryCapacity(5);     
     particle.occupySite(0);
+    cout << particle.getVisitationFrequencyOfCurrentlyOccupiedSite() << endl;
     assert(particle.getVisitationFrequencyOfCurrentlyOccupiedSite()==1);
     particle.occupySite(1);
     assert(particle.getVisitationFrequencyOfCurrentlyOccupiedSite()==1);

@@ -5,13 +5,10 @@
 using namespace std;
 using namespace kmccoursegrain;
 
-typedef shared_ptr<site> sitePtr;
+/*
+typedef shared_ptr<Site> sitePtr;
 
-int getThresh(){
-	return thresh;
-}
-
-site::site(int sId, int vFreq, std::map<std::shared_ptr<site>,double> nSites){
+Site::Site(int sId, int vFreq, std::map<std::shared_ptr<Site>,double> nSites){
 	siteId=sId;
 	visitFreq=vFreq;
 	clustTag = -1;
@@ -19,12 +16,12 @@ site::site(int sId, int vFreq, std::map<std::shared_ptr<site>,double> nSites){
 	this->addNeighbors(nSites);
 }
 
-site::site(int sId, int vFreq){
+Site::Site(int sId, int vFreq){
 	siteId=sId;
 	visitFreq=vFreq;
 	clustTag = -1;
 	probOnSite = 0.0; 
-}
+}*/
 
 void Site::setRatesToNeighbors(map<int const, double&> neighRates){
   neighRates_ = neighRates;

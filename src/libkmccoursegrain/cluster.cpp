@@ -1,5 +1,6 @@
 
 #include <kmccoursegrain/cluster.hpp>
+#include <kmccoursegrain/log.hpp>
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -9,14 +10,12 @@ using namespace kmccoursegrain;
 static int clusterIdCounter = 0;
 static int thresh = 0;
 
-int setThresh(int n){
+void setThresh(const int n){
     if(n>0){
         thresh=n;
-        if(Err) cout<<"Thresh hold is: "<<thresh<<endl;
-        return 1;
+        LOG("Threshold is "+to_string(thresh),1);
     }else{
-        if(Err) cerr<<"ERROR in setThresh: threshold is negative"<<endl;
-        return 0;
+        throw runtime_error("ERROR in setThresh, threshold is negative");
     }
 }
 

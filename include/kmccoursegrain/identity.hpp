@@ -1,7 +1,7 @@
 #ifndef KMCCOURSEGRAIN_IDENTITY_H_
 #define KMCCOURSEGRAIN_IDENTITY_H_
 
-#include <exception>
+#include <stdexcept>
 
 namespace kmccoursegrain {
 
