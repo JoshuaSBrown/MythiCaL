@@ -1,26 +1,28 @@
 
 #include <kmccoursegrain/cluster.hpp>
+#include <kmccoursegrain/site.hpp>
 #include <kmccoursegrain/log.hpp>
 
 using namespace std;
-using namespace kmccoursegrain;
 
-//typedef shared_ptr<site> sitePtr;
+namespace kmccoursegrain {
+
+typedef shared_ptr<Site> SitePtr;
 
 static int clusterIdCounter = 0;
-static int thresh = 0;
+static int threshold = 0;
 
-void setThresh(const int n){
+void setThreshold(const int n){
     if(n>0){
-        thresh=n;
-        LOG("Threshold is "+to_string(thresh),1);
+        threshold=n;
+        LOG("Threshold is "+to_string(threshold),1);
     }else{
         throw runtime_error("ERROR in setThresh, threshold is negative");
     }
 }
 
-int getThresh(){
-	return thresh;
+int getThreshold(){
+	return threshold;
 }
 
 /*
@@ -52,57 +54,44 @@ int site::addNeighbors(map<sitePtr, double> addSites){
 }
 */
 
-/*
-cluster::cluster(){
-	clustTag=clusterIdCounter;
+
+Cluster::Cluster(){
+	setId(clusterIdCounter);
 	clusterIdCounter++;
 }
 
-cluster::~cluster(){
-}
 
-int cluster::addSite(sitePtr newSite){
+void Cluster::addSite(SitePtr newSite){
 	if(newSite == NULL){
-		if(Err) cerr<<"ERROR in addSite: adding a null site"<<endl;
-		return 0;
+		throw invalid_argument("ERROR in addSite: adding a null site");
 	}
-
-	newSite->clustTag = clustTag;
-
-	sitesInCluster.push_back(newSite);
-	
-	int addFlag;
-	for(auto it = newSite->neighs.cbegin(); it != newSite->neighs.cend(); ++it){
-		addFlag = 1;
-		for(auto jt = neighs.cbegin(); jt != neighs.cend(); ++jt){
-			if(jt->first == newSite->siteId){
-				neighs.erase(jt);
-			}
-			if(it == jt){
-				addFlag = 0;
-			}
-		}
-		if(addFlag){
-			neighs.insert(it, pair<int, double>(it->first,it->second));
-		}
-	}
-	return 1;
+  if(sitesInCluster_.count(newSite->getId())){
+    throw invalid_argument("Site has already been added to the cluster");
+  }
+	newSite->setClusterId(this->getId());
+	sitesInCluster_[newSite->getId()]=newSite;
 }
 
-int cluster::getClusterId(){
-	return clustTag;
+vector<SitePtr> Cluster::getSitesInCluster(){
+  vector<SitePtr> sites;
+  for( auto site : sitesInCluster_ ) sites.push_back(site.second);
+	return sites;
 }
 
-
-vector<sitePtr> cluster::getSitesInCluster(){
-	return sitesInCluster;
+std::ostream& operator<<(std::ostream& os, const kmccoursegrain::Cluster& cluster){
+  os << "Cluster Id: "<<cluster.getId() << std::endl;
+  os << "Cluster visitFreq: "<<cluster.visitFreqCluster_ << std::endl;
+	os << "Number of sites in Cluster: " << cluster.sitesInCluster_.size()<<endl;
+  os << "Sites in cluster: " << endl;
+  for( auto site : cluster.sitesInCluster_ ){
+    os << *(site.second) << endl;
+  }
+  return os;
 }
-
-
+/*
 void cluster::printInfo(){
 	cout<<"Cluster ID: "<<clustTag<<endl;
 	cout<<"Visit Frequency to Cluster: "<< visitFreq<<endl;
-	cout<<"Sites in Cluster: "<<sitesInCluster.size()<<endl;
 	for(int i = 0; i < (int)sitesInCluster.size(); i++){
 		cout<<"Site Id: "<<sitesInCluster[i]->siteId<<" Visit Frequency: "<<sitesInCluster[i]->visitFreq<<endl;
 	}
@@ -117,20 +106,21 @@ void cluster::printInfo(){
 		}
 	}
 	return;
-}
+}*/
 
-double cluster::dwellTime(){
-	sitePtr tmp;
-	double sum;
-	for(int i =0; i < (int)sitesInCluster.size(); i++){
-		tmp=sitesInCluster[i];
-		for(auto it = tmp->neighs.cbegin(); it != tmp->neighs.cend(); ++it){
-			sum += it->second;
+double Cluster::dwellTime(){
+
+  throw runtime_error("Dwelltime needs to be fixed current implementation is not correct.");
+	SitePtr site_ptr;
+	double sum = 0.0;
+	for(auto site : sitesInCluster_){ 
+		for(auto rate : site.second->getRatesToNeighbors()){
+			sum += rate;
 		}
 	}
 	return (1/sum);
 }
-
+/*
 //Overload the probHop function
 double site::probHop(int receiving){
 	bool errFlag = true;
@@ -237,17 +227,69 @@ double cluster::probHopOff(int target, long iterations){
 	}
 	return(targetSum/sum); 
 }
-
-void cluster::initProbOnSite(){
-	for(int i =0; i < (int) sitesInCluster.size(); i++){
-		sitesInCluster[i]->probOnSite = 1.0/((double) sitesInCluster.size());
+*/
+void Cluster::initializeProbabilityOnSite_(){
+  for(auto site : sitesInCluster_ ){
+		probabilityOnSite_[site.first] = 1.0/(static_cast<double>(sitesInCluster_.size()));
 	}
-	if(Err) cout<<"Intializing Probs On site"<<endl;
 	return;
 }
+/*
 
-int cluster::convergence(long iterations){
-	vector<double> interProbs(sitesInCluster.size());
+// int in the map is the site 
+// int in the vector is the neighbor 
+// vector contains rates as shown
+//  
+// neigh1 <- site1 -> neigh2 
+//
+//
+map<const int,vector<pair<const int, double>>> 
+Cluster::getInternalRatesFromSiteGoingToNeighbor(){
+
+  map<const int, vector<pair<const int,double>>> internalRates;
+
+  set<int> neighIds;
+  for(auto site : sitesInCluster_) neighIds.insert(site.first);
+
+  for(auto site : sitesInCluster_){
+    for(auto neighId : site->getNeighIds()) {
+      if(siteIsInCluster(neighId)){
+        pair<const int,double> rateToNeighbor(neighId,site->getRateToNeighbor(neighId));
+        internalRates[site.first].push_back(rateToNeighbor);
+      }
+    }
+  } 
+  return internalRates;
+}
+
+// int in the map is the neigh 
+// int int the vector is the site 
+// vector contains rates as shown
+//  
+// neigh1 -> site1 <- neigh2 
+//
+//
+map<const int,vector<pair<const int, double>>> 
+Cluster::getInternalRatesFromNeighborsComingToSite(){
+
+  map<const int, vector<pair<const int,double>>> internalRates;
+
+  set<int> neighIds;
+  for(auto site : sitesInCluster_) neighIds.insert(site.first);
+
+  for(auto site : sitesInCluster_){
+    for(auto neighId : site->getNeighIds()) {
+      if(siteIsInCluster(neighId)){
+        pair<const int,double> rateToSite(site.first,site->getRateToNeighbor(neighId));
+        internalRates[neighId].push_back(rateToSite);
+      }
+    }
+  } 
+  return internalRates;
+}
+
+
+int Cluster::convergence(long iterations){
 	double total = 0;
 	double norm = 0;
 	initProbOnSite();
@@ -256,20 +298,31 @@ int cluster::convergence(long iterations){
 		if(Err) cerr<<"ERROR in convergence: iterations is not valid"<<endl;
 		return 0;
 	}
+
+	map<int,double> internalSiteProbability;
+  double prob = 1.0/static_cast<double>(sitesInCluster_.size());
+  for(auto site : sitesInCluster_) internalSiteProbability[site.first] = prob;
+
+  auto ratesToInternalSites = FromNeighborsComingToSite();
+
 	for(long i = 0; i < iterations; i++){
-		fill(interProbs.begin(),interProbs.end(), 0);
-		for(int j = 0; j < (int)sitesInCluster.size(); j++){
-			for(int k = 0; k < (int)sitesInCluster[j]->neighSites.size(); k++){
-				if(sitesInCluster[j]->neighSites[k]->clustTag == clustTag){
-					interProbs[j] += sitesInCluster[j]->neighSites[k]->probOnSite * 
+
+//		for(int j = 0; j < (int)sitesInCluster.size(); j++){
+      for(auto site : sitesInCluster_){
+//			for(int k = 0; k < (int)sitesInCluster[j]->neighSites.size(); k++){
+//        for( auto neighsite : site.getIdsOfNeighSites()){
+//				if(sitesInCluster[j]->neighSites[k]->clustTag == clustTag){
+  
+        internalSiteProbability[site->getId()] +=         
+//					internalSiteProbability[j] += sitesInCluster[j]->neighSites[k]->probOnSite * 
 						sitesInCluster[j]->neighSites[k]->probHop(sitesInCluster[j]);
 				}
 			}
-			total += interProbs[j];	
+			total += internalSiteProbability[j];	
 		}
 		for(int j = 0; j < (int) sitesInCluster.size(); j++){
 			sitesInCluster[j]->probOnSite = ((sitesInCluster[j]->probOnSite + 
-				(interProbs[j]/total)) / 2);
+				(internalSiteProbability[j]/total)) / 2);
 			norm += sitesInCluster[j]->probOnSite;
 		}
 		for(int j = 0; j < (int) sitesInCluster.size(); j++){
@@ -279,5 +332,6 @@ int cluster::convergence(long iterations){
 		norm = 0;
 	}
 	return 1;		
-}*/
-
+}
+*/
+}

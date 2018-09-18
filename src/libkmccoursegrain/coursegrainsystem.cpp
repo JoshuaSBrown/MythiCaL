@@ -9,7 +9,7 @@ using namespace std;
 using namespace kmccoursegrain;
 
 void CourseGrainSystem::initializeSystem(
-    map<int,map<int const,double&>> ratesOfAllSites){
+    map<int,map<int const,double*>> ratesOfAllSites){
 
   for(auto it = ratesOfAllSites.begin();it!=ratesOfAllSites.end();++it){
     auto site = unique_ptr<Site>(new Site);

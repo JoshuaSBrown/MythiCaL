@@ -3,8 +3,8 @@
 #include <kmccoursegrain/site.hpp>
 
 using namespace std;
-using namespace kmccoursegrain;
 
+namespace kmccoursegrain {
 /*
 typedef shared_ptr<Site> sitePtr;
 
@@ -23,9 +23,33 @@ Site::Site(int sId, int vFreq){
 	probOnSite = 0.0; 
 }*/
 
-void Site::setRatesToNeighbors(map<int const, double&> neighRates){
+void Site::setRatesToNeighbors(map<int const, double*> neighRates){
   neighRates_ = neighRates;
 }
+
+void Site::addNeighRate(pair<int const, double*> neighRate){
+  if(neighRates_.count(neighRate.first)){
+    throw invalid_argument("That neighbor has already been added.");
+  }
+  neighRates_[neighRate.first] = neighRate.second;
+}
+
+void Site::resetNeighRate(pair<int const, double*> neighRate){
+  neighRates_[neighRate.first] = neighRate.second;
+}
+
+vector<int> Site::getNeighborIds(){
+  vector<int> neighborIds;
+  for(auto neighId : neighRates_) neighborIds.push_back(neighId.first);
+  return neighborIds;
+}
+
+vector<double> Site::getRatesToNeighbors(){
+  vector<double> rates;
+  for(auto rate : neighRates_) rates.push_back(*(rate.second));
+  return rates;
+}
+
 /*
 int site::addNeighbors(map<sitePtr, double> addSites){
 	int found;
@@ -55,42 +79,33 @@ int site::addNeighbors(map<sitePtr, double> addSites){
 }
 */
 
-/*
-void site::printInfo(){
-	cout<<"Site Id: "<<siteId<<endl;
-	cout<<"Cluster tag: "<<clustTag<<endl;
-	cout<<"Visit Frequency: "<<visitFreq<<endl;
-	cout<<"Prob On Site: "<<probOnSite<<endl;
-	cout<<"Neighbors:Rates"<<endl;
-	for(auto it = neighs.cbegin(); it != neighs.cend(); ++it){
-		cout<<"\t"<<it->first<<":"<<it->second<<endl;
-	}
-	return;
+std::ostream& operator<<(std::ostream& os, const kmccoursegrain::Site& site){
+  os << "Site Id: "<<site.getId() << std::endl;
+  os << "Cluster Id: "<<site.clusterId_ << std::endl;
+  os << "Visit Frequency: "<<site.visitFreq_ << std::endl;
+  os << "Neighbors:Rates"<<std::endl;
+  for(auto rate_ptr : site.neighRates_ ){
+    os << "\t"<<rate_ptr.first<<":"<< *(rate_ptr.second) << std::endl;
+  }
+  return os;
 }
 
-double site::getProbOnSite(){
-	return probOnSite;
-}
-	*/ 
-
-/*
 //Overload the probHop function
-double site::probHop(int receiving){
-	bool errFlag = true;
-	double totalRates = 0.0;
+double Site::probHopToNeigh(const int neighSiteId){
 
-	for(auto it = neighs.cbegin(); it != neighs.cend(); ++it){
-	       if(it->first == receiving) errFlag = false;
-	       totalRates += it->second;
-	}
+  if(neighRates_.count(neighSiteId)==0){
+    string err = "Error site " +to_string(neighSiteId)+" is not a nieghbor of "
+      "" + to_string(getId());
+    throw invalid_argument(err);
+  }
 
-	if(errFlag){
-		if(Err) cerr<<"ERROR in probHop: receiving site not a neighbor of shipping site"<<endl;
-		return 0;
-	}
-	return (neighs[receiving]/totalRates);
+  double totalRates = 0.0;
+  for(auto ptr_rate : neighRates_) totalRates += *(ptr_rate.second);
+
+	return (*(neighRates_[neighSiteId])/totalRates);
 }
 
+/*
 double site::probHop(sitePtr receiving){ 
 	bool errFlag = true;
 	double totalRates = 0.0;
@@ -107,5 +122,4 @@ double site::probHop(sitePtr receiving){
 	return (neighs[receiving->siteId]/totalRates);
 }
 */
-
-
+}

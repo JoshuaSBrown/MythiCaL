@@ -24,7 +24,7 @@ class CourseGrainSystem{
     // double * - pointer to rate going from i->j
     //
     void initializeSystem(
-        std::map<int,std::map<int const,double &>> ratesOfAllSites);
+        std::map<int,std::map<int const,double *>> ratesOfAllSites);
 
     void visitSite(Particle & particle,int siteId);
 

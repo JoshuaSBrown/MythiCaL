@@ -12,7 +12,7 @@ namespace kmccoursegrain {
 
     public:
       Identity() : id_set_(false) {}
-      int getId() {
+      int getId() const {
         return (id_set_ ? id_ : throw std::runtime_error("ID not set"));
       }
       void setId( int id) { id_ = id; id_set_ = true;}

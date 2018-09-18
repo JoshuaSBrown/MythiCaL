@@ -14,33 +14,48 @@ namespace kmccoursegrain {
   class Site : public virtual Identity {
     //	friend class cluster;
     public:	
-      Site() : probabilitySet_(false), visitFreq_(0) {};
-      void setRatesToNeighbors(std::map<int const, double&> neighRates);
+      Site() : visitFreq_(0), clusterId_(-1) {};
+      void setRatesToNeighbors(std::map<int const, double*> neighRates);
+
+      void addNeighRate(std::pair<const int, double*> neighRate);
+
+      void resetNeighRate(std::pair<const int,double*> neighRate);
+
+      bool isNeighbor(int neighId) { return neighRates_.count(neighId);}
+
+      std::vector<double> getRatesToNeighbors();
+      double getRateToNeighbor(int neighId) { return *(neighRates_[neighId]);}
+
+      std::vector<int> getNeighborIds();
+      //std::vector<int> getIdsOfNeighSites();
       /*
       //Two ways to create a site object
       //Creates site with list of sites and rates as neighbors
       site(int sId, int vFreq, std::map<std::shared_ptr<site>,double> nSites);
       //Just creates site
-      site(int sId, int vFreq);
+      site(int sId, int vFreq);*/
       //Two ways to call probHop hop is from shipping to receivingSite
-      double probHop(std::shared_ptr<site> receivingSite);
-      double probHop(int receivingSiteId);
-      int addNeighbors(std::map<std::shared_ptr<site>, double>);
-      void printInfo();
-      double getProbOnSite();
-      int mergeSites();//FIXME
-       */
+//      double probHop(std::shared_ptr<site> receivingSite);
+      void setClusterId(const int clusterId) { clusterId_ = clusterId; }
+      double probHopToNeigh(const int neighSiteId);
+/*      int addNeighbors(std::map<std::shared_ptr<site>, double>);
+      void printInfo();*/
+//      int mergeSites();//FIXME
+
+      friend std::ostream& operator<<(std::ostream& os, const kmccoursegrain::Site& site);
     private:
       //		int siteId;
       //		std::vector<std::shared_ptr<site>> neighSites;
       //		std::map<int, double> neighs;
-      std::map<int const, double&> neighRates_;
+      std::map<int const, double *> neighRates_;
       int visitFreq_;
-      double courseGrainedSiteProb_;
-      bool probabilitySet_;
-      //		int clustTag;
+   //   double courseGrainedSiteProb_;
+   //   bool probabilitySet_;
+      int clusterId_;
       //		double probOnSite;
   };
 
 }
+
+
 #endif

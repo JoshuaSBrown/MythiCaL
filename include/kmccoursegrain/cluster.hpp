@@ -2,38 +2,59 @@
 #define KMCCOURSEGRAIN_CLUSTER_H_
 
 //#include <iostream>
-//#include <vector>
-//#include <map>
-//#include <memory>
+#include <vector>
+#include <map>
+#include <memory>
 //#include <math.h>
 
 #include <list>
 
 #include "identity.hpp"
 
+
 //All functions return 1 if success, 0 or nan if failure as well as cerr printing
 namespace kmccoursegrain{
 
-  class Cluster: public virtual Identity {
-    public:		
+  class Site;
+
+  class Cluster : public virtual Identity {
+    public:	
+	
       Cluster();
-      ~Cluster();
-      /*		int addSite(std::shared_ptr<site> siteToAdd);
-            int getClusterId();
-            std::vector<std::shared_ptr<site>> getSitesInCluster();
+
+      ~Cluster() {};
+      void addSite(std::shared_ptr<Site> siteToAdd);
+
+      bool siteIsInCluster(int siteId) { return sitesInCluster_.count(siteId);}
+     
+      std::vector<std::shared_ptr<Site>> getSitesInCluster();
       //Overloaded function from Site, prints cluster info
-      void printInfo(); 
+      int getNumberOfSitesInCluster() { return sitesInCluster_.size(); }
       double dwellTime();
-      int convergence(long iterations);
+//      int convergence(long iterations);
       //Two ways of calling probHopOff, target is target site it leaves the cluster
-      double probHopOff(std::shared_ptr<site> target, long interations);
-      double probHopOff(int targetId, long interations);
-       */
+//      double probHopOff(std::shared_ptr<Site> target, long interations);
+//      double probHopOff(int targetId, long interations);
+      friend std::ostream& operator<<(std::ostream& os, const kmccoursegrain::Cluster& cluster);
     private:
-      //      std::vector<std::shared_ptr<site>> sitesInCluster;
-      std::list<int> sitesInCluster_;
+      std::map<const int, std::shared_ptr<Site>> sitesInCluster_;
+//      std::list<int> sitesInCluster_;
       int visitFreqCluster_;
-      void initProbOnSite_(); 
+
+
+      std::map<const int,double> probabilityOnSite_;
+
+      // first int is hopping from
+      // second int is id hopping too
+      // double is the rate
+      std::map<const int,std::vector<std::pair<const int, double>>> getInternalRates();
+
+      // First int is the Id of a site within the cluster
+      // pair - first int is the id of the site neighboring the cluster
+      // double is the rate
+//      std::map<int,std::pair<int,double>> getRatesToNeighborsOfCluster_();
+ 
+      void initializeProbabilityOnSite_(); 
 
       //Notes:
       //Stuff to do not in matlab
@@ -99,17 +120,16 @@ namespace kmccoursegrain{
       //Tprob_off cluster or escape cluster = tescapsesite1*probhopoffsite1+...
   };
 
-
-  static void setThresh(const int n);
   // sets thresh as a static for all functions, not in class cluster
+  void setThreshold(const int n);
 
-  static int getThresh();
   //returns the threshold
+  int getThreshold();
 
-  static bool siteAboveThreshold(int siteId, int frequency_visitation);
+//  static bool siteAboveThreshold(int siteId, int frequency_visitation);
 
-  Cluster generateCluster(int clusterId);
+//  Cluster generateCluster(int clusterId);
 
 }
 
-#endif // KMCCOURSEGRAIN_CLUSTER_H)
+#endif // KMCCOURSEGRAIN_CLUSTER_H

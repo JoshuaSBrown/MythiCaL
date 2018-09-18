@@ -5,18 +5,20 @@
 //#include <map>
 //#include <iterator>
 
+//#include <kmccoursegrain/site.hpp>
 #include <kmccoursegrain/cluster.hpp>
+#include <kmccoursegrain/site.hpp>
 
 using namespace std;
 using namespace kmccoursegrain;
 
 int main(void){
 
+//  Site site;
 
   cout << "Testing: Cluster constructor" << endl;
   {
     Cluster cl;
-
   }
 
   cout << "Testing: Cluster identity setter" << endl;
@@ -40,19 +42,33 @@ int main(void){
     }
     assert(fail);
   }  
-/*
-	if(Err==1) cout<<"Error Reporting On"<<endl;
+
 	//Testing the Threshold Setter
+  cout << "Testing: Threshold setter and getter" << endl;
 	{
 		cout<<"Testing Thresh"<<endl;
-		assert(setThresh(10));
-		assert(getThresh()==10);
-		assert(setThresh(-20)==0);
+		setThreshold(10);
+		assert(getThreshold()==10);
 	}
+
+  cout << "Testing: addSite" << endl;
+  {
+    Site site;
+    site.setId(1);
+    double rate = 1.0;
+    site.addNeighRate(pair<int const, double *>(2,&rate));
+
+    Cluster cluster;
+    cluster.addSite(make_shared<Site>(site));
+    assert(cluster.getNumberOfSitesInCluster()==1);
+  }
+
 	//Testing the Constructor
-	{
+/*	{
 		cout<<"Testing the constructor"<<endl;
-		shared_ptr<cluster> tmp = make_shared<cluster>();
+		shared_ptr<Cluster> tmp = make_shared<Cluster>();
+
+
 		vector<double> nRates = {1.0,2.0};
 		vector<int> nId = {2,3};
 		map<int, double> neighbors1 = {
@@ -80,9 +96,9 @@ int main(void){
 		int vFreq3 = 3;
 		int sId3 = 3;
 		//site site1(sId, nRates, nId, vFreq);
-		shared_ptr<site> site1(new site(sId1,vFreq1));
-		shared_ptr<site> site2(new site(sId2,vFreq2));
-		shared_ptr<site> site3(new site(sId3,vFreq3));
+		shared_ptr<site> site1(new Site(sId1,vFreq1));
+		shared_ptr<site> site2(new Site(sId2,vFreq2));
+		shared_ptr<site> site3(new Site(sId3,vFreq3));
 		
 		map<shared_ptr<site>,double> linkSite1 = {
 			{site2,1.0},
