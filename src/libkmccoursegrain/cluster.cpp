@@ -376,11 +376,14 @@ void Cluster::iterate_(map<const int, vector<pair<const int,double >>> ratesBetw
 void Cluster::calculateProbabilityHopToNeighbors_(){
   
   auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
-  map<const int, double> probabilityHopToNeighbor;
+
+  cout << "Rates to Neighbors" << endl;
+
 
   auto sumRatesOffCluster = 0.0;
   for( auto rateToNeigh : ratesToNeighbors ) {
     for( auto rate : rateToNeigh.second ){
+      cout << "from " << rateToNeigh.first << " to " << rate.first << " rate " << rate.second << endl;
       sumRatesOffCluster+=rate.second;
     }
   }
@@ -389,30 +392,49 @@ void Cluster::calculateProbabilityHopToNeighbors_(){
   for( auto site : sitesInCluster_ ){
     sumDwell += site.second->getDwellTime();
   }
+  cout << "sumDwell " << sumDwell << endl;
 
+  map<const int, double> probabilityHopToNeighbor;
+  double total = 0.0;
   for(auto rateToNeigh : ratesToNeighbors){
     int siteHoppingFrom = rateToNeigh.first;
-
+    cout << "Site hopping from " << siteHoppingFrom << endl;
     for( auto rate : rateToNeigh.second ){
       int siteHoppingTo = rate.first;
+      cout << "Site hopping to " << siteHoppingTo << endl;
       if(probabilityHopToNeighbor.count(siteHoppingTo)){
+        cout << "Exists" << endl;
         probabilityHopToNeighbor[siteHoppingTo] +=\
           probabilityOnSite_[siteHoppingFrom]*\
           sitesInCluster_[siteHoppingFrom]->getDwellTime()/\
           sumDwell*\
-          probabilityHopToNeighbor[rate.second]/\
+          sitesInCluster_[siteHoppingFrom]->probHopToNeigh(siteHoppingTo)/\
           sumRatesOffCluster;
       }else{
+
+        cout << "Prob on site " << probabilityOnSite_[siteHoppingFrom] << endl;
+        cout << "dwell time " << sitesInCluster_[siteHoppingFrom]->getDwellTime() << endl;
+        cout << "Probability Hop to any neighbor " << sitesInCluster_[siteHoppingFrom]->probHopToNeigh(siteHoppingTo) << endl;
+        cout << "sumRatesOff " << sumRatesOffCluster << endl;
         probabilityHopToNeighbor[siteHoppingTo] =\
           probabilityOnSite_[siteHoppingFrom]*\
           sitesInCluster_[siteHoppingFrom]->getDwellTime()/\
           sumDwell*\
-          probabilityHopToNeighbor[rate.second]/\
+          sitesInCluster_[siteHoppingFrom]->probHopToNeigh(siteHoppingTo)/\
           sumRatesOffCluster;
-      } 
+      }
+      total += probabilityHopToNeighbor[siteHoppingTo];
     }
   }
+
+  for(auto neighborProb : probabilityHopToNeighbor ){
+    probabilityHopToNeighbor[neighborProb.first] = neighborProb.second/total;
+  }
   probabilityHopToNeighbor_ = probabilityHopToNeighbor;
+  cout << "Number of elements " << probabilityHopToNeighbor.size() << endl;
+  for(auto val : probabilityHopToNeighbor_){
+    cout << val.first << " " << val.second << endl;
+  }
 }
 
 void Cluster::converge(){
