@@ -50,6 +50,14 @@ vector<double> Site::getRatesToNeighbors(){
   return rates;
 }
 
+double Site::getDwellTime(){
+  double sum = 0.0;
+  for( auto rate : neighRates_){
+    sum+= *(rate.second);
+  }
+  return 1.0/sum;
+}
+
 /*
 int site::addNeighbors(map<sitePtr, double> addSites){
 	int found;
@@ -94,7 +102,7 @@ std::ostream& operator<<(std::ostream& os, const kmccoursegrain::Site& site){
 double Site::probHopToNeigh(const int neighSiteId){
 
   if(neighRates_.count(neighSiteId)==0){
-    string err = "Error site " +to_string(neighSiteId)+" is not a nieghbor of "
+    string err = "Error site " +to_string(neighSiteId)+" is not a neighbor of "
       "" + to_string(getId());
     throw invalid_argument(err);
   }

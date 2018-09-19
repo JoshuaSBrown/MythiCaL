@@ -30,13 +30,43 @@ namespace kmccoursegrain{
       std::vector<std::shared_ptr<Site>> getSitesInCluster();
       //Overloaded function from Site, prints cluster info
       int getNumberOfSitesInCluster() { return sitesInCluster_.size(); }
+
+      double getProbabilityOfOccupyingInternalSite(int siteId);
+
       double dwellTime();
-//      int convergence(long iterations);
+
+      enum Method { 
+        converge_by_iterations_per_cluster,
+        converge_by_iterations_per_site,
+        converge_by_tolerance
+      };
+
+
+      std::map<const int, double > getSiteOccupationPropability() { return probabilityOnSite_;}
+
+      void converge();
+      void setConvergenceMethod(Method convergence_method) { convergence_method_ = convergence_method;}
+
+      void setConvergenceTolerance(double tolerance);
+      double getConvergenceTolerance() { return convergenceTolerance_;}
+
+      void setConvergenceIterations(long iterations);
+      long getConvergenceIterations(){return iterations_;}
+
+      double getProbabilityOfHoppingToNeighbor(int neighId);     
+      
       //Two ways of calling probHopOff, target is target site it leaves the cluster
 //      double probHopOff(std::shared_ptr<Site> target, long interations);
 //      double probHopOff(int targetId, long interations);
       friend std::ostream& operator<<(std::ostream& os, const kmccoursegrain::Cluster& cluster);
     private:
+
+      long iterations_;
+      double convergenceTolerance_;
+      Method convergence_method_;
+      
+      std::map<const int, double> probabilityHopToNeighbor_;
+
       std::map<const int, std::shared_ptr<Site>> sitesInCluster_;
 //      std::list<int> sitesInCluster_;
       int visitFreqCluster_;
@@ -47,15 +77,23 @@ namespace kmccoursegrain{
       // first int is hopping from
       // second int is id hopping too
       // double is the rate
-      std::map<const int,std::vector<std::pair<const int, double>>> getInternalRates();
+      //std::map<const int,std::vector<std::pair<const int, double>>> getInternalRates();
 
       // First int is the Id of a site within the cluster
       // pair - first int is the id of the site neighboring the cluster
       // double is the rate
-//      std::map<int,std::pair<int,double>> getRatesToNeighborsOfCluster_();
- 
-      void initializeProbabilityOnSite_(); 
+      std::map<const int,std::map<const int,double>> getRatesToNeighborsOfCluster_();
 
+      void iterate_(std::map<const int,std::vector<std::pair<const int, double>>> rates);
+ 
+      void calculateProbabilityHopToNeighbors_();
+
+      void initializeProbabilityOnSites_(); 
+
+      std::map<const int,std::vector<std::pair<const int, double>>>
+      getInternalRatesFromNeighborsComingToSite_();
+
+      
       //Notes:
       //Stuff to do not in matlab
       //smoosh sites together if below thresh

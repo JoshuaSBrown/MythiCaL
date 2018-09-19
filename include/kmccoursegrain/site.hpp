@@ -27,6 +27,8 @@ namespace kmccoursegrain {
       double getRateToNeighbor(int neighId) { return *(neighRates_[neighId]);}
 
       std::vector<int> getNeighborIds();
+
+      double getDwellTime();
       //std::vector<int> getIdsOfNeighSites();
       /*
       //Two ways to create a site object

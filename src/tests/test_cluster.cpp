@@ -2,6 +2,7 @@
 #include <cassert>
 #include <vector>
 #include <memory>
+#include <cmath>
 //#include <map>
 //#include <iterator>
 
@@ -46,7 +47,6 @@ int main(void){
 	//Testing the Threshold Setter
   cout << "Testing: Threshold setter and getter" << endl;
 	{
-		cout<<"Testing Thresh"<<endl;
 		setThreshold(10);
 		assert(getThreshold()==10);
 	}
@@ -61,6 +61,92 @@ int main(void){
     Cluster cluster;
     cluster.addSite(make_shared<Site>(site));
     assert(cluster.getNumberOfSitesInCluster()==1);
+  }
+
+
+  cout << "Testing: siteIsInCluster" << endl;
+  {
+    Site site;
+    site.setId(1);
+    
+    Cluster cluster;
+    assert(!cluster.siteIsInCluster(1));
+    cluster.addSite(make_shared<Site>(site));
+    assert(cluster.siteIsInCluster(1));
+  }
+
+  cout << "Testing: convergence1" << endl;
+  {
+
+    // Simple convergence test 
+    // 
+    // site1 -> site2
+    //       <-
+    //
+    // Same rate should lead to 50 % probability on either site
+
+    Site site;
+    site.setId(1);
+    double rate = 1;
+    site.addNeighRate(pair<int const, double *>(2,&rate));
+    
+    Site site2;
+    site2.setId(2);
+    double rate2 = 1;
+    site2.addNeighRate(pair<int const, double *>(1,&rate2));
+  
+    Cluster cluster;
+    cluster.addSite(make_shared<Site>(site));
+    cluster.addSite(make_shared<Site>(site2));
+
+    cluster.converge();
+
+    assert(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(1)))==50);
+    assert(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(2)))==50);
+
+  }
+
+  cout << "Testing: convergence2" << endl;
+  {
+
+    // Simple convergence test 
+    // 
+    // site1 -> site2  -> site3
+    //       <-        <-
+    //
+    // Same rate should lead to 25 % probability on end sites
+    // and 50 % probability on middle site
+
+    Site site;
+    site.setId(1);
+    double rate = 1;
+    site.addNeighRate(pair<int const, double *>(2,&rate));
+    
+    Site site2;
+    site2.setId(2);
+    double rate2 = 1;
+    double rate3 = 1;
+    site2.addNeighRate(pair<int const, double *>(1,&rate2));
+    site2.addNeighRate(pair<int const, double *>(3,&rate3));
+  
+    Site site3;
+    site3.setId(3);
+    double rate4 = 1;
+    site3.addNeighRate(pair<int const, double *>(2,&rate4));
+
+    Cluster cluster;
+    cluster.setConvergenceIterations(6);
+
+    cluster.addSite(make_shared<Site>(site));
+    cluster.addSite(make_shared<Site>(site2));
+    cluster.addSite(make_shared<Site>(site3));
+
+    cluster.converge();
+
+    assert(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(1)))==25);
+    assert(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(2)))==50);
+    assert(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(3)))==25);
+
   }
 
 	//Testing the Constructor
