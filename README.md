@@ -12,3 +12,8 @@ Library is designed to course grain sites involved in charge transport simulatio
 ## Developers
 
 [Developers Guide](doc/DEVELOPERS_GUIDE.md)
+
+## Author List
+
+* Joshua Brown
+* Riley Hadjis
