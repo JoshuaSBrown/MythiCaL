@@ -9,7 +9,9 @@ namespace kmccoursegrain{
 class Site;
 class Cluster;
 class Particle;
-//class Cluster;
+
+typedef std::shared_ptr<Site> SitePtr;
+typedef std::shared_ptr<Cluster> ClusterPtr;
 
 class CourseGrainSystem{
 
@@ -28,18 +30,17 @@ class CourseGrainSystem{
         std::map<int,std::map<int const,double * >> ratesOfAllSites);
 
     
-    // Return the id of the site the charge has hopped too
-    int hop(Particle & particle);
+    void hop(Particle & particle);
 
     void setCourseGrainThreshold(int threshold);
   private:
 
     // How many times does a charge have to visit the same sites before it should be course grained
     int courseGrainingThreshold_;
-    std::map<int,std::shared_ptr<Site>> sites_;    
+    std::map<int,SitePtr> sites_;    
 
 
-    std::map<int,std::shared_ptr<Cluster>> clusters_;
+    std::map<int,ClusterPtr> clusters_;
 
     void courseGrainSiteIfNeeded_(Particle & particle,const int siteId);
     

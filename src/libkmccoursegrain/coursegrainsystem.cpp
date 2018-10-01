@@ -99,7 +99,7 @@ namespace kmccoursegrain {
     }
   }
 
-  int CourseGrainSystem::hop(Particle & particle){
+  void CourseGrainSystem::hop(Particle & particle){
 
     auto siteId = particle.getIdOfSiteCurrentlyOccupying();
     int siteToHopTo = particle.getPotentialSite();
