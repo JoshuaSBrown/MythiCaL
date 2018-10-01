@@ -394,8 +394,7 @@ namespace kmccoursegrain{
       std::map<const int,std::map<const int,double>> 
         getRatesToNeighborsOfCluster_();
 
-      void iterate_
-        (std::map<const int,std::vector<std::pair<const int, double>>> rates);
+      void iterate_();
  
       void calculateProbabilityHopToNeighbors_();
 

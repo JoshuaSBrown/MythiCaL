@@ -9,6 +9,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 ########################################################
+# Compiler Flags                                       #
+########################################################
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
+########################################################
 # Basic system tests (standard libraries, headers etc) #
 ########################################################
 
