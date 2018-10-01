@@ -42,7 +42,7 @@ class CourseGrainSystem{
 
     std::map<int,ClusterPtr> clusters_;
 
-    void courseGrainSiteIfNeeded_(Particle & particle,const int siteId);
+    void courseGrainSiteIfNeeded_(Particle & particle);
     
     void mergeSiteToCluster_(const int siteId, const int clusterId);
     void createCluster_(const int siteId1,const int siteId2);

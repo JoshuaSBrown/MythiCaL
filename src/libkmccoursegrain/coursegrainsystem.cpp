@@ -57,9 +57,7 @@ namespace kmccoursegrain {
     }
   }
 
-  void CourseGrainSystem::courseGrainSiteIfNeeded_(
-      Particle & particle,
-      const int siteId){
+  void CourseGrainSystem::courseGrainSiteIfNeeded_(Particle & particle){
 
     auto siteFrequencies = particle.getVisitationFrequenciesOfCurrentSites();
     // Get frequencies of visitiation of the currently occupied site and 
@@ -132,7 +130,7 @@ namespace kmccoursegrain {
         auto clusterId = sites_[siteToHopTo]->getClusterId();
         sites_[siteId]->vacateSite();
         sites_[siteToHopTo]->occupySite();
-        courseGrainSiteIfNeeded_(particle,siteToHopTo);
+        courseGrainSiteIfNeeded_(particle);
 
         int newId = clusters_[clusterId]->pickNewSiteId();
         auto hopTime = clusters_[clusterId]->getDwellTime();
@@ -145,7 +143,7 @@ namespace kmccoursegrain {
 
         sites_[siteId]->vacateSite();
         sites_[siteToHopTo]->occupySite();
-        courseGrainSiteIfNeeded_(particle,siteToHopTo);
+        courseGrainSiteIfNeeded_(particle);
 
         int newId = sites_[siteToHopTo]->pickNewSiteId();
         auto hopTime = sites_[siteToHopTo]->getDwellTime();
