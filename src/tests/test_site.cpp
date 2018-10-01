@@ -12,7 +12,7 @@ int main(void){
 
   cout << "Testing: Site constructor" << endl;
   {
-    Sie site;
+    Site site;
   }
 
   cout << "Testing: Site Id setter" << endl;
