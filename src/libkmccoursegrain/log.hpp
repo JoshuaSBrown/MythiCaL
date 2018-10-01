@@ -1,7 +1,7 @@
 // Taken from https://stackoverflow.com/questions/19415845/a-better-log-macro-using-template-metaprogramming
 
-#ifndef _KMCCOURSEGRAIN_LOG_HPP_
-#define _KMCCOURSEGRAIN_LOG_HPP_
+#ifndef KMCCOURSEGRAIN_LOG_HPP
+#define KMCCOURSEGRAIN_LOG_HPP
 
 #ifndef LOG_LEVEL
 #define LOG_LEVEL 0
@@ -78,5 +78,5 @@ inline void output(std::ostream& os, None)
 }
 
 }
-#endif // _CATNIP_LOG_HPP_
+#endif // KMCCOURSEGRAIN_LOG_HPP
 

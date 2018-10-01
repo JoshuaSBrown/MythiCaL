@@ -1,5 +1,5 @@
-#ifndef KMCCOURSEGRAIN_COURSEGRAINSYSTEM_H_
-#define KMCCOURSEGRAIN_COURSEGRAINSYSTEM_H_
+#ifndef KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
+#define KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
 
 #include <memory>
 #include <map>
@@ -7,13 +7,14 @@
 namespace kmccoursegrain{
 
 class Site;
+class Cluster;
 class Particle;
 //class Cluster;
 
 class CourseGrainSystem{
 
   public:
-    CourseGrainSystem() : tolerance_(0.01) {};
+    CourseGrainSystem() {};
     // There should be no reason to update the rates because we are using 
     // pointers to the rates, though this means the doubles must be stored on
     // the heap somewhere. 
@@ -24,21 +25,29 @@ class CourseGrainSystem{
     // double * - pointer to rate going from i->j
     //
     void initializeSystem(
-        std::map<int,std::map<int const,double *>> ratesOfAllSites);
+        std::map<int,std::map<int const,double * >> ratesOfAllSites);
 
-    void visitSite(Particle & particle,int siteId);
+    
+    // Return the id of the site the charge has hopped too
+    int hop(Particle & particle);
 
     void setCourseGrainThreshold(int threshold);
-    // This will update the internals when the rates vary by the set tolerance 
-    void setTheUpdateRateToleranceThreshold(double tolerance);
   private:
 
     // How many times does a charge have to visit the same sites before it should be course grained
     int courseGrainingThreshold_;
-    double tolerance_;
-    std::map<int,std::unique_ptr<Site>> sites_;    
-//    std::map<int,std::unique_ptr<Cluster>> clusters_;
+    std::map<int,std::shared_ptr<Site>> sites_;    
+
+
+    std::map<int,std::shared_ptr<Cluster>> clusters_;
+
+    void courseGrainSiteIfNeeded_(Particle & particle,const int siteId);
+    
+    void mergeSiteToCluster_(const int siteId, const int clusterId);
+    void createCluster_(const int siteId1,const int siteId2);
+    void mergeClusters_(const int clusterId1, const int clusterId2);
+
 };
 
 }
-#endif // KMCCOURSEGRAIN_COURSEGRAINSYSTEM_H_
+#endif // KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP

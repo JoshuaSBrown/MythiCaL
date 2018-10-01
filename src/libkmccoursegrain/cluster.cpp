@@ -1,469 +1,381 @@
 
 #include <cmath>
+#include <random>
+#include <chrono>
 
-#include <kmccoursegrain/cluster.hpp>
-#include <kmccoursegrain/site.hpp>
-#include <kmccoursegrain/log.hpp>
+#include "cluster.hpp"
+#include "site.hpp"
+#include "log.hpp"
 
 using namespace std;
 
 namespace kmccoursegrain {
 
-typedef shared_ptr<Site> SitePtr;
+  /****************************************************************************
+   * Constants
+   ****************************************************************************/
 
-static int clusterIdCounter = 0;
-static int threshold = 0;
+  static int clusterIdCounter = 0;
+  static int threshold = 0;
 
-void setThreshold(const int n){
+  /****************************************************************************
+   * Global Functions
+   ****************************************************************************/
+  void setThreshold(const int n){
     if(n>0){
-        threshold=n;
-        LOG("Threshold is "+to_string(threshold),1);
+      threshold=n;
+      LOG("Threshold is "+to_string(threshold),1);
     }else{
-        throw runtime_error("ERROR in setThresh, threshold is negative");
+      throw runtime_error("ERROR in setThresh, threshold is negative");
     }
-}
-
-int getThreshold(){
-	return threshold;
-}
-
-/*
-int site::addNeighbors(map<sitePtr, double> addSites){
-	int found;
-
-	for(auto it = addSites.cbegin(); it != addSites.cend(); ++it){
-		if(it->first == NULL){
-			if(Err) cerr<<"ERROR in addNeighbors: adding a null site"<<endl;
-			return 0;
-		}
-		if(it->first->siteId == this->siteId) continue;
-		found = 0;
-		for(int j = 0; j < (int) neighSites.size(); j++){
-			if(neighSites[j]->siteId == it->first->siteId) found = 1;
-		}
-		
-		if(!found) neighSites.push_back(it->first);
-		neighs[it->first->siteId] = it->second;
-
-		found = 0;
-		for(int j = 0; j < (int) it->first->neighSites.size(); j++){
-			if(it->first->neighSites[j]->siteId == this->siteId) found = 1;
-		}
-		if(!found) it->first->neighSites.push_back(sitePtr(this));
-		it->first->neighs[siteId] = it->second;
-	}
-	return 1;
-}
-*/
-
-
-Cluster::Cluster(){
-	setId(clusterIdCounter);
-	clusterIdCounter++;
-  iterations_ = 3;
-  convergenceTolerance_ = 0.01;
-  convergence_method_ = converge_by_iterations_per_site;
-}
-
-
-void Cluster::addSite(SitePtr newSite){
-	if(newSite == NULL){
-		throw invalid_argument("ERROR in addSite: adding a null site");
-	}
-  if(sitesInCluster_.count(newSite->getId())){
-    throw invalid_argument("Site has already been added to the cluster");
   }
-	newSite->setClusterId(this->getId());
-	sitesInCluster_[newSite->getId()]=newSite;
-}
 
-vector<SitePtr> Cluster::getSitesInCluster(){
-  vector<SitePtr> sites;
-  for( auto site : sitesInCluster_ ) sites.push_back(site.second);
-	return sites;
-}
-
-std::ostream& operator<<(std::ostream& os, const kmccoursegrain::Cluster& cluster){
-  os << "Cluster Id: "<<cluster.getId() << std::endl;
-  os << "Cluster visitFreq: "<<cluster.visitFreqCluster_ << std::endl;
-	os << "Number of sites in Cluster: " << cluster.sitesInCluster_.size()<<endl;
-  os << "Sites in cluster: " << endl;
-  for( auto site : cluster.sitesInCluster_ ){
-    os << *(site.second) << endl;
+  int getThreshold(){
+    return threshold;
   }
-  return os;
-}
-/*
-void cluster::printInfo(){
-	cout<<"Cluster ID: "<<clustTag<<endl;
-	cout<<"Visit Frequency to Cluster: "<< visitFreq<<endl;
-	for(int i = 0; i < (int)sitesInCluster.size(); i++){
-		cout<<"Site Id: "<<sitesInCluster[i]->siteId<<" Visit Frequency: "<<sitesInCluster[i]->visitFreq<<endl;
-	}
-	std::map<int, double> neighbors;
-	cout<<"Rates: "<<endl;
-	for(int i = 0; i < (int)sitesInCluster.size(); i++){
-		cout<<"\tSite: "<<sitesInCluster[i]->siteId<<endl;
-		neighbors = sitesInCluster[i]->neighs;
-		cout<<"\t\tNeighbor:Rate"<<endl;
-		for(auto it = neighbors.cbegin(); it != neighbors.cend(); ++it){
-			cout<<"\t\t"<<it->first<<":"<<it->second<<endl;
-		}
-	}
-	return;
-}*/
 
-double Cluster::dwellTime(){
+  /****************************************************************************
+   * Public Facing Functions
+   ****************************************************************************/
 
-  throw runtime_error("Dwelltime needs to be fixed current implementation is not correct.");
-	SitePtr site_ptr;
-	double sum = 0.0;
-	for(auto site : sitesInCluster_){ 
-		for(auto rate : site.second->getRatesToNeighbors()){
-			sum += rate;
-		}
-	}
-	return (1/sum);
-}
-
-double Cluster::getProbabilityOfOccupyingInternalSite(int siteId){
-  if(!sitesInCluster_.count(siteId)){
-    throw invalid_argument("the provided site is not in the cluster");
+  Cluster::Cluster() : Identity() {
+    setId(clusterIdCounter);
+    clusterIdCounter++;
+    iterations_ = 3;
+    resolution_ = 20;
+    convergenceTolerance_ = 0.01;
+    convergence_method_ = converge_by_iterations_per_site;
+    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+    randomEngine_ = mt19937(seed);
+    randomDistribution_ = uniform_real_distribution<double>(0.0,1.0);
   }
-  return probabilityOnSite_[siteId];
-}
 
-/*
-//Overload the probHop function
-double site::probHop(int receiving){
-	bool errFlag = true;
-	double totalRates = 0.0;
+  void Cluster::addSite(SitePtr newSite){
+    if(newSite == nullptr){
+      throw invalid_argument("ERROR in addSite: adding a null site");
+    }
+    if(sitesInCluster_.count(newSite->getId())){
+      throw invalid_argument("Site has already been added to the cluster");
+    }
+    newSite->setClusterId(this->getId());
+    sitesInCluster_[newSite->getId()]=newSite;
+    
+    updateProbabilitiesAndTimeConstant();
+  }
 
-	for(auto it = neighs.cbegin(); it != neighs.cend(); ++it){
-	       if(it->first == receiving) errFlag = false;
-	       totalRates += it->second;
-	}
+  void Cluster::updateProbabilitiesAndTimeConstant(){
+    solveMasterEquation_();
+    calculateEscapeTimeConstant_();
+  }
 
-	if(errFlag){
-		if(Err) cerr<<"ERROR in probHop: receiving site not a neighbor of shipping site"<<endl;
-		return 0;
-	}
-	return (neighs[receiving]/totalRates);
-}
+  vector<SitePtr> Cluster::getSitesInCluster() const {
+    vector<SitePtr> sites;
+    for( auto site : sitesInCluster_ ) sites.push_back(site.second);
+    return sites;
+  }
 
-double site::probHop(sitePtr receiving){ 
-	bool errFlag = true;
-	double totalRates = 0.0;
+  double Cluster::getProbabilityOfOccupyingInternalSite(const int siteId) {
+    if(!sitesInCluster_.count(siteId)){
+      throw invalid_argument("the provided site is not in the cluster");
+    }
+    return probabilityOnSite_[siteId];
+  }
 
-	for(auto it = neighs.cbegin(); it != neighs.cend(); ++it){
-	       if(it->first == receiving->siteId) errFlag = false;
-	       totalRates += it->second;
-	}
+  double Cluster::getTimeConstant() const {
+        return escapeTimeConstant_;
+  }
 
-	if(errFlag){
-		if(Err) cerr<<"ERROR in probHop: receiving site not a neighbor of shipping site"<<endl;
-		return 0;
-	}
-	return (neighs[receiving->siteId]/totalRates);
-}
+  void Cluster::migrateSitesFrom(ClusterPtr cluster){
 
+    for( auto site : cluster->sitesInCluster_ ) {
+      site.second->setClusterId(getId());
+      sitesInCluster_[site.first] = site.second;
+    }
 
-double cluster::probHopOff(sitePtr target, long iterations){
-	if(iterations <= 0){
-		if(Err) cerr<<"ERROR in probHopOff: iterations is not valid"<<endl;
-		return nan("");
-	}		
-	convergence(iterations);
-	double interSum = 0.0;
-	double sum = 0.0;
-	double targetSum = 0.0;
-	double tmpInter = 0.0;
-	
-	if(target == NULL){
-		if(Err) cerr<<"ERROR in probHopOff: targeting a null site"<<endl;
-		return 0;
-	}
+    updateProbabilitiesAndTimeConstant();
+    cluster->updateProbabilitiesAndTimeConstant();
+  }
 
-	int found = 1;
-	for(int i = 0; i < (int) sitesInCluster.size(); i++){
-		for(int j = 0; j < (int) sitesInCluster[i]->neighSites.size(); j++){
-			if(sitesInCluster[i]->neighSites[j]->clustTag != clustTag){
-				tmpInter = sitesInCluster[i]->probHop(sitesInCluster[i]->neighSites[j]);
-				interSum += tmpInter;
-				if(sitesInCluster[i]->neighSites[j]->siteId == target->siteId){
-					found = 0;
-					targetSum = tmpInter * sitesInCluster[i]->probOnSite;
-				}
-			}
-		}
-		interSum *= sitesInCluster[i]->probOnSite;
-		sum += interSum;
-		interSum = 0.0;
-	}
-	if(!found){
-		if(Err) cerr<<"ERROR in probHopOff: target not connected to cluster"<<endl;
-		return nan("");
-	}
-	return(targetSum/sum); 
-}
+  void Cluster::setRandomSeed(const unsigned long seed){
+    randomEngine_ = mt19937(seed);
+  }
 
-//Overload probHopOff
-double cluster::probHopOff(int target, long iterations){
-	if(iterations <= 0){
-		if(Err) cerr<<"ERROR in probHopOff: iterations is not valid"<<endl;
-		return nan("");
-	}
-	convergence(iterations);
-	double interSum = 0.0;
-	double sum = 0.0;
-	double targetSum = 0.0;
-	double tmpInter = 0.0;
-	
-	int found = 1;
-	for(int i = 0; i < (int) sitesInCluster.size(); i++){
-		for(int j = 0; j < (int) sitesInCluster[i]->neighSites.size(); j++){
-			if(sitesInCluster[i]->neighSites[j]->clustTag != clustTag){
-				tmpInter = sitesInCluster[i]->probHop(sitesInCluster[i]->neighSites[j]);
-				interSum += tmpInter;
-				if(sitesInCluster[i]->neighSites[j]->siteId == target){
-					targetSum = tmpInter * sitesInCluster[i]->probOnSite;
-				}
-			}
-		}
-		interSum *= sitesInCluster[i]->probOnSite;
-		sum += interSum;
-		interSum = 0.0;
-	}
-	if(!found){
-		if(Err) cerr<<"ERROR in probHopOff: target not connected to cluster"<<endl;
-		return nan("");
-	}
-	return(targetSum/sum); 
-}
-*/
-void Cluster::initializeProbabilityOnSites_(){
-  for(auto site : sitesInCluster_ ){
-		probabilityOnSite_[site.first] = 1.0/(static_cast<double>(sitesInCluster_.size()));
-	}
-	return;
-}
+  int Cluster::pickNewSiteId(){
+    if(hopWithinCluster_()){
+      return pickInternalSite_();
+    }
+    return pickClusterNeighbor_();
+  }
 
-/*
+  double 
+  Cluster::getProbabilityOfHoppingToNeighborOfCluster(const int neighId) {
+    if(!probabilityHopToNeighbor_.count(neighId)){
+      string err = "Cannot get probability of hopping to neighbor, either the"
+        " site is not a neighbor or the cluster has not been converged.";
+      throw invalid_argument(err);
+    }
+    return probabilityHopToNeighbor_[neighId];
+  }
 
-// int in the map is the site 
-// int in the vector is the neighbor 
-// vector contains rates as shown
-//  
-// neigh1 <- site1 -> neigh2 
-//
-//
-map<const int,vector<pair<const int, double>>> 
-Cluster::getInternalRatesFromSiteGoingToNeighbor(){
+  void Cluster::setConvergenceTolerance(double tolerance){
+    if(tolerance<0.0){
+      throw invalid_argument("tolerance must be a positive value");
+    }
+    convergenceTolerance_ = tolerance;
+  }
 
-  map<const int, vector<pair<const int,double>>> internalRates;
+  void Cluster::setConvergenceIterations(long iterations){
+    if(iterations<1){
+      throw invalid_argument("number of iterations must be greater than 0.");
+    }
+    iterations_ = iterations;
+  }
 
-  set<int> neighIds;
-  for(auto site : sitesInCluster_) neighIds.insert(site.first);
+  double Cluster::getDwellTime() {
+    double number = randomDistribution_(randomEngine_);
+    return (-log(number)*escapeTimeConstant_/resolution_);
+  }
 
-  for(auto site : sitesInCluster_){
-    for(auto neighId : site->getNeighIds()) {
-      if(siteIsInCluster(neighId)){
-        pair<const int,double> rateToNeighbor(neighId,site->getRateToNeighbor(neighId));
-        internalRates[site.first].push_back(rateToNeighbor);
+  std::ostream& 
+  operator<<(std::ostream& os, const kmccoursegrain::Cluster& cluster){
+    os << "Cluster Id: "        << cluster.getId()                << endl;
+    os << "Cluster visitFreq: " << cluster.visitFreqCluster_      << endl;
+    os << "Number of sites in Cluster: "
+                                << cluster.sitesInCluster_.size() << endl;
+
+    os << "Sites in cluster: " << endl;
+    for( auto site : cluster.sitesInCluster_ ){
+      os << *(site.second) << endl;
+    }
+    return os;
+  }
+
+  /****************************************************************************
+   * Private Internal Functions
+   ****************************************************************************/
+
+  // The firsts int is the id of site within cluster
+  // second int is the id of the neighbor of site outside of cluster
+  map<const int, map<const int, double>>
+    Cluster::getRatesToNeighborsOfCluster_(){
+
+      map<const int, map<const int,double>> externalRates;
+
+      for(auto site : sitesInCluster_){
+        for(auto neighId : site.second->getNeighborSiteIds()) {
+          if(!siteIsInCluster(neighId)){
+            externalRates[site.first][neighId]=site.second->getRateToNeighbor(neighId);
+          }
+        }
+      } 
+      return externalRates;
+    }
+
+  void Cluster::initializeProbabilityOnSites_(){
+    for(auto site : sitesInCluster_ ){
+      probabilityOnSite_[site.first] = \
+        1.0/(static_cast<double>(sitesInCluster_.size()));
+    }
+    return;
+  }
+
+  void Cluster::calculateProbabilityHopToNeighbors_(){
+
+    auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
+
+    double sumRatesOffCluster = 0.0;
+    for( auto rateToNeigh : ratesToNeighbors ) {
+      for( auto rate : rateToNeigh.second ){
+        sumRatesOffCluster+=rate.second;
       }
     }
-  } 
-  return internalRates;
-}
 
-*/
-// int in the map is the neigh 
-// int in the vector is the site 
-// vector contains rates as shown
-//  
-// neigh1 -> site1 <- neigh2 
-//
-//
-map<const int,vector<pair<const int, double>>> 
-Cluster::getInternalRatesFromNeighborsComingToSite_(){
+    auto sumDwell = 0.0;
+    for( auto site : sitesInCluster_ ){
+      sumDwell += site.second->getTimeConstant();
+    }
 
-  map<const int, vector<pair<const int,double>>> internalRates;
+    map<const int, double> probabilityHopToNeighbor;
+    double total = 0.0;
+    for(auto rateToNeigh : ratesToNeighbors){
+      int siteHoppingFrom = rateToNeigh.first;
+      for( auto rate : rateToNeigh.second ){
+        int siteHoppingTo = rate.first;
+        if(probabilityHopToNeighbor.count(siteHoppingTo)){
+          probabilityHopToNeighbor[siteHoppingTo] +=\
+            probabilityOnSite_[siteHoppingFrom]*\
+            sitesInCluster_[siteHoppingFrom]->getTimeConstant()/\
+            sumDwell*\
+            sitesInCluster_[siteHoppingFrom]->getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
+            sumRatesOffCluster;
+        }else{
 
-  for(auto site : sitesInCluster_){
-    for(auto neighId : site.second->getNeighborIds()) {
-      if(siteIsInCluster(neighId)){
-        pair<const int,double> rateToSite(site.first,site.second->getRateToNeighbor(neighId));
-        internalRates[neighId].push_back(rateToSite);
+          probabilityHopToNeighbor[siteHoppingTo] =\
+            probabilityOnSite_[siteHoppingFrom]*\
+            sitesInCluster_[siteHoppingFrom]->getTimeConstant()/\
+            sumDwell*\
+            sitesInCluster_[siteHoppingFrom]->getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
+            sumRatesOffCluster;
+        }
+        total += probabilityHopToNeighbor[siteHoppingTo];
       }
     }
-  } 
-  return internalRates;
-}
 
-double Cluster::getProbabilityOfHoppingToNeighbor(int neighId){
-  if(!probabilityHopToNeighbor_.count(neighId)){
-    string err = "Cannot get probability of hopping to neighbor, either the"
-      " site is not a neighbor or the cluster has not been converged.";
+    for(auto neighborProb : probabilityHopToNeighbor ){
+      probabilityHopToNeighbor[neighborProb.first] = neighborProb.second/total;
+    }
+    probabilityHopToNeighbor_ = probabilityHopToNeighbor;
+
+  }
+
+
+  void Cluster::iterate_(
+      map<const int, vector<pair<const int,double >>> ratesBetween){
+
+    map<const int, double> temp_probabilityOnSite;
+
+    double total = 0;
+    for(auto site : sitesInCluster_){
+      for( auto neighsite : site.second->getNeighborSiteIds()){
+        if(siteIsInCluster(neighsite)){
+          if(temp_probabilityOnSite.count(site.first)){
+            temp_probabilityOnSite[site.first] += \
+              sitesInCluster_[neighsite]->getProbabilityOfHoppingToNeighboringSite(site.first)*\
+              probabilityOnSite_[neighsite];
+          }else{  
+            temp_probabilityOnSite[site.first] = \
+              sitesInCluster_[neighsite]->getProbabilityOfHoppingToNeighboringSite(site.first)*\
+              probabilityOnSite_[neighsite];
+          }
+          total+=temp_probabilityOnSite[site.first];
+        }
+      }
+    }
+
+    double total2 = 0.0;
+    for(auto site : sitesInCluster_){
+      probabilityOnSite_[site.first] = 
+        (temp_probabilityOnSite[site.first]/total+\
+         probabilityOnSite_[site.first])/2.0;
+      total2 += probabilityOnSite_[site.first];
+    }
+
+    for(auto site: sitesInCluster_){
+      probabilityOnSite_[site.first] = probabilityOnSite_[site.first]/total2;
+    }
+
+  }
+
+  void Cluster::solveMasterEquation_(){
+
+    initializeProbabilityOnSites_();
+    auto ratesBetweenInternalSites =
+      getInternalRatesFromNeighborsComingToSite_();
+
+    if(convergence_method_==converge_by_iterations_per_cluster){
+      for(long i = 0; i < iterations_; i++){
+        iterate_(ratesBetweenInternalSites); 
+      }
+    }else if(convergence_method_==converge_by_iterations_per_site){
+
+      long total_iterations = iterations_*\
+        static_cast<long>(sitesInCluster_.size());
+
+      for(long i = 0; i < total_iterations; i++){
+        iterate_(ratesBetweenInternalSites); 
+      }
+    }else{
+      double error = convergenceTolerance_*1.1;
+      while(error>convergenceTolerance_){
+        auto oldSiteProbs = probabilityOnSite_;
+        iterate_(ratesBetweenInternalSites); 
+        error = 0.0;
+        for( auto site : oldSiteProbs ){
+          auto diff = oldSiteProbs[site.first]-probabilityOnSite_[site.first];
+          error += pow(diff,2.0);
+        }
+        error = pow(error,1.0/2.0);
+      }
+    }
+    calculateProbabilityHopToNeighbors_();
+  }
+
+  map<const int,vector<pair<const int, double>>> 
+  Cluster::getInternalRatesFromNeighborsComingToSite_(){
+
+    map<const int, vector<pair<const int,double>>> internalRates;
+
+    for(auto site : sitesInCluster_){
+      for(auto neighId : site.second->getNeighborSiteIds()) {
+        if(siteIsInCluster(neighId)){
+          auto rateToNeigh = site.second->getRateToNeighbor(neighId); 
+          pair<const int,double> rateToSite(site.first,rateToNeigh);
+          internalRates[neighId].push_back(rateToSite);
+        }
+      }
+    } 
+    return internalRates;
+  }
+
+  bool Cluster::hopWithinCluster_(){
+    double hop = randomDistribution_(randomEngine_);
+    double inOrOutThreshold = static_cast<double>(resolution_-1)/\
+                              static_cast<double>(resolution_);
+    return (hop<inOrOutThreshold);
+  }
+
+  int Cluster::pickClusterNeighbor_() {
+
+    double number = randomDistribution_(randomEngine_);
+    double threshold = 0.0;
+    for(auto pval : probabilityHopToNeighbor_ ){
+      threshold+= pval.second;
+      if(number < threshold ) return pval.first;
+    }
+    string err = "Cummulitive probability distribution is flawed or random "
+      "number is greater than 1";
     throw invalid_argument(err);
   }
-  return probabilityHopToNeighbor_[neighId];
-}
 
-// The firsts int is the id of site within cluster
-// second int is the id of the neighbor of site outside of cluster
-map<const int, map<const int, double>>
-Cluster::getRatesToNeighborsOfCluster_(){
+  int Cluster::pickInternalSite_(){
 
-  map<const int, map<const int,double>> externalRates;
-
-  for(auto site : sitesInCluster_){
-    for(auto neighId : site.second->getNeighborIds()) {
-      if(!siteIsInCluster(neighId)){
-        externalRates[site.first][neighId]=site.second->getRateToNeighbor(neighId);
-      }
+    double number = randomDistribution_(randomEngine_);
+    double threshold = 0.0;
+    for(auto pval : probabilityOnSite_ ){
+      threshold+= pval.second;
+      if(number < threshold ) return pval.first;
     }
-  } 
-  return externalRates;
-}
-
-void Cluster::setConvergenceTolerance(double tolerance){
-  if(tolerance<0.0){
-    throw invalid_argument("tolerance must be a positive value");
+    string err = "cummulitive probability distribution of sites in the cluster "
+      "is flawed or random number is greater than 1";
+    throw invalid_argument(err);
   }
-  convergenceTolerance_ = tolerance;
-}
 
-void Cluster::setConvergenceIterations(long iterations){
-  if(iterations<1){
-    throw invalid_argument("number of iterations must be greater than 0.");
-  }
-  iterations_ = iterations;
-}
+  void Cluster::calculateEscapeRatesFromSitesToTheirNeighbors_(){
 
+    auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
 
-void Cluster::iterate_(map<const int, vector<pair<const int,double >>> ratesBetween){
+    map<const int, double> temp;
 
-  map<const int, double> temp_probabilityOnSite;
-
-  double total = 0;
-  for(auto site : sitesInCluster_){
-    for( auto neighsite : site.second->getNeighborIds()){
-      if(siteIsInCluster(neighsite)){
-        if(temp_probabilityOnSite.count(site.first)){
-          temp_probabilityOnSite[site.first] += sitesInCluster_[neighsite]->probHopToNeigh(site.first)*
-            probabilityOnSite_[neighsite];
-        }else{  
-          temp_probabilityOnSite[site.first] = sitesInCluster_[neighsite]->probHopToNeigh(site.first)*
-            probabilityOnSite_[neighsite];
+    for(auto site : ratesToNeighbors ){
+      for(auto neigh : site.second ){
+        if(temp.count(site.first)){
+          temp[site.first]=neigh.second;
+        }else{
+          temp[site.first]+=neigh.second;
         }
-        total+=temp_probabilityOnSite[site.first];
+      }
+    }
+    escapeRateFromSiteToNeighbor_ = temp;
+  }
+
+  void Cluster::calculateEscapeTimeConstant_(){
+    auto ratesToNeighbors = getRatesToNeighborsOfCluster_(); 
+    escapeTimeConstant_ = 0.0;
+    for(auto site : ratesToNeighbors ){
+      for(auto neigh : site.second ){
+        escapeTimeConstant_ += neigh.second*escapeRateFromSiteToNeighbor_[site.first];
       }
     }
   }
-
-  double total2 = 0.0;
-  for(auto site : sitesInCluster_){
-    probabilityOnSite_[site.first] = (temp_probabilityOnSite[site.first]/total+probabilityOnSite_[site.first])/2.0;
-    total2 += probabilityOnSite_[site.first];
-  }
-
-  for(auto site: sitesInCluster_){
-    probabilityOnSite_[site.first] = probabilityOnSite_[site.first]/total2;
-  }
-
-}
-
-void Cluster::calculateProbabilityHopToNeighbors_(){
-  
-  auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
-
-  cout << "Rates to Neighbors" << endl;
-
-
-  auto sumRatesOffCluster = 0.0;
-  for( auto rateToNeigh : ratesToNeighbors ) {
-    for( auto rate : rateToNeigh.second ){
-      cout << "from " << rateToNeigh.first << " to " << rate.first << " rate " << rate.second << endl;
-      sumRatesOffCluster+=rate.second;
-    }
-  }
-
-  auto sumDwell = 0.0;
-  for( auto site : sitesInCluster_ ){
-    sumDwell += site.second->getDwellTime();
-  }
-  cout << "sumDwell " << sumDwell << endl;
-
-  map<const int, double> probabilityHopToNeighbor;
-  double total = 0.0;
-  for(auto rateToNeigh : ratesToNeighbors){
-    int siteHoppingFrom = rateToNeigh.first;
-    cout << "Site hopping from " << siteHoppingFrom << endl;
-    for( auto rate : rateToNeigh.second ){
-      int siteHoppingTo = rate.first;
-      cout << "Site hopping to " << siteHoppingTo << endl;
-      if(probabilityHopToNeighbor.count(siteHoppingTo)){
-        cout << "Exists" << endl;
-        probabilityHopToNeighbor[siteHoppingTo] +=\
-          probabilityOnSite_[siteHoppingFrom]*\
-          sitesInCluster_[siteHoppingFrom]->getDwellTime()/\
-          sumDwell*\
-          sitesInCluster_[siteHoppingFrom]->probHopToNeigh(siteHoppingTo)/\
-          sumRatesOffCluster;
-      }else{
-
-        cout << "Prob on site " << probabilityOnSite_[siteHoppingFrom] << endl;
-        cout << "dwell time " << sitesInCluster_[siteHoppingFrom]->getDwellTime() << endl;
-        cout << "Probability Hop to any neighbor " << sitesInCluster_[siteHoppingFrom]->probHopToNeigh(siteHoppingTo) << endl;
-        cout << "sumRatesOff " << sumRatesOffCluster << endl;
-        probabilityHopToNeighbor[siteHoppingTo] =\
-          probabilityOnSite_[siteHoppingFrom]*\
-          sitesInCluster_[siteHoppingFrom]->getDwellTime()/\
-          sumDwell*\
-          sitesInCluster_[siteHoppingFrom]->probHopToNeigh(siteHoppingTo)/\
-          sumRatesOffCluster;
-      }
-      total += probabilityHopToNeighbor[siteHoppingTo];
-    }
-  }
-
-  for(auto neighborProb : probabilityHopToNeighbor ){
-    probabilityHopToNeighbor[neighborProb.first] = neighborProb.second/total;
-  }
-  probabilityHopToNeighbor_ = probabilityHopToNeighbor;
-  cout << "Number of elements " << probabilityHopToNeighbor.size() << endl;
-  for(auto val : probabilityHopToNeighbor_){
-    cout << val.first << " " << val.second << endl;
-  }
-}
-
-void Cluster::converge(){
-
-  initializeProbabilityOnSites_();
-  auto ratesBetweenInternalSites = getInternalRatesFromNeighborsComingToSite_();
-
-  if(convergence_method_==converge_by_iterations_per_cluster){
-    for(long i = 0; i < iterations_; i++){
-      iterate_(ratesBetweenInternalSites); 
-    }
-  }else if(convergence_method_==converge_by_iterations_per_site){
-    long total_iterations = iterations_*static_cast<long>(sitesInCluster_.size());
-    for(long i = 0; i < total_iterations; i++){
-      iterate_(ratesBetweenInternalSites); 
-    }
-  }else{
-    double error = convergenceTolerance_*1.1;
-    while(error>convergenceTolerance_){
-      auto oldSiteProbs = probabilityOnSite_;
-      iterate_(ratesBetweenInternalSites); 
-      error = 0.0;
-      for( auto site : oldSiteProbs ){
-        error += pow(oldSiteProbs[site.first]-probabilityOnSite_[site.first],2.0);
-      }
-      error = pow(error,1.0/2.0);
-    }
-  }
-  calculateProbabilityHopToNeighbors_();
-}
 
 }

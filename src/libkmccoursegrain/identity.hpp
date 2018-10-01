@@ -1,5 +1,5 @@
-#ifndef KMCCOURSEGRAIN_IDENTITY_H_
-#define KMCCOURSEGRAIN_IDENTITY_H_
+#ifndef KMCCOURSEGRAIN_IDENTITY_HPP
+#define KMCCOURSEGRAIN_IDENTITY_HPP
 
 #include <stdexcept>
 
@@ -19,4 +19,4 @@ namespace kmccoursegrain {
   };
 }
 
-#endif // KMCCOURSEGRAIN_IDENTITY_H_
+#endif // KMCCOURSEGRAIN_IDENTITY_HPP
