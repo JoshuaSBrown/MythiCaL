@@ -229,12 +229,11 @@ namespace kmccoursegrain {
   }
 
 
-  void Cluster::iterate_(
-      map<const int, vector<pair<const int,double >>> ratesBetween){
+  void Cluster::iterate_(){
 
     map<const int, double> temp_probabilityOnSite;
 
-    double total = 0;
+    double total = 0.0;
     for(auto site : sitesInCluster_){
       for( auto neighsite : site.second->getNeighborSiteIds()){
         if(siteIsInCluster(neighsite)){
@@ -269,12 +268,10 @@ namespace kmccoursegrain {
   void Cluster::solveMasterEquation_(){
 
     initializeProbabilityOnSites_();
-    auto ratesBetweenInternalSites =
-      getInternalRatesFromNeighborsComingToSite_();
 
     if(convergence_method_==converge_by_iterations_per_cluster){
       for(long i = 0; i < iterations_; i++){
-        iterate_(ratesBetweenInternalSites); 
+        iterate_(); 
       }
     }else if(convergence_method_==converge_by_iterations_per_site){
 
@@ -282,13 +279,13 @@ namespace kmccoursegrain {
         static_cast<long>(sitesInCluster_.size());
 
       for(long i = 0; i < total_iterations; i++){
-        iterate_(ratesBetweenInternalSites); 
+        iterate_(); 
       }
     }else{
       double error = convergenceTolerance_*1.1;
       while(error>convergenceTolerance_){
         auto oldSiteProbs = probabilityOnSite_;
-        iterate_(ratesBetweenInternalSites); 
+        iterate_(); 
         error = 0.0;
         for( auto site : oldSiteProbs ){
           auto diff = oldSiteProbs[site.first]-probabilityOnSite_[site.first];
