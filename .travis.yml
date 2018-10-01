@@ -7,6 +7,8 @@ compiler:
   - clang
 
 install:
+  - echo "${TRAVIS_BUILD_DIR}"
+  - echo "${TRAVIS_OS_NAME}"
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
 
