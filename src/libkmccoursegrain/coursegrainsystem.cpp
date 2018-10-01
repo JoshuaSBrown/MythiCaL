@@ -11,7 +11,7 @@ using namespace std;
 namespace kmccoursegrain {
 
   void CourseGrainSystem::initializeSystem(
-    map<int,map<int const,double* >> ratesOfAllSites){
+    map<int const,map<int const,double* >> ratesOfAllSites){
 
     for(auto it = ratesOfAllSites.begin();it!=ratesOfAllSites.end();++it){
       auto site = shared_ptr<Site>(new Site);
