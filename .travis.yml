@@ -15,8 +15,7 @@ install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz"
-    mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-    export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    mkdir cmake && wget ${CMAKE_URL} && tar -xvzf cmake-3.4.1.tar.gz && cd cmake-3.4.1/ && ./configure && make && sudo make install
     fi
 
 before_script:
@@ -30,6 +29,6 @@ script:
   - mkdir build
   - cd build
   - pwd
-  - ${DEPS_DIR}/cmake/bin/cmake -DENABLE_TESTING=ON ..
+  - cmake -DENABLE_TESTING=ON ..
   - make
   - make test ARGS="-V"
