@@ -17,8 +17,12 @@ install:
     export PATH=${DEPS_DIR}/cmake/bin:${PATH}
     fi
 
-    # Go to the Root directory  
-  - cd ..
+before_script:
+  - cd ~
+  - git clone https://github.com/JoshuaSBrown/CourseGrainSites.git
+  - cd CourseGrainSites
+  - git checkout -b current_commit
+
 
 script:
   - mkdir build
