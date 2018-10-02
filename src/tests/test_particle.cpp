@@ -16,7 +16,7 @@ int main(void){
   cout << "Testing: Particle getMemoryCapacity" << endl;
   {
     Particle particle;
-    assert(particle.getMemoryCapacity()==0);
+    assert(particle.getMemoryCapacity()==2);
   }
 	
   cout << "Testing: Particle setMemoryCapacity" << endl;

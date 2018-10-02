@@ -8,6 +8,12 @@
 
 namespace kmccoursegrain{
 
+  namespace kmc_particle{
+
+      /// Internal constant
+      const int unassignedSiteId = std::numeric_limits<int>::min();
+
+  }
   /**
    * \brief Particle class meant to be inherited 
    *
@@ -22,7 +28,7 @@ namespace kmccoursegrain{
    **/
   class Particle{
     public: 
-      Particle() {};
+      Particle();
 
       /**
        * \brief Sets the size of the particles memory
@@ -60,10 +66,8 @@ namespace kmccoursegrain{
        *
        * \return A vector of pairs is returned the first int in the pair is the 
        * id of the site, the second int is the count of the number of times the 
-       * particle has visited the site. It specifically returns numbers 
-       * associated with the site the particle currently resides on. The two 
-       * most recently visited sites are returned where element (0) is the most
-       * recent
+       * particle has visited the site. Element (0) is the most recently visited
+       * site.
        **/
       std::vector<std::pair<int,int>> 
         getVisitationFrequenciesOfCurrentSites() const;
@@ -99,7 +103,7 @@ namespace kmccoursegrain{
       /**
        * \brief Return the id of the site the particle will attemt to move to
        **/
-      int getPotentialSite() const { return potentialSite_; }
+      int getPotentialSite() const; 
 
       /**
        * \brief Get the dwell time 
@@ -111,9 +115,6 @@ namespace kmccoursegrain{
        **/
       void setDwellTime(const double dwelltime) { dwelltime_ = dwelltime; }
     private:
-
-      /// Internal constant
-      const int unassignedSiteId_ = std::numeric_limits<int>::min();
 
       /// The next site the particle will try to move to
       int potentialSite_;
