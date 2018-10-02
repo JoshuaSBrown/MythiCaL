@@ -25,7 +25,18 @@ namespace kmccoursegrain {
 
     public:	
  
-      Site() : totalVisitFreq_(0), clusterId_(-1) {};
+      Site();
+
+      /**
+       * \brief Set the seed for the random number generator
+       *
+       * By default this is initialized in the constructor from the time.
+       * However, having the ability to set it allows to reproducably test the
+       * class.
+       *
+       * \param[in] seed a random number seed
+       **/
+      void setRandomSeed(const unsigned long seed);
 
       /**
        * \brief Sets the rates to sites neighboring this site
@@ -235,6 +246,11 @@ namespace kmccoursegrain {
        * an inverse relation with the rates off. 
        */ 
       double escapeTimeConstant_;
+
+      /**
+       * \brief Random number seed
+       **/
+      unsigned long seed_;
 
       /**
        * \brief This is the random number engine

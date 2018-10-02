@@ -1,7 +1,7 @@
 //#include "cluster.h"
 
+#include <chrono>
 #include "site.hpp"
-
 using namespace std;
 
 namespace kmccoursegrain {
@@ -10,6 +10,16 @@ namespace kmccoursegrain {
  * Public Facing Functions
  *********************************************************************/
 
+  Site::Site() : totalVisitFreq_(0), clusterId_(-1), siteOccupied_(false) {
+    auto seed = chrono::system_clock::now().time_since_epoch().count();
+    randomEngine_ = mt19937(seed);
+    randomDistribution_ = uniform_real_distribution<double>(0.0,1.0);
+  }
+
+  void Site::setRandomSeed(const unsigned long seed){
+    randomEngine_ = mt19937(seed);
+  }
+  
   void Site::setRatesToNeighbors(map<int const, double* > neighRates){
     for(auto neighAndRate : neighRates ){
       neighRates_[neighAndRate.first] =  neighAndRate.second;

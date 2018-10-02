@@ -65,6 +65,7 @@ namespace kmccoursegrain {
 
   void Cluster::updateProbabilitiesAndTimeConstant(){
     solveMasterEquation_();
+    calculateEscapeRatesFromSitesToTheirNeighbors_();
     calculateEscapeTimeConstant_();
   }
 
