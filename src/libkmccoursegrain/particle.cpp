@@ -32,7 +32,7 @@ namespace kmccoursegrain {
 
     if(delta>0){
       for(int i=0;i<delta;++i) {
-//        memoryQueue_.push_back(pair<int,int>(kmc_particle::unassignedSiteId,0));
+        memoryQueue_.push_back(pair<int,int>(kmc_particle::unassignedSiteId,0));
       }
     }else{
       delta = delta*-1;

@@ -20,6 +20,8 @@ install:
 
 before_script:
   - cd ~
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - git clone https://github.com/JoshuaSBrown/CourseGrainSites.git
   - cd CourseGrainSites
   - git checkout -b current_commit
