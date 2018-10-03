@@ -24,7 +24,9 @@ before_script:
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - git clone https://github.com/JoshuaSBrown/CourseGrainSites.git
   - cd CourseGrainSites
-  - git checkout -b current_commit
+  - git branch
+  - git checkout -b ${BRANCH}
+  - git branch
 
 
 script:
