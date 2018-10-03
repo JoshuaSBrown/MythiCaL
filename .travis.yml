@@ -16,7 +16,7 @@ install:
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
   - yes | sudo add-apt-repository ppa:george-edison55/cmake-3.x
   - yes | sudo apt-get update
-  - yes | sudo aptget install cmake
+  - sudo aptget install cmake
   - cmake --version
     #  - |
     #if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
