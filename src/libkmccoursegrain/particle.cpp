@@ -1,6 +1,5 @@
 #include <stdexcept>
 #include <cassert>
-
 #include "../../include/kmccoursegrain/particle.hpp"
 
 using namespace std;
@@ -10,8 +9,17 @@ namespace kmccoursegrain {
   /****************************************************************************
    * External Methods
    ****************************************************************************/
+  Particle::Particle(){
+    potentialSite_ = kmc_particle::unassignedSiteId;
+    dwelltime_ = -1.0;
+    setMemoryCapacity(2);
+  }
 
   void Particle::setMemoryCapacity(unsigned int numberSitesToRemember){
+
+    if(numberSitesToRemember==static_cast<unsigned int>(memoryQueue_.size())) {
+      return;
+    }
 
     if(numberSitesToRemember==1){
       string err = "It does not make sense to have a memory of 1 because a "
@@ -24,7 +32,7 @@ namespace kmccoursegrain {
 
     if(delta>0){
       for(int i=0;i<delta;++i) {
-        memoryQueue_.push_back(pair<int,int>(unassignedSiteId_,0));
+        memoryQueue_.push_back(pair<int,int>(kmc_particle::unassignedSiteId,0));
       }
     }else{
       delta = delta*-1;
@@ -39,7 +47,7 @@ namespace kmccoursegrain {
   int Particle::getVisitationFrequencyOfCurrentlyOccupiedSite(){
     assert(memoryQueue_.size()>0);
     for( auto memory : memoryQueue_ ){
-      if(memory.first != unassignedSiteId_) return memory.second;
+      if(memory.first != kmc_particle::unassignedSiteId) return memory.second;
     }
     string err = "ERROR you cannot get the visitation frequency of the "
       "unoccupied site at this moment, as no sites have yet been occupied.\n";
@@ -47,7 +55,7 @@ namespace kmccoursegrain {
   }
 
   void Particle::occupySite(const int siteId){
-    assert(siteId!=unassignedSiteId_);
+    assert(siteId!=kmc_particle::unassignedSiteId);
     if(rememberSite_(siteId)){
       refreshMemory_(siteId);
     }else{
@@ -64,23 +72,12 @@ namespace kmccoursegrain {
         memory_it != memoryQueue_.end();
         ++memory_it){
 
-      if(memory_it->first != unassignedSiteId_ ){
+      if(memory_it->first != kmc_particle::unassignedSiteId ){
         frequencies.push_back(pair<int,int>(memory_it->first,memory_it->second));
-        ++memory_it;
-        if(memory_it->first != unassignedSiteId_ ){
-          frequencies.push_back(pair<int,int>(memory_it->first,memory_it->second));
-          return frequencies;
-        }else{
-          string err = "ERROR only a single site was found to have been occupied"
-            " a particle needs to have occupied at least two sites before you "
-            "can grab the frequencies of the two most recently occupied sites.";
-            throw runtime_error(err);
-        }
       }
     }
-    string err = "ERROR you cannot get the visitation frequency of the "
-      "unoccupied site at this moment, as no sites have yet been occupied.\n";
-    throw runtime_error(err);
+
+    return frequencies;
   }
 
   int Particle::getIdOfSiteCurrentlyOccupying() const {
@@ -91,6 +88,13 @@ namespace kmccoursegrain {
     return memoryQueue_;
   }
 
+  int Particle::getPotentialSite() const {
+    if(potentialSite_==kmc_particle::unassignedSiteId){
+      throw runtime_error("Cannot get potential site as it has not yet been "
+          "assigned. You many need to first initialize the particle");
+    }
+    return potentialSite_;
+  }
   /****************************************************************************
    * Internal Methods
    ****************************************************************************/
