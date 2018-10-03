@@ -3,9 +3,9 @@
 
 #include "../../include/kmccoursegrain/coursegrainsystem.hpp"
 #include "../../include/kmccoursegrain/particle.hpp"
-#include "site.hpp"
+#include "kmc_site.hpp"
 #include "log.hpp"
-#include "cluster.hpp"
+#include "kmc_cluster.hpp"
 
 using namespace std;
 
@@ -17,7 +17,7 @@ namespace kmccoursegrain {
     LOG("Initializeing system",1);
 
     for(auto it = ratesOfAllSites.begin();it!=ratesOfAllSites.end();++it){
-      auto site = shared_ptr<Site>(new Site);
+      auto site = shared_ptr<KMC_Site>(new KMC_Site);
       site->setId(it->first);
       site->setRatesToNeighbors(it->second);
       if(seed_set_) {
@@ -69,7 +69,7 @@ namespace kmccoursegrain {
 
   void CourseGrainSystem::createCluster_(const int siteId1,const int siteId2){
     LOG("Creating cluster",1);
-    auto cluster_ptr = shared_ptr<Cluster>(new Cluster());
+    auto cluster_ptr = shared_ptr<KMC_Cluster>(new KMC_Cluster());
     cluster_ptr->addSite(sites_[siteId1]);
     cluster_ptr->addSite(sites_[siteId2]);
     if(seed_set_){

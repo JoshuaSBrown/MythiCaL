@@ -15,11 +15,11 @@
 
 namespace kmccoursegrain{
 
-  class Site;
-  class Cluster;
+  class KMC_Site;
+  class KMC_Cluster;
 
-  typedef std::shared_ptr<Site> SitePtr;
-  typedef std::shared_ptr<Cluster> ClusterPtr;
+  typedef std::shared_ptr<KMC_Site> SitePtr;
+  typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
   /**
    * \brief Course graining of sites is handled by the Cluster class
    *
@@ -31,7 +31,7 @@ namespace kmccoursegrain{
    * probability of hopping to sites surrounding the cluster can also be 
    * calculated. As well as the dwell time. etc...
    **/
-  class Cluster : public virtual Identity {
+  class KMC_Cluster : public virtual Identity {
     public:	
 	
       /** 
@@ -53,7 +53,7 @@ namespace kmccoursegrain{
        * on creation. This is automated in the constructor. Such that every new
        * cluster will be given an integer id greater than the last one created. 
        **/
-      Cluster();
+      KMC_Cluster();
 
       /**
        * \brief Convergence Methods
@@ -267,7 +267,7 @@ namespace kmccoursegrain{
        * \brief Prints the contents of the cluster
        **/
       friend std::ostream& 
-        operator<<(std::ostream& os, const kmccoursegrain::Cluster& cluster);
+        operator<<(std::ostream& os, const kmccoursegrain::KMC_Cluster& cluster);
 
     private:
 

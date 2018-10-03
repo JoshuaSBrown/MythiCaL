@@ -7,12 +7,12 @@
 
 namespace kmccoursegrain{
 
-class Site;
-class Cluster;
+class KMC_Site;
+class KMC_Cluster;
 class Particle;
 
-typedef std::shared_ptr<Site> SitePtr;
-typedef std::shared_ptr<Cluster> ClusterPtr;
+typedef std::shared_ptr<KMC_Site> SitePtr;
+typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
 
 /**
  * \brief Course Grain System allows abstraction of renormalization of sites
