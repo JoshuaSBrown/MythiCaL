@@ -3,8 +3,8 @@
 #include <random>
 #include <chrono>
 
-#include "cluster.hpp"
-#include "site.hpp"
+#include "kmc_cluster.hpp"
+#include "kmc_site.hpp"
 #include "log.hpp"
 
 using namespace std;
@@ -38,7 +38,7 @@ namespace kmccoursegrain {
    * Public Facing Functions
    ****************************************************************************/
 
-  Cluster::Cluster() : Identity() {
+  KMC_Cluster::KMC_Cluster() : Identity() {
     setId(clusterIdCounter);
     clusterIdCounter++;
     iterations_ = 3;
@@ -50,7 +50,7 @@ namespace kmccoursegrain {
     randomDistribution_ = uniform_real_distribution<double>(0.0,1.0);
   }
 
-  void Cluster::addSite(SitePtr newSite){
+  void KMC_Cluster::addSite(SitePtr newSite){
     if(newSite == nullptr){
       throw invalid_argument("ERROR in addSite: adding a null site");
     }
@@ -63,30 +63,30 @@ namespace kmccoursegrain {
     updateProbabilitiesAndTimeConstant();
   }
 
-  void Cluster::updateProbabilitiesAndTimeConstant(){
+  void KMC_Cluster::updateProbabilitiesAndTimeConstant(){
     solveMasterEquation_();
     calculateEscapeRatesFromSitesToTheirNeighbors_();
     calculateEscapeTimeConstant_();
   }
 
-  vector<SitePtr> Cluster::getSitesInCluster() const {
+  vector<SitePtr> KMC_Cluster::getSitesInCluster() const {
     vector<SitePtr> sites;
     for( auto site : sitesInCluster_ ) sites.push_back(site.second);
     return sites;
   }
 
-  double Cluster::getProbabilityOfOccupyingInternalSite(const int siteId) {
+  double KMC_Cluster::getProbabilityOfOccupyingInternalSite(const int siteId) {
     if(!sitesInCluster_.count(siteId)){
       throw invalid_argument("the provided site is not in the cluster");
     }
     return probabilityOnSite_[siteId];
   }
 
-  double Cluster::getTimeConstant() const {
+  double KMC_Cluster::getTimeConstant() const {
         return escapeTimeConstant_;
   }
 
-  void Cluster::migrateSitesFrom(ClusterPtr cluster){
+  void KMC_Cluster::migrateSitesFrom(ClusterPtr cluster){
 
     for( auto site : cluster->sitesInCluster_ ) {
       site.second->setClusterId(getId());
@@ -97,11 +97,11 @@ namespace kmccoursegrain {
     cluster->updateProbabilitiesAndTimeConstant();
   }
 
-  void Cluster::setRandomSeed(const unsigned long seed){
+  void KMC_Cluster::setRandomSeed(const unsigned long seed){
     randomEngine_ = mt19937(seed);
   }
 
-  int Cluster::pickNewSiteId(){
+  int KMC_Cluster::pickNewSiteId(){
     if(hopWithinCluster_()){
       return pickInternalSite_();
     }
@@ -109,7 +109,7 @@ namespace kmccoursegrain {
   }
 
   double 
-  Cluster::getProbabilityOfHoppingToNeighborOfCluster(const int neighId) {
+  KMC_Cluster::getProbabilityOfHoppingToNeighborOfCluster(const int neighId) {
     if(!probabilityHopToNeighbor_.count(neighId)){
       string err = "Cannot get probability of hopping to neighbor, either the"
         " site is not a neighbor or the cluster has not been converged.";
@@ -118,27 +118,27 @@ namespace kmccoursegrain {
     return probabilityHopToNeighbor_[neighId];
   }
 
-  void Cluster::setConvergenceTolerance(double tolerance){
+  void KMC_Cluster::setConvergenceTolerance(double tolerance){
     if(tolerance<0.0){
       throw invalid_argument("tolerance must be a positive value");
     }
     convergenceTolerance_ = tolerance;
   }
 
-  void Cluster::setConvergenceIterations(long iterations){
+  void KMC_Cluster::setConvergenceIterations(long iterations){
     if(iterations<1){
       throw invalid_argument("number of iterations must be greater than 0.");
     }
     iterations_ = iterations;
   }
 
-  double Cluster::getDwellTime() {
+  double KMC_Cluster::getDwellTime() {
     double number = randomDistribution_(randomEngine_);
     return (-log(number)*escapeTimeConstant_/resolution_);
   }
 
   std::ostream& 
-  operator<<(std::ostream& os, const kmccoursegrain::Cluster& cluster){
+  operator<<(std::ostream& os, const kmccoursegrain::KMC_Cluster& cluster){
     os << "Cluster Id: "        << cluster.getId()                << endl;
     os << "Cluster visitFreq: " << cluster.visitFreqCluster_      << endl;
     os << "Number of sites in Cluster: "
@@ -158,21 +158,21 @@ namespace kmccoursegrain {
   // The firsts int is the id of site within cluster
   // second int is the id of the neighbor of site outside of cluster
   map<const int, map<const int, double>>
-    Cluster::getRatesToNeighborsOfCluster_(){
+  KMC_Cluster::getRatesToNeighborsOfCluster_(){
 
-      map<const int, map<const int,double>> externalRates;
+    map<const int, map<const int,double>> externalRates;
 
-      for(auto site : sitesInCluster_){
-        for(auto neighId : site.second->getNeighborSiteIds()) {
-          if(!siteIsInCluster(neighId)){
-            externalRates[site.first][neighId]=site.second->getRateToNeighbor(neighId);
-          }
+    for(auto site : sitesInCluster_){
+      for(auto neighId : site.second->getNeighborSiteIds()) {
+        if(!siteIsInCluster(neighId)){
+          externalRates[site.first][neighId]=site.second->getRateToNeighbor(neighId);
         }
-      } 
-      return externalRates;
-    }
+      }
+    } 
+    return externalRates;
+  }
 
-  void Cluster::initializeProbabilityOnSites_(){
+  void KMC_Cluster::initializeProbabilityOnSites_(){
     for(auto site : sitesInCluster_ ){
       probabilityOnSite_[site.first] = \
         1.0/(static_cast<double>(sitesInCluster_.size()));
@@ -180,7 +180,7 @@ namespace kmccoursegrain {
     return;
   }
 
-  void Cluster::calculateProbabilityHopToNeighbors_(){
+  void KMC_Cluster::calculateProbabilityHopToNeighbors_(){
 
     auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
 
@@ -230,7 +230,7 @@ namespace kmccoursegrain {
   }
 
 
-  void Cluster::iterate_(){
+  void KMC_Cluster::iterate_(){
 
     map<const int, double> temp_probabilityOnSite;
 
@@ -266,7 +266,7 @@ namespace kmccoursegrain {
 
   }
 
-  void Cluster::solveMasterEquation_(){
+  void KMC_Cluster::solveMasterEquation_(){
 
     initializeProbabilityOnSites_();
 
@@ -299,7 +299,7 @@ namespace kmccoursegrain {
   }
 
   map<const int,vector<pair<const int, double>>> 
-  Cluster::getInternalRatesFromNeighborsComingToSite_(){
+  KMC_Cluster::getInternalRatesFromNeighborsComingToSite_(){
 
     map<const int, vector<pair<const int,double>>> internalRates;
 
@@ -315,14 +315,14 @@ namespace kmccoursegrain {
     return internalRates;
   }
 
-  bool Cluster::hopWithinCluster_(){
+  bool KMC_Cluster::hopWithinCluster_(){
     double hop = randomDistribution_(randomEngine_);
     double inOrOutThreshold = static_cast<double>(resolution_-1)/\
                               static_cast<double>(resolution_);
     return (hop<inOrOutThreshold);
   }
 
-  int Cluster::pickClusterNeighbor_() {
+  int KMC_Cluster::pickClusterNeighbor_() {
 
     double number = randomDistribution_(randomEngine_);
     double threshold = 0.0;
@@ -335,7 +335,7 @@ namespace kmccoursegrain {
     throw invalid_argument(err);
   }
 
-  int Cluster::pickInternalSite_(){
+  int KMC_Cluster::pickInternalSite_(){
 
     double number = randomDistribution_(randomEngine_);
     double threshold = 0.0;
@@ -348,7 +348,7 @@ namespace kmccoursegrain {
     throw invalid_argument(err);
   }
 
-  void Cluster::calculateEscapeRatesFromSitesToTheirNeighbors_(){
+  void KMC_Cluster::calculateEscapeRatesFromSitesToTheirNeighbors_(){
 
     auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
 
@@ -366,7 +366,7 @@ namespace kmccoursegrain {
     escapeRateFromSiteToNeighbor_ = temp;
   }
 
-  void Cluster::calculateEscapeTimeConstant_(){
+  void KMC_Cluster::calculateEscapeTimeConstant_(){
     auto ratesToNeighbors = getRatesToNeighborsOfCluster_(); 
     escapeTimeConstant_ = 0.0;
     for(auto site : ratesToNeighbors ){

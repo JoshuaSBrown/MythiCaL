@@ -4,8 +4,8 @@
 #include <memory>
 #include <cmath>
 
-#include "../libkmccoursegrain/cluster.hpp"
-#include "../libkmccoursegrain/site.hpp"
+#include "../libkmccoursegrain/kmc_cluster.hpp"
+#include "../libkmccoursegrain/kmc_site.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -16,18 +16,18 @@ int main(void){
 
   cout << "Testing: Cluster constructor" << endl;
   {
-    Cluster cl;
+    KMC_Cluster cl;
   }
 
   cout << "Testing: Cluster identity setter" << endl;
   {
-    Cluster cl;
+    KMC_Cluster cl;
     cl.setId(0);
   }
 
   cout << "Testing: Cluster identity getter" << endl;
   {
-    Cluster cl;
+    KMC_Cluster cl;
     cl.setId(0);
     assert(cl.getId()==0);
 
@@ -50,25 +50,25 @@ int main(void){
 
   cout << "Testing: addSite" << endl;
   {
-    Site site;
+    KMC_Site site;
     site.setId(1);
     double rate = 1.0;
     site.addNeighRate(pair<int const, double *>(2,&rate));
 
-    Cluster cluster;
-    cluster.addSite(make_shared<Site>(site));
+    KMC_Cluster cluster;
+    cluster.addSite(make_shared<KMC_Site>(site));
     assert(cluster.getNumberOfSitesInCluster()==1);
   }
 
 
   cout << "Testing: siteIsInCluster" << endl;
   {
-    Site site;
+    KMC_Site site;
     site.setId(1);
     
-    Cluster cluster;
+    KMC_Cluster cluster;
     assert(!cluster.siteIsInCluster(1));
-    cluster.addSite(make_shared<Site>(site));
+    cluster.addSite(make_shared<KMC_Site>(site));
     assert(cluster.siteIsInCluster(1));
   }
 
@@ -82,19 +82,19 @@ int main(void){
     //
     // Same rate should lead to 50 % probability on either site
 
-    Site site;
+    KMC_Site site;
     site.setId(1);
     double rate = 1;
     site.addNeighRate(pair<int const, double *>(2,&rate));
     
-    Site site2;
+    KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
     site2.addNeighRate(pair<int const, double *>(1,&rate2));
   
-    Cluster cluster;
-    cluster.addSite(make_shared<Site>(site));
-    cluster.addSite(make_shared<Site>(site2));
+    KMC_Cluster cluster;
+    cluster.addSite(make_shared<KMC_Site>(site));
+    cluster.addSite(make_shared<KMC_Site>(site2));
 
     assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(1)))==50);
     assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(2)))==50);
@@ -112,29 +112,29 @@ int main(void){
     // Same rate should lead to 25 % probability on end sites
     // and 50 % probability on middle site
 
-    Site site;
+    KMC_Site site;
     site.setId(1);
     double rate = 1;
     site.addNeighRate(pair<int const, double *>(2,&rate));
     
-    Site site2;
+    KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
     double rate3 = 1;
     site2.addNeighRate(pair<int const, double *>(1,&rate2));
     site2.addNeighRate(pair<int const, double *>(3,&rate3));
   
-    Site site3;
+    KMC_Site site3;
     site3.setId(3);
     double rate4 = 1;
     site3.addNeighRate(pair<int const, double *>(2,&rate4));
 
-    Cluster cluster;
+    KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
 
-    cluster.addSite(make_shared<Site>(site));
-    cluster.addSite(make_shared<Site>(site2));
-    cluster.addSite(make_shared<Site>(site3));
+    cluster.addSite(make_shared<KMC_Site>(site));
+    cluster.addSite(make_shared<KMC_Site>(site2));
+    cluster.addSite(make_shared<KMC_Site>(site3));
 
     assert(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(1)))==25);
     assert(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(2)))==50);
@@ -152,32 +152,32 @@ int main(void){
     // Same rate should lead to 25 % probability on end sites
     // and 50 % probability on middle site
 
-    Site site;
+    KMC_Site site;
     site.setId(1);
     double rate = 1;
     site.addNeighRate(pair<int const, double *>(2,&rate));
-    auto siteSmart = make_shared<Site>(site);   
+    auto siteSmart = make_shared<KMC_Site>(site);   
  
-    Site site2;
+    KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
     double rate3 = 1;
     site2.addNeighRate(pair<int const, double *>(1,&rate2));
     site2.addNeighRate(pair<int const, double *>(3,&rate3));
   
-    Site site3;
+    KMC_Site site3;
     site3.setId(3);
     double rate4 = 1;
     site3.addNeighRate(pair<int const, double *>(2,&rate4));
     double rate5 = 1;
     site3.addNeighRate(pair<int const, double *>(4,&rate5));
 
-    Cluster cluster;
+    KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
 
     cluster.addSite(siteSmart);
-    cluster.addSite(make_shared<Site>(site2));
-    cluster.addSite(make_shared<Site>(site3));
+    cluster.addSite(make_shared<KMC_Site>(site2));
+    cluster.addSite(make_shared<KMC_Site>(site3));
 
     assert(round(static_cast<int>(100*cluster.getProbabilityOfHoppingToNeighborOfCluster(4)))==100);
 
@@ -195,33 +195,33 @@ int main(void){
 
   cout << "Testing: pickNewSiteId" << endl;
   {
-    Site site;
+    KMC_Site site;
     site.setId(1);
     double rate = 1;
     double rate6 = 1;
     site.addNeighRate(pair<int const, double *>(2,&rate));
     site.addNeighRate(pair<int const, double *>(5,&rate6));
  
-    Site site2;
+    KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
     double rate3 = 1;
     site2.addNeighRate(pair<int const, double *>(1,&rate2));
     site2.addNeighRate(pair<int const, double *>(3,&rate3));
   
-    Site site3;
+    KMC_Site site3;
     site3.setId(3);
     double rate4 = 1;
     site3.addNeighRate(pair<int const, double *>(2,&rate4));
     double rate5 = 1;
     site3.addNeighRate(pair<int const, double *>(4,&rate5));
 
-    Cluster cluster;
+    KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
 
-    cluster.addSite(make_shared<Site>(site));
-    cluster.addSite(make_shared<Site>(site2));
-    cluster.addSite(make_shared<Site>(site3));
+    cluster.addSite(make_shared<KMC_Site>(site));
+    cluster.addSite(make_shared<KMC_Site>(site2));
+    cluster.addSite(make_shared<KMC_Site>(site3));
 
     // Setting the seed will ensure that the results are reproducable
 

@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "../libkmccoursegrain/site.hpp"
+#include "../libkmccoursegrain/kmc_site.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -12,23 +12,23 @@ int main(void){
 
   cout << "Testing: Site constructor" << endl;
   {
-    Site site;
+    KMC_Site site;
   }
 
   cout << "Testing: Site Id setter" << endl;
   {
-    Site site;
+    KMC_Site site;
     site.setId(0);
   }
 	
   cout << "Testing: Site Id getter" << endl;
   {
-    Site site;
+    KMC_Site site;
     site.setId(0);
     assert(site.getId()==0);
 
     bool fail = false;
-    Site site2;
+    KMC_Site site2;
     try {
       site2.getId();
     }catch(...){
@@ -49,7 +49,7 @@ int main(void){
     neighRates[3]=&rate3;
     neighRates[4]=&rate4;
     
-    Site site;
+    KMC_Site site;
     site.setRatesToNeighbors(neighRates);
   }
 
@@ -65,7 +65,7 @@ int main(void){
     neighRates[3]=&rate3;
     neighRates[4]=&rate4;
     
-    Site site;
+    KMC_Site site;
     site.setRatesToNeighbors(neighRates);
     assert(static_cast<int>(site.getRateToNeighbor(1))==400);
     assert(static_cast<int>(site.getRateToNeighbor(2))==200);
@@ -80,7 +80,7 @@ int main(void){
     double rate3 = 10;
     double rate4 = 1;
     
-    Site site;
+    KMC_Site site;
 
     site.addNeighRate(pair<const int,double *>(1,&rate1));
     site.addNeighRate(pair<const int,double *>(2,&rate2));
@@ -108,7 +108,7 @@ int main(void){
     double rate3 = 10;
     double rate4 = 1;
     
-    Site site;
+    KMC_Site site;
 
     site.resetNeighRate(pair<const int,double * >(1,&rate1));
     site.resetNeighRate(pair<const int,double * >(2,&rate2));
@@ -138,7 +138,7 @@ int main(void){
     double rate3 = 10;
     double rate4 = 1;
     
-    Site site;
+    KMC_Site site;
 
     site.addNeighRate(pair<const int,double * >(1,&rate1));
     site.addNeighRate(pair<const int,double * >(2,&rate2));
@@ -155,7 +155,7 @@ int main(void){
 
   cout << "Testing: occupation functions" << endl;
   {
-    Site site;
+    KMC_Site site;
     assert(site.siteIsOccupied()==false);
     site.occupySite();
     assert(site.siteIsOccupied()==true);
@@ -165,7 +165,7 @@ int main(void){
 
   cout << "Testing: cluster functions " << endl;
   {
-    Site site;
+    KMC_Site site;
     assert(site.partOfCluster()==false);
     site.setClusterId(1);
     assert(site.partOfCluster()==true);
@@ -184,7 +184,7 @@ int main(void){
     neighRates[3]=&rate3;
     neighRates[4]=&rate4;
     
-    Site site;
+    KMC_Site site;
     site.setRatesToNeighbors(neighRates);
 
     bool fail = false;
@@ -212,7 +212,7 @@ int main(void){
     neighRates[3]=&rate3;
     neighRates[4]=&rate4;
     
-    Site site;
+    KMC_Site site;
     site.setRatesToNeighbors(neighRates);
     
     auto neighborIds = site.getNeighborSiteIds();
@@ -247,7 +247,7 @@ int main(void){
     neighRates[3]=&rate3;
     neighRates[4]=&rate4;
     
-    Site site;
+    KMC_Site site;
     site.setId(0);
     site.setRatesToNeighbors(neighRates);
     cout << site << endl;

@@ -21,11 +21,11 @@ namespace kmccoursegrain {
    * is to make it possible for an end user to alter the rates externally 
    * without having to touch this class. 
    **/
-  class Site : public virtual Identity {
+  class KMC_Site : public virtual Identity {
 
     public:	
  
-      Site();
+      KMC_Site();
 
       /**
        * \brief Set the seed for the random number generator
@@ -208,7 +208,7 @@ namespace kmccoursegrain {
        * \brief Prints the output of the site
        **/
       friend std::ostream& 
-        operator<<(std::ostream& os, const kmccoursegrain::Site& site);
+        operator<<(std::ostream& os, const kmccoursegrain::KMC_Site& site);
     private:
 
       /**
