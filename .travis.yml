@@ -9,23 +9,28 @@ compiler:
 install:
   - echo "${TRAVIS_BUILD_DIR}"
   - echo "${TRAVIS_OS_NAME}"
+  - ls
+  - pwd
+  - git branch -a
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
-
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz"
     mkdir cmake && wget ${CMAKE_URL} && tar -xzf cmake-3.4.1.tar.gz && cd cmake-3.4.1/ && ./configure >/dev/null && make >/dev/null && sudo make install >/dev/null
     fi
 
-before_script:
-  - cd ~
-  - git clone https://github.com/JoshuaSBrown/CourseGrainSites.git
-  - cd CourseGrainSites
-  - git checkout -b current_commit
+#before_script:
+#  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+#  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+#  - cd "${TRAVIS_BUILD_DIR}"
+#  - git branch
+#  - git checkout -b ${BRANCH}
+#  - git branch
 
 
 script:
+  - cd "${TRAVIS_BUILD_DIR}"
   - mkdir build
   - cd build
   - pwd
