@@ -11,24 +11,23 @@ install:
   - echo "${TRAVIS_OS_NAME}"
   - ls
   - pwd
+  - git branch -a
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
-  - sudo add-apt-repository ppa:george-edison55/cmake-3.x
-  - sudo apt-get update
-  - sudo aptget install cmake
+  - yes | sudo add-apt-repository ppa:george-edison55/cmake-3.x
+  - yes | sudo apt-get update
+  - yes | sudo aptget install cmake
   - cmake --version
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz"
-    mkdir cmake && wget ${CMAKE_URL} && tar -xzf cmake-3.4.1.tar.gz && cd cmake-3.4.1/ && ./configure >/dev/null && make >/dev/null && sudo make install >/dev/null
-    fi
+    #  - |
+    #if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    #CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz"
+    #mkdir cmake && wget ${CMAKE_URL} && tar -xzf cmake-3.4.1.tar.gz && cd cmake-3.4.1/ && ./configure >/dev/null && make >/dev/null && sudo make install >/dev/null
+    #fi
 
 before_script:
-  - cd ~
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
-  - git clone https://github.com/JoshuaSBrown/CourseGrainSites.git
-  - cd CourseGrainSites
+  - cd "${TRAVIS_BUILD_DIR}"
   - git branch
   - git checkout -b ${BRANCH}
   - git branch
