@@ -20,13 +20,13 @@ install:
     mkdir cmake && wget ${CMAKE_URL} && tar -xzf cmake-3.4.1.tar.gz && cd cmake-3.4.1/ && ./configure >/dev/null && make >/dev/null && sudo make install >/dev/null
     fi
 
-before_script:
-  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
-  - cd "${TRAVIS_BUILD_DIR}"
-  - git branch
-  - git checkout -b ${BRANCH}
-  - git branch
+#before_script:
+#  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+#  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+#  - cd "${TRAVIS_BUILD_DIR}"
+#  - git branch
+#  - git checkout -b ${BRANCH}
+#  - git branch
 
 
 script:
