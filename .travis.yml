@@ -13,7 +13,10 @@ install:
   - pwd
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
-
+  - sudo add-apt-repository ppa:george-edison55/cmake-3.x
+  - sudo apt-get update
+  - sudo aptget install cmake
+  - cmake --version
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz"
