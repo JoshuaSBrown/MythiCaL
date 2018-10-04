@@ -1,18 +1,18 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "../../include/kmccoursegrain/coursegrainsystem.hpp"
-#include "../../include/kmccoursegrain/particle.hpp"
 #include "log.hpp"
 #include "kmc_cluster.hpp"
 #include "kmc_site.hpp"
+#include "../../include/kmccoursegrain/coursegrainsystem.hpp"
+#include "../../include/kmccoursegrain/particle.hpp"
 #include "../../include/kmccoursegrain/kmc_constants.hpp"
 
 using namespace std;
 
 namespace kmccoursegrain {
 
-  void CourseGrainSystem::initializeSystem(
+  void KMC_CourseGrainSystem::initializeSystem(
       map<int const,map<int const,double* >> ratesOfAllSites){
 
     LOG("Initializeing system",1);
@@ -29,7 +29,8 @@ namespace kmccoursegrain {
     }
   }
 
-  void CourseGrainSystem::initializeParticles(vector<ParticlePtr> particles){
+  void 
+  KMC_CourseGrainSystem::initializeParticles(vector<ParticlePtr> particles){
 
     LOG("Initializeing particles",1);
 
@@ -54,12 +55,12 @@ namespace kmccoursegrain {
     }
   }
 
-  void CourseGrainSystem::setCourseGrainThreshold(int threshold){
+  void KMC_CourseGrainSystem::setCourseGrainThreshold(int threshold){
     LOG("Setting threshold",1);
     courseGrainingThreshold_ = threshold;
   }
 
-  void CourseGrainSystem::setRandomSeed(const unsigned long seed){
+  void KMC_CourseGrainSystem::setRandomSeed(const unsigned long seed){
     if(sites_.size()!=0){
       throw runtime_error("For the random seed to have an affect, it must be "
           "set before initializeSystem is called");
@@ -68,7 +69,8 @@ namespace kmccoursegrain {
     seed_set_=true;
   }
 
-  void CourseGrainSystem::createCluster_(const int siteId1,const int siteId2){
+  void 
+  KMC_CourseGrainSystem::createCluster_(const int siteId1,const int siteId2){
     LOG("Creating cluster",1);
     auto cluster_ptr = shared_ptr<KMC_Cluster>(new KMC_Cluster());
     cluster_ptr->addSite(sites_[siteId1]);
@@ -80,15 +82,16 @@ namespace kmccoursegrain {
     clusters_[cluster_ptr->getId()] = cluster_ptr;
   }
 
-  void CourseGrainSystem::mergeSiteToCluster_(
-      const int siteId,
-      const int clusterId){
+  void KMC_CourseGrainSystem::mergeSiteToCluster_(
+    const int siteId,
+    const int clusterId){
+
     LOG("Merging site to cluster",1);
 
     clusters_[clusterId]->addSite(sites_[siteId]);
   }
 
-  void CourseGrainSystem::mergeClusters_(
+  void KMC_CourseGrainSystem::mergeClusters_(
       const int clusterId1,
       const int clusterId2){
     LOG("Merging clusters",1);
@@ -106,7 +109,7 @@ namespace kmccoursegrain {
     }
   }
 
-  void CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr particle){
+  void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr particle){
 
     LOG("Course graining sites if needed",1);
 
@@ -187,7 +190,7 @@ namespace kmccoursegrain {
     }
   }
 
-  void CourseGrainSystem::hop(ParticlePtr particle){
+  void KMC_CourseGrainSystem::hop(ParticlePtr particle){
 
     LOG("Particle is hopping in system",1);
     auto siteId = particle->getIdOfSiteCurrentlyOccupying();

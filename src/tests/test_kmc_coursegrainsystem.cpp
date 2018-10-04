@@ -3,8 +3,8 @@
 #include <vector>
 #include <memory>
 
-#include "../../include/kmccoursegrain/coursegrainsystem.hpp"
-#include "../../include/kmccoursegrain/particle.hpp"
+#include "../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
+#include "../../include/kmccoursegrain/kmc_particle.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -13,7 +13,7 @@ int main(void){
 
   cout << "Testing: CourseGrainSystem constructor" << endl;
   {
-    CourseGrainSystem CGsystem;
+    KMC_CourseGrainSystem CGsystem;
   }
 
   cout << "Testing: initializeSystem" << endl;
@@ -130,7 +130,7 @@ int main(void){
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
-    CourseGrainSystem CGsystem;
+    KMC_CourseGrainSystem CGsystem;
     CGsystem.initializeSystem(ratesToNeighbors);
   }
 
@@ -247,18 +247,18 @@ int main(void){
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
-    CourseGrainSystem CGsystem;
+    KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
     CGsystem.initializeSystem(ratesToNeighbors);
 
-    class Electron : public Particle {};
+    class Electron : public KMC_Particle {};
   
     Electron electron;
     // Place the electron on site 1
     electron.occupySite(1);
 
     auto electron_ptr = make_shared<Electron>(electron);
-    vector<shared_ptr<Particle>> electrons;
+    vector<shared_ptr<KMC_Particle>> electrons;
     electrons.push_back(electron_ptr);
 
     CGsystem.initializeParticles(electrons);

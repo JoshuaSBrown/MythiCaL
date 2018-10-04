@@ -1,12 +1,10 @@
 #ifndef KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 #define KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 
-//#include <iostream>
 #include <vector>
 #include <map>
 #include <memory>
 #include <random>
-//#include <math.h>
 
 #include <list>
 

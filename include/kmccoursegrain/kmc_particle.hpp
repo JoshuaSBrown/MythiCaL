@@ -1,5 +1,5 @@
-#ifndef KMCCOURSEGRAIN_PARTICLE_HPP
-#define KMCCOURSEGRAIN_PARTICLE_HPP
+#ifndef KMCCOURSEGRAIN_KMC_PARTICLE_HPP
+#define KMCCOURSEGRAIN_KMC_PARTICLE_HPP
 
 #include <map>
 #include <list>
@@ -20,9 +20,9 @@ namespace kmccoursegrain{
    * between two or more sites. The library can then course grain the low energy
    * sites and hopefully improve the performance.  
    **/
-  class Particle{
+  class KMC_Particle{
     public: 
-      Particle();
+      KMC_Particle();
 
       /**
        * \brief Sets the size of the particles memory
@@ -46,6 +46,10 @@ namespace kmccoursegrain{
        * \brief Record the id of the site the particle currently resides on
        *
        * Default value is assigned for the clusterId if it is not provided
+       *
+       * \param[in] siteId id of the site the particle is to occupy
+       * \param[in] clusterId id of the cluster if there is one that the site 
+       * belongs to, by default this is unassigned
        **/
       void occupySite(int siteId, int clusterId = constants::unassignedId);
 
@@ -64,7 +68,8 @@ namespace kmccoursegrain{
        * \return A vector of vectors is returned the first int is the id of the 
        * site, the second int is the id of the cluster. The third int is the 
        * count of the number of times the particle has visited the site. Element
-       * (0) is the most recently visited site.
+       * (0) is the most recently visited site followed by sites that were 
+       * visited later.
        **/
       std::vector<std::vector<int>> 
         getVisitationFrequenciesOfCurrentSites() const;
@@ -81,13 +86,20 @@ namespace kmccoursegrain{
        *
        * The memory consists of recording the number of unique sites visited
        * most recently and the corresponding number of times the sites have been
-       * visited. 
+       * visited and the clusters the site might be attached too. 
        *
        * \return list containing vectors, indicating the site id, the cluster id
        * and the number of times it has been visited
       **/
       std::list<std::vector<int>> getMemory();
 
+      /**
+       * \brief Remove a memory from a particle
+       *
+       * This is necessary if the memory is out of date
+       *
+       * \param[in] siteId the id of the site to be removed from memory
+       **/
       void removeMemory(const int siteId);
 
       /**
@@ -98,9 +110,25 @@ namespace kmccoursegrain{
        **/
       void setPotentialSite(const int siteId) { potentialSite_ = siteId; }
 
+      /**
+       * \brief the ability to reset the frequency by which a particle has been 
+       * visited
+       *
+       * Will throw an error if the site is not in memory.
+       *
+       * \param[in] siteId id of the site whos visitation frequency is to be 
+       * reset
+       **/
       void resetVisitationFrequency(const int siteId);
 
+      /**
+       * \brief Set the cluster a site belongs too
+       *
+       * If a site is updated and now belongs to a cluster this information 
+       * can be recorded. 
+       **/
       void setClusterSiteBelongsTo(const int siteId, const int clusterId);
+
       /**
        * \brief Return the id of the site the particle will attemt to move to
        **/
@@ -132,10 +160,6 @@ namespace kmccoursegrain{
       /** 
        * \brief List that is essentially the particles memory
        *
-       * The vector is composed of three elements, the first is the site id the
-       * second is the cluster id, the third is the number of times the site has
-       * been visited.
-       *
        * Once a site is attached to a cluster, a single memory is stored per 
        * cluster, thus if two sites are part of the same cluster, the memory
        * will reflect the most recently visited site. 
@@ -152,7 +176,8 @@ namespace kmccoursegrain{
       /**
        * \brief Make the site id `siteId` the most currently remembered site
        *
-       * This function works by moving the site to the top of the list.
+       * This function works by moving the Memory of the site to the top of the
+       * memoryQueue.
        *
        * \param[in] siteId id of the site most recently visited by the particle
        **/
@@ -178,4 +203,4 @@ namespace kmccoursegrain{
   };
 
 }
-#endif // KMCCOURSEGRAIN_PARTICLE_HPP
+#endif // KMCCOURSEGRAIN_KMC_PARTICLE_HPP

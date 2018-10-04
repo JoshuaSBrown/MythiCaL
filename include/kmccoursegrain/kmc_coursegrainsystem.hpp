@@ -1,5 +1,5 @@
-#ifndef KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
-#define KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
+#ifndef KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP
+#define KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP
 
 #include <vector>
 #include <memory>
@@ -9,9 +9,9 @@ namespace kmccoursegrain{
 
 class KMC_Site;
 class KMC_Cluster;
-class Particle;
+class KMC_Particle;
 
-typedef std::shared_ptr<Particle> ParticlePtr;
+typedef std::shared_ptr<KMC_Particle> ParticlePtr;
 typedef std::shared_ptr<KMC_Site> SitePtr;
 typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
 
@@ -25,7 +25,7 @@ typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
  * on each site will be the same but the number of compute cycles will be 
  * significantly reduced. 
  **/
-class CourseGrainSystem{
+class KMC_CourseGrainSystem{
 
   public:
   
@@ -38,7 +38,7 @@ class CourseGrainSystem{
      * forth between two sites at least 20 times before the sites are course 
      * grained. 
      **/
-    CourseGrainSystem() : seed_set_(false), courseGrainingThreshold_(20) {};
+    KMC_CourseGrainSystem() : seed_set_(false), courseGrainingThreshold_(20) {};
 
     /**
      * \brief This will correctly initialize the system 
@@ -165,4 +165,4 @@ class CourseGrainSystem{
 };
 
 }
-#endif // KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
+#endif // KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP
