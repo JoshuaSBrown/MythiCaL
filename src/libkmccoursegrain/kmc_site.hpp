@@ -1,5 +1,5 @@
-#ifndef KMCCOURSEGRAIN_SITE_HPP
-#define KMCCOURSEGRAIN_SITE_HPP
+#ifndef KMCCOURSEGRAIN_KMC_SITE_HPP
+#define KMCCOURSEGRAIN_KMC_SITE_HPP
 
 #include <iostream>
 #include <vector>
@@ -283,4 +283,4 @@ namespace kmccoursegrain {
 
 }
 
-#endif // KMCCOURSEGRAIN_SITE_HPP
+#endif // KMCCOURSEGRAIN_KMC_SITE_HPP

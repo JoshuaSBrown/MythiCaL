@@ -257,58 +257,59 @@ int main(void){
     // Place the electron on site 1
     electron.occupySite(1);
 
-    vector<Particle *> electrons;
-    electrons.push_back(&electron);
+    auto electron_ptr = make_shared<Electron>(electron);
+    vector<shared_ptr<Particle>> electrons;
+    electrons.push_back(electron_ptr);
 
     CGsystem.initializeParticles(electrons);
 
-    assert(electron.getIdOfSiteCurrentlyOccupying()==1);
-    assert(electron.getPotentialSite()==5);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==34);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==1);
+    assert(electron_ptr->getPotentialSite()==5);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==34);
 
-    CGsystem.hop(&electron);
-    assert(electron.getIdOfSiteCurrentlyOccupying()==5);
-    assert(electron.getPotentialSite()==6);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==1);
+    CGsystem.hop(electron_ptr);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==5);
+    assert(electron_ptr->getPotentialSite()==6);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==1);
 
-    CGsystem.hop(&electron);
-    assert(electron.getIdOfSiteCurrentlyOccupying()==6);
-    assert(electron.getPotentialSite()==7);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==15);
+    CGsystem.hop(electron_ptr);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==6);
+    assert(electron_ptr->getPotentialSite()==7);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==15);
 
-    CGsystem.hop(&electron);
-    assert(electron.getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron.getPotentialSite()==6);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==11);
+    CGsystem.hop(electron_ptr);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
+    assert(electron_ptr->getPotentialSite()==6);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==11);
 
     // Enough to trigger the formation of a cluster
     for(int i=0; i<50;++i){
-      CGsystem.hop(&electron);
+      CGsystem.hop(electron_ptr);
     }    
 
-    assert(electron.getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron.getPotentialSite()==7);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==372);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
+    assert(electron_ptr->getPotentialSite()==7);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==372);
     
-    CGsystem.hop(&electron);
-    assert(electron.getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron.getPotentialSite()==7);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==192);
+    CGsystem.hop(electron_ptr);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
+    assert(electron_ptr->getPotentialSite()==7);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==192);
 
-    CGsystem.hop(&electron);
-    assert(electron.getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron.getPotentialSite()==7);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==183);
+    CGsystem.hop(electron_ptr);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
+    assert(electron_ptr->getPotentialSite()==7);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==183);
 
-    CGsystem.hop(&electron);
-    assert(electron.getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron.getPotentialSite()==7);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==120);
+    CGsystem.hop(electron_ptr);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
+    assert(electron_ptr->getPotentialSite()==7);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==120);
 
-    CGsystem.hop(&electron);
-    assert(electron.getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron.getPotentialSite()==6);
-    assert(static_cast<int>(electron.getDwellTime()*1000)==53);
+    CGsystem.hop(electron_ptr);
+    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
+    assert(electron_ptr->getPotentialSite()==6);
+    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==53);
   }
 
 

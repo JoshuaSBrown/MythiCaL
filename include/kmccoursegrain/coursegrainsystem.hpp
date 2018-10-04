@@ -11,6 +11,7 @@ class KMC_Site;
 class KMC_Cluster;
 class Particle;
 
+typedef std::shared_ptr<Particle> ParticlePtr;
 typedef std::shared_ptr<KMC_Site> SitePtr;
 typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
 
@@ -103,7 +104,7 @@ class CourseGrainSystem{
      *
      * \param[in] particles a vector of pointers to the particles
      **/
-    void initializeParticles(std::vector<Particle *> particles);
+    void initializeParticles(std::vector<ParticlePtr> particles);
 
     /**
      * \brief Define the seed for the random number generator
@@ -126,7 +127,7 @@ class CourseGrainSystem{
      *
      * \param[in] particle
      **/
-    void hop(Particle * particle);
+    void hop(ParticlePtr particle);
 
     /**
      * \brief Threshold for course graining sites
@@ -156,7 +157,7 @@ class CourseGrainSystem{
     /// Stores smart pointers to all the clusters
     std::map<int,ClusterPtr> clusters_;
 
-    void courseGrainSiteIfNeeded_(Particle * particle);
+    void courseGrainSiteIfNeeded_(ParticlePtr particle);
     void mergeSiteToCluster_(const int siteId, const int clusterId);
     void createCluster_(const int siteId1,const int siteId2);
     void mergeClusters_(const int clusterId1, const int clusterId2);

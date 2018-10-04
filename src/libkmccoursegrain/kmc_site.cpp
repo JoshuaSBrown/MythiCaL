@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include "kmc_site.hpp"
+#include "../../include/kmccoursegrain/kmc_constants.hpp"
 
 using namespace std;
 
@@ -11,7 +12,11 @@ namespace kmccoursegrain {
  * Public Facing Functions
  *********************************************************************/
 
-  KMC_Site::KMC_Site() : totalVisitFreq_(0), clusterId_(-1), siteOccupied_(false) {
+  KMC_Site::KMC_Site() : 
+    totalVisitFreq_(0), 
+    clusterId_(constants::unassignedId), 
+    siteOccupied_(false) {
+
     auto seed = chrono::system_clock::now().time_since_epoch().count();
     randomEngine_ = mt19937(seed);
     randomDistribution_ = uniform_real_distribution<double>(0.0,1.0);
