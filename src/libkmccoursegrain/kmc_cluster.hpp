@@ -1,12 +1,10 @@
-#ifndef KMCCOURSEGRAIN_CLUSTER_HPP
-#define KMCCOURSEGRAIN_CLUSTER_HPP
+#ifndef KMCCOURSEGRAIN_KMC_CLUSTER_HPP
+#define KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 
-//#include <iostream>
 #include <vector>
 #include <map>
 #include <memory>
 #include <random>
-//#include <math.h>
 
 #include <list>
 
@@ -435,4 +433,4 @@ namespace kmccoursegrain{
 
 }
 
-#endif // KMCCOURSEGRAIN_CLUSTER_HPP
+#endif // KMCCOURSEGRAIN_KMC_CLUSTER_HPP

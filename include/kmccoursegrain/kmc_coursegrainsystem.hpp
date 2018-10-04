@@ -1,5 +1,5 @@
-#ifndef KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
-#define KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
+#ifndef KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP
+#define KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP
 
 #include <vector>
 #include <memory>
@@ -9,8 +9,9 @@ namespace kmccoursegrain{
 
 class KMC_Site;
 class KMC_Cluster;
-class Particle;
+class KMC_Particle;
 
+typedef std::shared_ptr<KMC_Particle> ParticlePtr;
 typedef std::shared_ptr<KMC_Site> SitePtr;
 typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
 
@@ -24,7 +25,7 @@ typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
  * on each site will be the same but the number of compute cycles will be 
  * significantly reduced. 
  **/
-class CourseGrainSystem{
+class KMC_CourseGrainSystem{
 
   public:
   
@@ -37,7 +38,7 @@ class CourseGrainSystem{
      * forth between two sites at least 20 times before the sites are course 
      * grained. 
      **/
-    CourseGrainSystem() : seed_set_(false), courseGrainingThreshold_(20) {};
+    KMC_CourseGrainSystem() : seed_set_(false), courseGrainingThreshold_(20) {};
 
     /**
      * \brief This will correctly initialize the system 
@@ -103,7 +104,7 @@ class CourseGrainSystem{
      *
      * \param[in] particles a vector of pointers to the particles
      **/
-    void initializeParticles(std::vector<Particle *> particles);
+    void initializeParticles(std::vector<ParticlePtr> particles);
 
     /**
      * \brief Define the seed for the random number generator
@@ -126,7 +127,7 @@ class CourseGrainSystem{
      *
      * \param[in] particle
      **/
-    void hop(Particle * particle);
+    void hop(ParticlePtr particle);
 
     /**
      * \brief Threshold for course graining sites
@@ -156,7 +157,7 @@ class CourseGrainSystem{
     /// Stores smart pointers to all the clusters
     std::map<int,ClusterPtr> clusters_;
 
-    void courseGrainSiteIfNeeded_(Particle * particle);
+    void courseGrainSiteIfNeeded_(ParticlePtr particle);
     void mergeSiteToCluster_(const int siteId, const int clusterId);
     void createCluster_(const int siteId1,const int siteId2);
     void mergeClusters_(const int clusterId1, const int clusterId2);
@@ -164,4 +165,4 @@ class CourseGrainSystem{
 };
 
 }
-#endif // KMCCOURSEGRAIN_COURSEGRAINSYSTEM_HPP
+#endif // KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP

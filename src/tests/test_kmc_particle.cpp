@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cassert>
 
-#include <kmccoursegrain/particle.hpp>
+#include <kmccoursegrain/kmc_particle.hpp>
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -10,18 +10,18 @@ int main(void){
 
   cout << "Testing: Particle constructor" << endl;
   {
-    Particle particle;
+    KMC_Particle particle;
   }
 
   cout << "Testing: Particle getMemoryCapacity" << endl;
   {
-    Particle particle;
+    KMC_Particle particle;
     assert(particle.getMemoryCapacity()==2);
   }
 	
   cout << "Testing: Particle setMemoryCapacity" << endl;
   {
-    Particle particle;
+    KMC_Particle particle;
     particle.setMemoryCapacity(5);
     assert(particle.getMemoryCapacity()==5);
     
@@ -34,16 +34,16 @@ int main(void){
     assert(fail);
   }
 
-  cout << "Testing: Partilce occupySite" << endl;
+  cout << "Testing: Particle occupySite" << endl;
   {
-    Particle particle;
+    KMC_Particle particle;
     particle.setMemoryCapacity(5);
     particle.occupySite(0);
   }
 
   cout << "Testing: Particle getVisitationFrequencyOfCurrentlyOccupiedSite" << endl;
   {
-    Particle particle;
+    KMC_Particle particle;
     particle.setMemoryCapacity(5);     
     particle.occupySite(0);
     cout << particle.getVisitationFrequencyOfCurrentlyOccupiedSite() << endl;

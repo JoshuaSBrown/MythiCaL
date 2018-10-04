@@ -165,7 +165,8 @@ namespace kmccoursegrain {
     for(auto site : sitesInCluster_){
       for(auto neighId : site.second->getNeighborSiteIds()) {
         if(!siteIsInCluster(neighId)){
-          externalRates[site.first][neighId]=site.second->getRateToNeighbor(neighId);
+          externalRates[site.first][neighId]=
+            site.second->getRateToNeighbor(neighId);
         }
       }
     } 
@@ -207,7 +208,8 @@ namespace kmccoursegrain {
             probabilityOnSite_[siteHoppingFrom]*\
             sitesInCluster_[siteHoppingFrom]->getTimeConstant()/\
             sumDwell*\
-            sitesInCluster_[siteHoppingFrom]->getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
+            sitesInCluster_[siteHoppingFrom]->\
+              getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
             sumRatesOffCluster;
         }else{
 
@@ -215,7 +217,8 @@ namespace kmccoursegrain {
             probabilityOnSite_[siteHoppingFrom]*\
             sitesInCluster_[siteHoppingFrom]->getTimeConstant()/\
             sumDwell*\
-            sitesInCluster_[siteHoppingFrom]->getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
+            sitesInCluster_[siteHoppingFrom]->\
+              getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
             sumRatesOffCluster;
         }
         total += probabilityHopToNeighbor[siteHoppingTo];
@@ -240,11 +243,13 @@ namespace kmccoursegrain {
         if(siteIsInCluster(neighsite)){
           if(temp_probabilityOnSite.count(site.first)){
             temp_probabilityOnSite[site.first] += \
-              sitesInCluster_[neighsite]->getProbabilityOfHoppingToNeighboringSite(site.first)*\
+              sitesInCluster_[neighsite]->\
+                getProbabilityOfHoppingToNeighboringSite(site.first)*\
               probabilityOnSite_[neighsite];
           }else{  
             temp_probabilityOnSite[site.first] = \
-              sitesInCluster_[neighsite]->getProbabilityOfHoppingToNeighboringSite(site.first)*\
+              sitesInCluster_[neighsite]->\
+                getProbabilityOfHoppingToNeighboringSite(site.first)*\
               probabilityOnSite_[neighsite];
           }
           total+=temp_probabilityOnSite[site.first];
@@ -317,7 +322,7 @@ namespace kmccoursegrain {
 
   bool KMC_Cluster::hopWithinCluster_(){
     double hop = randomDistribution_(randomEngine_);
-    double inOrOutThreshold = static_cast<double>(resolution_-1)/\
+    double inOrOutThreshold = static_cast<double>(resolution_)/\
                               static_cast<double>(resolution_);
     return (hop<inOrOutThreshold);
   }
@@ -371,7 +376,8 @@ namespace kmccoursegrain {
     escapeTimeConstant_ = 0.0;
     for(auto site : ratesToNeighbors ){
       for(auto neigh : site.second ){
-        escapeTimeConstant_ += neigh.second*escapeRateFromSiteToNeighbor_[site.first];
+        escapeTimeConstant_ += neigh.second*\
+                               escapeRateFromSiteToNeighbor_[site.first];
       }
     }
   }
