@@ -1,11 +1,10 @@
 #include <stdexcept>
-#include <iostream>
 
 #include "log.hpp"
 #include "kmc_cluster.hpp"
 #include "kmc_site.hpp"
-#include "../../include/kmccoursegrain/coursegrainsystem.hpp"
-#include "../../include/kmccoursegrain/particle.hpp"
+#include "../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
+#include "../../include/kmccoursegrain/kmc_particle.hpp"
 #include "../../include/kmccoursegrain/kmc_constants.hpp"
 
 using namespace std;

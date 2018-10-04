@@ -1,6 +1,6 @@
 #include <stdexcept>
 #include <cassert>
-#include "../../include/kmccoursegrain/particle.hpp"
+#include "../../include/kmccoursegrain/kmc_particle.hpp"
 
 using namespace std;
 
@@ -9,13 +9,13 @@ namespace kmccoursegrain {
   /****************************************************************************
    * External Methods
    ****************************************************************************/
-  Particle::Particle(){
+  KMC_Particle::KMC_Particle(){
     potentialSite_ = constants::unassignedId;
     dwelltime_ = -1.0;
     setMemoryCapacity(2);
   }
 
-  void Particle::setMemoryCapacity(unsigned int numberSitesToRemember){
+  void KMC_Particle::setMemoryCapacity(unsigned int numberSitesToRemember){
 
     if(numberSitesToRemember==static_cast<unsigned int>(memoryQueue_.size())) {
       return;
@@ -45,11 +45,11 @@ namespace kmccoursegrain {
     }
   }
 
-  unsigned int Particle::getMemoryCapacity() const {
+  unsigned int KMC_Particle::getMemoryCapacity() const {
     return static_cast<unsigned int>(memoryQueue_.size());
   }
 
-  int Particle::getVisitationFrequencyOfCurrentlyOccupiedSite(){
+  int KMC_Particle::getVisitationFrequencyOfCurrentlyOccupiedSite(){
 
     assert(memoryQueue_.size()>0);
     for( auto memory : memoryQueue_ ){
@@ -62,7 +62,7 @@ namespace kmccoursegrain {
     throw runtime_error(err);
   }
 
-  void Particle::occupySite(
+  void KMC_Particle::occupySite(
       const int siteId,
       const int clusterId){
 
@@ -85,12 +85,12 @@ namespace kmccoursegrain {
 
   }
 
-  void Particle::setClusterSiteBelongsTo(const int siteId,const int clusterId){
+  void KMC_Particle::setClusterSiteBelongsTo(const int siteId,const int clusterId){
     auto memory_it = getMemoryIteratorSite_(siteId);
     memory_it->clusterId = clusterId;
   }
 
-  vector<vector<int>> Particle::getVisitationFrequenciesOfCurrentSites() const {
+  vector<vector<int>> KMC_Particle::getVisitationFrequenciesOfCurrentSites() const {
 
     vector<vector<int>> frequencies;
     for(auto memory : memoryQueue_){
@@ -105,7 +105,7 @@ namespace kmccoursegrain {
     return frequencies;
   }
 
-  void Particle::resetVisitationFrequency(const int siteId){
+  void KMC_Particle::resetVisitationFrequency(const int siteId){
     for(auto memory : memoryQueue_){
       if(memory.siteId == siteId ) {
         memory.visitFrequency = 0;
@@ -115,7 +115,7 @@ namespace kmccoursegrain {
     throw invalid_argument("Site id is not in the particles memory");
   }
 
-  void Particle::removeMemory(const int siteId){
+  void KMC_Particle::removeMemory(const int siteId){
     auto memory_it = getMemoryIteratorSite_(siteId);
     memory_it->siteId = constants::unassignedId;
     memory_it->clusterId = constants::unassignedId;
@@ -123,11 +123,11 @@ namespace kmccoursegrain {
     memoryQueue_.splice(memoryQueue_.end(),memoryQueue_,memory_it);
   }
 
-  int Particle::getIdOfSiteCurrentlyOccupying() const {
+  int KMC_Particle::getIdOfSiteCurrentlyOccupying() const {
     return memoryQueue_.begin()->siteId;
   }
 
-  list<vector<int>> Particle::getMemory(){
+  list<vector<int>> KMC_Particle::getMemory(){
     list<vector<int>> memories;
     for(auto memory : memoryQueue_){
       memories.push_back(vector<int>{
@@ -138,7 +138,7 @@ namespace kmccoursegrain {
     return memories;
   }
 
-  int Particle::getPotentialSite() const {
+  int KMC_Particle::getPotentialSite() const {
     if(potentialSite_==constants::unassignedId){
       throw runtime_error("Cannot get potential site as it has not yet been "
           "assigned. You many need to first initialize the particle");
@@ -149,7 +149,7 @@ namespace kmccoursegrain {
    * Internal Methods
    ****************************************************************************/
 
-  bool Particle::rememberSite_(const int siteId){
+  bool KMC_Particle::rememberSite_(const int siteId){
 
     if(siteId!=constants::unassignedId){
       for(auto memory : memoryQueue_){
@@ -160,7 +160,7 @@ namespace kmccoursegrain {
     return false;
   }
 
-  bool Particle::rememberCluster_(const int clusterId){
+  bool KMC_Particle::rememberCluster_(const int clusterId){
 
     if(clusterId!=constants::unassignedId){
       for(auto memory : memoryQueue_){
@@ -170,24 +170,24 @@ namespace kmccoursegrain {
     return false;
   }
 
-  bool Particle::remember_(const int siteId,const int clusterId){
+  bool KMC_Particle::remember_(const int siteId,const int clusterId){
     if( rememberSite_(siteId) && rememberCluster_(clusterId) ) return true;
     return false;
   }
 
-  void Particle::refreshMemoryOfSite_(const int siteId){
+  void KMC_Particle::refreshMemoryOfSite_(const int siteId){
     auto memory_it = getMemoryIteratorSite_(siteId);
     ++(memory_it->visitFrequency);
     memoryQueue_.splice(memoryQueue_.begin(),memoryQueue_,memory_it);
   }
 
-  void Particle::refreshMemoryOfCluster_(const int clusterId){
+  void KMC_Particle::refreshMemoryOfCluster_(const int clusterId){
     auto memory_it = getMemoryIteratorCluster_(clusterId);
     ++(memory_it->visitFrequency);
     memoryQueue_.splice(memoryQueue_.begin(),memoryQueue_,memory_it);
   }
 
-  void Particle::createNewMemory_(const int siteId,const int clusterId){
+  void KMC_Particle::createNewMemory_(const int siteId,const int clusterId){
     auto memory_it = memoryQueue_.end();
     --memory_it;
     memory_it->siteId = siteId;
@@ -196,8 +196,8 @@ namespace kmccoursegrain {
     memoryQueue_.splice(memoryQueue_.begin(), memoryQueue_,memory_it);
   }
 
-  list<Particle::Memory>::iterator 
-  Particle::getMemoryIteratorSite_(const int siteId){
+  list<KMC_Particle::Memory>::iterator 
+  KMC_Particle::getMemoryIteratorSite_(const int siteId){
 
     auto memory_it = memoryQueue_.begin();
     while(memory_it!=memoryQueue_.end()){
@@ -207,8 +207,8 @@ namespace kmccoursegrain {
     throw runtime_error("Site does not exist in queue/memory");
   }
 
-  list<Particle::Memory>::iterator 
-  Particle::getMemoryIteratorCluster_(const int clusterId){
+  list<KMC_Particle::Memory>::iterator 
+  KMC_Particle::getMemoryIteratorCluster_(const int clusterId){
     auto memory_it = memoryQueue_.begin();
     while(memory_it!=memoryQueue_.end()){
       if( memory_it->clusterId == clusterId)  return memory_it;
