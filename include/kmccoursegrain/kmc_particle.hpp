@@ -121,7 +121,7 @@ namespace kmccoursegrain{
       void setClusterSiteBelongsTo(const int siteId, const int clusterId);
 
       /**
-       * \brief Return the id of the site the particle will attemt to move to
+       * \brief Return the id of the site the particle will attempt to move to
        **/
       int getPotentialSite() const; 
 

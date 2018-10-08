@@ -91,7 +91,7 @@ namespace kmccoursegrain {
   }
 
   void KMC_Particle::resetVisitationFrequency(const int siteId){
-    for(auto memory : memoryQueue_){
+    for(Memory& memory : memoryQueue_){
       if(memory.siteId == siteId ) {
         memory.visitFrequency = 0;
         return;

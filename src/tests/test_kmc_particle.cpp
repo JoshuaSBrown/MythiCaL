@@ -1,8 +1,9 @@
 #include <iostream>
+#include <cmath>
 #include <cassert>
 
-#include <kmccoursegrain/kmc_particle.hpp>
-#include <kmccoursegrain/kmc_constants.hpp>
+#include "../../include/kmccoursegrain/kmc_particle.hpp"
+#include "../../include/kmccoursegrain/kmc_constants.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -47,7 +48,6 @@ int main(void){
     KMC_Particle particle;
     particle.setMemoryCapacity(5);     
     particle.occupySite(0);
-    cout << particle.getVisitationFrequencyOfCurrentlyOccupiedSite() << endl;
     assert(particle.getVisitationFrequencyOfCurrentlyOccupiedSite()==1);
     particle.occupySite(1);
     assert(particle.getVisitationFrequencyOfCurrentlyOccupiedSite()==1);
@@ -125,6 +125,83 @@ int main(void){
     assert(particle.getIdOfSiteCurrentlyOccupying()==1);
     particle.occupySite(4);
     assert(particle.getIdOfSiteCurrentlyOccupying()==4);
+  }
+
+  cout << "Testing: Particle removeMemory" << endl;
+  {
+    KMC_Particle particle;
+    particle.setMemoryCapacity(5);     
+
+    particle.occupySite(2);
+    particle.occupySite(2);
+    particle.occupySite(4);
+    particle.occupySite(1);
+    particle.occupySite(0);
+    particle.occupySite(3);
+    particle.occupySite(4);
+    particle.occupySite(1);
+    particle.occupySite(4);
+
+    particle.removeMemory(4);
+
+    auto visits = particle.getMemory();
+    
+    // Site id of most recently visited to latest
+    assert(visits.at(0).at(0)==1);
+    assert(visits.at(1).at(0)==3);
+    assert(visits.at(2).at(0)==0);
+    assert(visits.at(3).at(0)==2);
+
+    // Cluster id of most recently visited site to latest
+    assert(visits.at(0).at(1)==constants::unassignedId);
+    assert(visits.at(1).at(1)==constants::unassignedId);
+    assert(visits.at(2).at(1)==constants::unassignedId);
+    assert(visits.at(3).at(1)==constants::unassignedId);
+
+    // Frequency of visitation of the most recently visited site to the oldest
+    assert(visits.at(0).at(2)==2); // site 1 visited 2 times
+    assert(visits.at(1).at(2)==1); // Site 3 visited 1 time
+    assert(visits.at(2).at(2)==1); // Site 0 visited 1 time
+    assert(visits.at(3).at(2)==2); // Site 2 visited 2 times
+    
+  }
+
+  cout << "Testing: Particle set and get PotentialSite" << endl;
+  {
+    KMC_Particle particle;
+    particle.setPotentialSite(4);
+    assert(particle.getPotentialSite()==4);
+  }
+
+  cout << "Testing: Particle resetVisitationFrequency" << endl;
+  {
+    KMC_Particle particle;
+    particle.setMemoryCapacity(5);     
+
+    particle.occupySite(2);
+    particle.occupySite(2);
+    particle.occupySite(4);
+    particle.occupySite(1);
+    particle.occupySite(0);
+    particle.occupySite(3);
+    particle.occupySite(4);
+    particle.occupySite(1);
+    particle.occupySite(4);
+
+    assert(particle.getVisitationFrequencyOfCurrentlyOccupiedSite()==3);
+    assert(particle.getIdOfSiteCurrentlyOccupying()==4);
+ 
+    particle.resetVisitationFrequency(4);
+   
+    assert(particle.getVisitationFrequencyOfCurrentlyOccupiedSite()==0);
+    assert(particle.getIdOfSiteCurrentlyOccupying()==4);
+  }
+
+  cout << "Testing: Particle set and get DwellTime" << endl;
+  {
+    KMC_Particle particle;
+    particle.setDwellTime(124.0);
+    assert(static_cast<int>(round(particle.getDwellTime()))==124);
   }
 	return 0;
 }
