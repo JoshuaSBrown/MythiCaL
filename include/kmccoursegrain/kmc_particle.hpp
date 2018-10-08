@@ -63,18 +63,6 @@ namespace kmccoursegrain{
       int getVisitationFrequencyOfCurrentlyOccupiedSite();
 
       /**
-       * \brief Get the site id and number of times the particle has visited it
-       *
-       * \return A vector of vectors is returned the first int is the id of the 
-       * site, the second int is the id of the cluster. The third int is the 
-       * count of the number of times the particle has visited the site. Element
-       * (0) is the most recently visited site followed by sites that were 
-       * visited later.
-       **/
-      std::vector<std::vector<int>> 
-        getVisitationFrequenciesOfCurrentSites() const;
-
-      /**
        * \brief Grabs the id of the site the particle currently resides on
        *
        * \return is of site
@@ -88,10 +76,13 @@ namespace kmccoursegrain{
        * most recently and the corresponding number of times the sites have been
        * visited and the clusters the site might be attached too. 
        *
-       * \return list containing vectors, indicating the site id, the cluster id
-       * and the number of times it has been visited
+       * \return A vector of vectors is returned the first int is the id of the 
+       * site, the second int is the id of the cluster. The third int is the 
+       * count of the number of times the particle has visited the site. Element
+       * (0) is the most recently visited site followed by sites that were 
+       * visited later.
       **/
-      std::list<std::vector<int>> getMemory();
+      std::vector<std::vector<int>> getMemory();
 
       /**
        * \brief Remove a memory from a particle

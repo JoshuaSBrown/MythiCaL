@@ -112,7 +112,7 @@ namespace kmccoursegrain {
 
     LOG("Course graining sites if needed",1);
 
-    auto siteFrequencies = particle->getVisitationFrequenciesOfCurrentSites();
+    auto siteFrequencies = particle->getMemory();
 
     // Determine if the particle has made enough jumps to have a memory
     if(siteFrequencies.size()>1){
