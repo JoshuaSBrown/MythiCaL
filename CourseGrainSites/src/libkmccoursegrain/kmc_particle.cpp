@@ -168,7 +168,7 @@ namespace kmccoursegrain {
     memoryQueue_.splice(memoryQueue_.begin(),memoryQueue_,memory_it);
   }
 
-  void KMC_Particle::refreshMemoryOfCluster_(const int clusterId){
+ void KMC_Particle::refreshMemoryOfCluster_(const int clusterId){
     auto memory_it = getMemoryIteratorCluster_(clusterId);
     ++(memory_it->visitFrequency);
     memoryQueue_.splice(memoryQueue_.begin(),memoryQueue_,memory_it);

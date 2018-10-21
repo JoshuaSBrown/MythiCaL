@@ -46,11 +46,11 @@ foreach(FUNC sqrt)
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/kmcoursegrain/*.hpp)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-install(FILES ${HEADERS} DESTINATION include/kmccoursegrain)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include/kmcoursegrain/*.hpp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include)
+install(FILES ${HEADERS} DESTINATION CourseGrainSites/include/kmccoursegrain)
 
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/libkmccoursegrain/*.cpp)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/*.cpp)
 add_library(kmc_course_grain ${SOURCES})
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
@@ -63,6 +63,6 @@ option(BUILD_SHARED_LIBS "Build shared libs" ON)
 option(ENABLE_TESTING "Build and enable testing stuff" OFF)
 if(ENABLE_TESTING)
   enable_testing()
-  add_subdirectory(src/tests)
+  add_subdirectory(CourseGrainSites/src/tests)
 endif(ENABLE_TESTING)
 

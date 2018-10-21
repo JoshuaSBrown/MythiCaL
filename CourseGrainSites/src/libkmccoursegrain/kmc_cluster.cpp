@@ -322,7 +322,7 @@ namespace kmccoursegrain {
 
   bool KMC_Cluster::hopWithinCluster_(){
     double hop = randomDistribution_(randomEngine_);
-    double inOrOutThreshold = static_cast<double>(resolution_)/\
+    double inOrOutThreshold = (static_cast<double>(resolution_)-1.0)/\
                               static_cast<double>(resolution_);
     return (hop<inOrOutThreshold);
   }

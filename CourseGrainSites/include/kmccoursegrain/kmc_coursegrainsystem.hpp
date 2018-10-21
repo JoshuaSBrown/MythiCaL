@@ -38,7 +38,10 @@ class KMC_CourseGrainSystem{
      * forth between two sites at least 20 times before the sites are course 
      * grained. 
      **/
-    KMC_CourseGrainSystem() : seed_set_(false), courseGrainingThreshold_(20) {};
+    KMC_CourseGrainSystem() : 
+      seed_set_(false), 
+      courseGrainingThreshold_(20),
+      equlibriumThreshold_(100.0) {};
 
     /**
      * \brief This will correctly initialize the system 
@@ -130,6 +133,11 @@ class KMC_CourseGrainSystem{
     void hop(ParticlePtr particle);
 
     /**
+     * \brief Remove the particle from the system
+     **/
+
+    void removeParticleFromSystem(ParticlePtr particle);
+    /**
      * \brief Threshold for course graining sites
      *
      * This function allows you to set how many times a particle will hop back
@@ -151,17 +159,19 @@ class KMC_CourseGrainSystem{
     /// cluster
     int courseGrainingThreshold_;
 
+    double equlibriumThreshold_;
+
     /// Stores smart pointers to all the sites
     std::map<int,SitePtr> sites_;    
 
     /// Stores smart pointers to all the clusters
     std::map<int,ClusterPtr> clusters_;
 
-    void courseGrainSiteIfNeeded_(ParticlePtr particle);
+    void courseGrainSiteIfNeeded_(ParticlePtr& particle);
     void mergeSiteToCluster_(const int siteId, const int clusterId);
     void createCluster_(const int siteId1,const int siteId2);
     void mergeClusters_(const int clusterId1, const int clusterId2);
-
+    bool sitesSatisfyEquilibriumCondition(std::vector<int> siteIds);
 };
 
 }

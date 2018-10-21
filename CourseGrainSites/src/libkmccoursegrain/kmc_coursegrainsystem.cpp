@@ -1,5 +1,5 @@
 #include <stdexcept>
-
+#include <iostream>
 #include "log.hpp"
 #include "kmc_cluster.hpp"
 #include "kmc_site.hpp"
@@ -10,6 +10,10 @@
 using namespace std;
 
 namespace kmccoursegrain {
+
+  /****************************************************************************
+   * Public Facing Functions
+   ****************************************************************************/
 
   void KMC_CourseGrainSystem::initializeSystem(
       map<int const,map<int const,double* >> ratesOfAllSites){
@@ -68,6 +72,76 @@ namespace kmccoursegrain {
     seed_set_=true;
   }
 
+  void KMC_CourseGrainSystem::removeParticleFromSystem(ParticlePtr particle){
+    LOG("Particle is being removed from system",1);
+    auto siteId = particle->getIdOfSiteCurrentlyOccupying();
+    sites_[siteId]->vacateSite();
+  }
+
+  void KMC_CourseGrainSystem::hop(ParticlePtr particle){
+
+    LOG("Particle is hopping in system",1);
+    auto siteId = particle->getIdOfSiteCurrentlyOccupying();
+    int siteToHopTo = particle->getPotentialSite();
+
+    if( sites_[siteToHopTo]->siteIsOccupied() ){
+      LOG("Site "+to_string(siteToHopTo)+" is occupied",1);
+      if( sites_[siteId]->partOfCluster() ){
+
+        auto clusterId = sites_[siteId]->getClusterId();
+        int newId = clusters_[clusterId]->pickNewSiteId();
+        auto hopTime = clusters_[clusterId]->getDwellTime();
+        particle->setDwellTime(hopTime);
+        particle->setPotentialSite(newId);
+
+      }else{
+
+        int newId = sites_[siteId]->pickNewSiteId();
+        auto hopTime = sites_[siteId]->getDwellTime();
+
+        particle->setDwellTime(hopTime);
+        particle->setPotentialSite(newId);
+      }
+
+    }else{
+
+      if( sites_[siteToHopTo]->partOfCluster() ){
+        LOG("Hopping to "+to_string(siteToHopTo)+" site",1);
+        auto clusterId = sites_[siteToHopTo]->getClusterId();
+        sites_[siteId]->vacateSite();
+        sites_[siteToHopTo]->occupySite();
+
+        int newId = clusters_[clusterId]->pickNewSiteId();
+        auto hopTime = clusters_[clusterId]->getDwellTime();
+
+        particle->occupySite(siteToHopTo,clusterId);
+        particle->setDwellTime(hopTime);
+        particle->setPotentialSite(newId);
+        courseGrainSiteIfNeeded_(particle);
+
+      }else{
+
+        sites_[siteId]->vacateSite();
+        sites_[siteToHopTo]->occupySite();
+
+        int newId = sites_[siteToHopTo]->pickNewSiteId();
+        auto hopTime = sites_[siteToHopTo]->getDwellTime();
+        particle->occupySite(siteToHopTo,constants::unassignedId);
+        particle->setDwellTime(hopTime);
+        particle->setPotentialSite(newId);
+
+        courseGrainSiteIfNeeded_(particle);
+
+      }
+
+    }
+
+  }
+
+  /****************************************************************************
+   * Internal Private Functions
+   ****************************************************************************/
+
   void 
   KMC_CourseGrainSystem::createCluster_(const int siteId1,const int siteId2){
     LOG("Creating cluster",1);
@@ -86,7 +160,7 @@ namespace kmccoursegrain {
     const int clusterId){
 
     LOG("Merging site to cluster",1);
-
+   
     clusters_[clusterId]->addSite(sites_[siteId]);
   }
 
@@ -108,29 +182,71 @@ namespace kmccoursegrain {
     }
   }
 
-  void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr particle){
+  bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition(vector<int> siteIds){
+    for(auto siteId : siteIds){
+
+    }
+  }
+
+  void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr& particle){
 
     LOG("Course graining sites if needed",1);
 
-    auto siteFrequencies = particle->getMemory();
+    auto memories = particle->getMemory();
 
     // Determine if the particle has made enough jumps to have a memory
-    if(siteFrequencies.size()>1){
+    if(memories.size()>1){
+
+      // Determine how many sites are above the threshold, stores the ones that
+      // are over the threshold and appear in consecutive order from the most 
+      // recently visited
+      vector<int> relevantSites;
+      for(auto memory : memories ){
+        if(memory.at(3)>courseGrainingThreshold_){
+          relevantSites.push_back(memory.at(0));
+        }else{
+          break;
+        }
+      }
+
       // Get frequencies of visitiation of the currently occupied site and 
       // the site it just hopped from  
-      int siteId1 = siteFrequencies.at(0).at(0);
-      int siteId2 = siteFrequencies.at(1).at(0);
-      int frequency1 = siteFrequencies.at(0).at(2);
-      int frequency2 = siteFrequencies.at(1).at(2);
+//      int siteId1 = siteFrequencies.at(0).at(0);
+//      int siteId2 = siteFrequencies.at(1).at(0);
+//      int frequency1 = siteFrequencies.at(0).at(2);
+//      int frequency2 = siteFrequencies.at(1).at(2);
       // If it has exceeded the threshold
 
-      if(frequency1 > courseGrainingThreshold_ &&
-          frequency2 > courseGrainingThreshold_){
+//      if(frequency1 > courseGrainingThreshold_ &&
+//          frequency2 > courseGrainingThreshold_){
 
-        // Determine if the two sites are already part of a cluster
-        int clusterId1 = sites_[siteId1]->getClusterId();
-        int clusterId2 = sites_[siteId2]->getClusterId();
+        if(relevantSites.size()>1){
 
+        // Determine if the sites are already part of a cluster
+//        int clusterId1 = sites_[siteId1]->getClusterId();
+//        int clusterId2 = sites_[siteId2]->getClusterId();
+          vector<int> sitePartOfCluster(relevantSites.size(),constants::unassignedId);
+
+          int favoredCluster_ = constants::unassignedId;
+          for( int index=0; index<relevantSites.size();++index){
+            auto clusterId = sites_[relevantSites.at(index)].getClusterId();
+            if(clusterId!=constants::unassignedId){
+              sitePartOfCluster.at(index)==clusterId;
+              if(favoredCluster_==constants::unassignedId){
+                favoredCluster_ = clusterId;
+              }else if(clusterId<favoredCluster_){
+                favoredCluster_ = clusterId;
+              }
+            }
+          }
+
+          if(favoredCluster_==constants::unassignedId){
+            // None of the sites are part of a cluster 
+            // Now we want to determine if the sites satisfy the equilibrium 
+            // conditions
+            sitesSatisfyEquilibriumCondition(relevantSites); 
+          }
+/*
         // If neither is part of a cluster create one
         if(clusterId1==constants::unassignedId &&
            clusterId2==constants::unassignedId){
@@ -185,70 +301,9 @@ namespace kmccoursegrain {
           particle->resetVisitationFrequency(siteId2);
         }
 
-      }
+      }*/
     }
   }
 
-  void KMC_CourseGrainSystem::hop(ParticlePtr particle){
-
-    LOG("Particle is hopping in system",1);
-    auto siteId = particle->getIdOfSiteCurrentlyOccupying();
-    int siteToHopTo = particle->getPotentialSite();
-
-    // Determine if the potential site is occupied or not
-    if( sites_[siteToHopTo]->siteIsOccupied() ){
-
-      LOG("Site "+to_string(siteToHopTo)+" is occupied",1);
-      if( sites_[siteId]->partOfCluster() ){
-
-        auto clusterId = sites_[siteId]->getClusterId();
-        int newId = clusters_[clusterId]->pickNewSiteId();
-        auto hopTime = clusters_[clusterId]->getDwellTime();
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-
-      }else{
-
-        int newId = sites_[siteId]->pickNewSiteId();
-        auto hopTime = sites_[siteId]->getDwellTime();
-
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-      }
-
-    }else{
-
-      if( sites_[siteToHopTo]->partOfCluster() ){
-        LOG("Hopping to "+to_string(siteToHopTo)+" site",1);
-
-        auto clusterId = sites_[siteToHopTo]->getClusterId();
-        sites_[siteId]->vacateSite();
-        sites_[siteToHopTo]->occupySite();
-        courseGrainSiteIfNeeded_(particle);
-
-        int newId = clusters_[clusterId]->pickNewSiteId();
-        auto hopTime = clusters_[clusterId]->getDwellTime();
-
-        particle->occupySite(siteToHopTo,clusterId);
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-
-      }else{
-
-        sites_[siteId]->vacateSite();
-        sites_[siteToHopTo]->occupySite();
-        courseGrainSiteIfNeeded_(particle);
-
-        int newId = sites_[siteToHopTo]->pickNewSiteId();
-        auto hopTime = sites_[siteToHopTo]->getDwellTime();
-
-        particle->occupySite(siteToHopTo,constants::unassignedId);
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-      }
-
-    }
-
-  }
 
 }
