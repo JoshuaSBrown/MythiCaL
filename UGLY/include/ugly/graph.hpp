@@ -20,13 +20,13 @@ namespace ugly {
   template<typename... Ts>
   class Graph {
     private: 
-      std::map<int,GraphNode<Ts>...> nodes_;
+      std::map<int,std::weak_ptr<GraphNode<Ts>>...> nodes_;
       std::unordered_map<int,std::vector<std::pair<int,std::weak_ptr<Edge>>>> neighboring_vertices_;
       std::string label_;
       void calculateLabel_();
     public:
       Graph() {};
-      Graph(std::list<std::weak_ptr<Edge>> connections, std::map<int,GraphNode<Ts>...> nodes); 
+      Graph(std::list<std::weak_ptr<Edge>> connections, std::map<int,std::weak_ptr<GraphNode<Ts>>...> nodes); 
       std::vector<std::weak_ptr<Edge>> getEdgesConnectedToVertex(int vertex);
       std::vector<std::weak_ptr<Edge>> getEdgesOriginatingFromVertex(int vertex);
       std::vector<int> getVertices();
@@ -54,7 +54,11 @@ namespace ugly {
   template<typename... Ts>
     void Graph<Ts...>::calculateLabel_() {
       std::vector<std::string> labels;
-      for(auto item : nodes_ ) labels.push_back(item.second.getLabel());
+      for(auto item : nodes_ ){
+        if( auto node = item.second.lock()){
+          labels.push_back(node->getLabel());
+        }
+      }
       std::sort(labels.begin(),labels.end());
       label_ = "";
       for(auto label : labels ){
@@ -63,7 +67,10 @@ namespace ugly {
     }
 
   template<typename... Ts>
-  Graph<Ts...>::Graph(std::list<std::weak_ptr<Edge>> connections, std::map<int,GraphNode<Ts>...> nodes){
+  Graph<Ts...>::Graph(
+      std::list<std::weak_ptr<Edge>> connections, 
+      std::map<int,std::weak_ptr<GraphNode<Ts>>...> nodes){
+
     for(auto item : nodes ) {
       nodes_[item.first] = item.second;
     }

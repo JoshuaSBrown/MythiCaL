@@ -17,16 +17,16 @@ int main(void){
 
     cout << "Testing: Constructor " << endl;
     {
-        GraphNode<string> GN0("B");
-        GraphNode<string> GN1("C");
-        GraphNode<string> GN2("A");
+        auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("B"));
+        auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+        auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("A"));
 
         shared_ptr<Edge> ed1( new Edge(1,2));
         shared_ptr<Edge> ed2( new Edge(2,3));
 
         list<weak_ptr<Edge>> eds = { ed1, ed2 };        
     
-        map<int,GraphNode<string>> nds;
+        map<int,weak_ptr<GraphNode<string>>> nds;
         nds[1]=GN0;
         nds[2]=GN1;
         nds[3]=GN2;
@@ -37,16 +37,16 @@ int main(void){
 
     cout << "Testing: directional " << endl;
     {
-        GraphNode<string> GN0("B");
-        GraphNode<string> GN1("C");
-        GraphNode<string> GN2("A");
+        auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("B"));
+        auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+        auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("A"));
 
         shared_ptr<Edge> ed1( new Edge(1,2));
         shared_ptr<Edge> ed2( new Edge(2,3));
 
         list<weak_ptr<Edge>> eds = { ed1, ed2 };        
     
-        map<int,GraphNode<string>> nds;
+        map<int,weak_ptr<GraphNode<string>>> nds;
         nds[1]=GN0;
         nds[2]=GN1;
         nds[3]=GN2;
@@ -66,11 +66,11 @@ int main(void){
         //     |    |
         //    4c -- 3c
         //     
-        GraphNode<string> GN0("C");
-        GraphNode<string> GN1("C");
-        GraphNode<string> GN2("C");
-        GraphNode<string> GN3("C");
-        GraphNode<string> GN4("C");
+        auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+        auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+        auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+        auto GN3 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+        auto GN4 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
 
         shared_ptr<Edge> ed1( new Edge(1,2));
         shared_ptr<Edge> ed2( new Edge(2,3));
@@ -80,7 +80,7 @@ int main(void){
 
         list<weak_ptr<Edge>> eds = { ed1, ed2, ed3, ed4, ed5 };        
 
-        map<int,GraphNode<string>> nds;
+        map<int,weak_ptr<GraphNode<string>>> nds;
         nds[1]= GN0;
         nds[2]= GN1;
         nds[3]= GN2;
@@ -100,8 +100,8 @@ int main(void){
         //     |    |
         //    4c -- 3c
         //     
-        GraphNode<string> GN5("H");
-        map<int,GraphNode<string>> nds2;
+        auto GN5 = shared_ptr<GraphNode<string>>(new GraphNode<string>("H"));
+        map<int,weak_ptr<GraphNode<string>>> nds2;
         nds2[1]= GN0;
         nds2[2]= GN1;
         nds2[3]= GN2;
@@ -126,11 +126,11 @@ int main(void){
       //     |    |
       //    4c -- 3c
       //     
-      GraphNode<string> GN0("C");
-      GraphNode<string> GN1("C");
-      GraphNode<string> GN2("C");
-      GraphNode<string> GN3("C");
-      GraphNode<string> GN4("C");
+      auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+      auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+      auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+      auto GN3 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+      auto GN4 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
 
       shared_ptr<Edge> ed1( new Edge(1,2));
       shared_ptr<Edge> ed2( new Edge(2,3));
@@ -140,7 +140,7 @@ int main(void){
 
       list<weak_ptr<Edge>> eds = { ed1, ed2, ed3, ed4, ed5 };        
 
-      map<int,GraphNode<string>> nds;
+      map<int,weak_ptr<GraphNode<string>>> nds;
       nds[1]= GN0;
       nds[2]= GN1;
       nds[3]= GN2;

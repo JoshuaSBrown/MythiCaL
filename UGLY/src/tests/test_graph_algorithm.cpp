@@ -30,11 +30,11 @@ int main(void){
     //     |    |
     //    4c -- 3c
     //     
-    GraphNode<string> GN0("C");
-    GraphNode<string> GN1("C");
-    GraphNode<string> GN2("C");
-    GraphNode<string> GN3("C");
-    GraphNode<string> GN4("C");
+    auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN3 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN4 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
 
     // Edge 1-2
     shared_ptr<Edge> ed1( new EdgeWeighted(1,2,1.0));
@@ -49,7 +49,7 @@ int main(void){
 
     list<weak_ptr<Edge>> eds = { ed1, ed2, ed3, ed4, ed5 };        
 
-    map<int,GraphNode<string>> nds;
+    map<int,weak_ptr<GraphNode<string>>> nds;
     nds[1]= GN0;
     nds[2]= GN1;
     nds[3]= GN2;
@@ -75,11 +75,11 @@ int main(void){
     //     |    |
     //    4c -- 3c
     //     
-    GraphNode<string> GN0("C");
-    GraphNode<string> GN1("C");
-    GraphNode<string> GN2("C");
-    GraphNode<string> GN3("C");
-    GraphNode<string> GN4("C");
+    auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN3 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN4 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
 
     // Edge 1-2
     shared_ptr<Edge> ed1( new EdgeWeighted(1,2,1.0));
@@ -104,7 +104,7 @@ int main(void){
 
     list<weak_ptr<Edge>> eds = { ed1, ed2, ed3, ed4, ed5, ed6, ed7, ed8, ed9, ed10 };        
 
-    map<int,GraphNode<string>> nds;
+    map<int,weak_ptr<GraphNode<string>>> nds;
     nds[1]= GN0;
     nds[2]= GN1;
     nds[3]= GN2;
@@ -130,11 +130,11 @@ int main(void){
     //     |    |
     //    4c -- 3c
     //     
-    GraphNode<string> GN0("C");
-    GraphNode<string> GN1("C");
-    GraphNode<string> GN2("C");
-    GraphNode<string> GN3("C");
-    GraphNode<string> GN4("C");
+    auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN3 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN4 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
 
     // Edge 1->2
     shared_ptr<Edge> ed1( new EdgeDirectedWeighted(1,2,1.0));
@@ -149,7 +149,7 @@ int main(void){
 
     list<weak_ptr<Edge>> eds = { ed1, ed2, ed3, ed4, ed5 };        
 
-    map<int,GraphNode<string>> nds;
+    map<int,weak_ptr<GraphNode<string>>> nds;
     nds[1]= GN0;
     nds[2]= GN1;
     nds[3]= GN2;
@@ -175,11 +175,11 @@ int main(void){
     //     |    |
     //    4c -- 3c
     //     
-    GraphNode<string> GN0("C");
-    GraphNode<string> GN1("C");
-    GraphNode<string> GN2("C");
-    GraphNode<string> GN3("C");
-    GraphNode<string> GN4("C");
+    auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN3 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN4 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
 
     // Switched the order so it should not be possible to find a shortest
     // distance between the vertices
@@ -196,7 +196,7 @@ int main(void){
 
     list<weak_ptr<Edge>> eds = { ed1, ed2, ed3, ed4, ed5 };        
 
-    map<int,GraphNode<string>> nds;
+    map<int,weak_ptr<GraphNode<string>>> nds;
     nds[1]= GN0;
     nds[2]= GN1;
     nds[3]= GN2;
@@ -228,11 +228,11 @@ int main(void){
     //     |    |
     //    4c -- 3c
     //     
-    GraphNode<string> GN0("C");
-    GraphNode<string> GN1("C");
-    GraphNode<string> GN2("C");
-    GraphNode<string> GN3("C");
-    GraphNode<string> GN4("C");
+    auto GN0 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN1 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN2 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN3 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
+    auto GN4 = shared_ptr<GraphNode<string>>(new GraphNode<string>("C"));
 
     // Switched the order so it should not be possible to find a shortest
     // distance between the vertices
@@ -249,7 +249,7 @@ int main(void){
 
     list<weak_ptr<Edge>> eds = { ed1, ed2, ed3, ed4, ed5 };        
 
-    map<int,GraphNode<string>> nds;
+    map<int,weak_ptr<GraphNode<string>>> nds;
     nds[1]= GN0;
     nds[2]= GN1;
     nds[3]= GN2;
