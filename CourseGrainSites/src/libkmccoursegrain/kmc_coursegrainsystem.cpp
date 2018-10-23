@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <iostream>
+#include <map>
 #include "log.hpp"
 #include "kmc_cluster.hpp"
 #include "kmc_site.hpp"
@@ -7,7 +8,14 @@
 #include "../../include/kmccoursegrain/kmc_particle.hpp"
 #include "../../include/kmccoursegrain/kmc_constants.hpp"
 
+#include "../../../UGLY/include/ugly/edge_directed_weighted.hpp"
+#include "../../../UGLY/include/ugly/graph.hpp"
+#include "../../../UGLY/include/ugly/graph_node.hpp"
+#include "../../../UGLY/include/ugly/graph_algorithms.hpp"
+
 using namespace std;
+using namespace ugly;
+using namespace ugly::graphalgorithms;
 
 namespace kmccoursegrain {
 
@@ -143,11 +151,14 @@ namespace kmccoursegrain {
    ****************************************************************************/
 
   void 
-  KMC_CourseGrainSystem::createCluster_(const int siteId1,const int siteId2){
-    LOG("Creating cluster",1);
+  KMC_CourseGrainSystem::createCluster_(vector<int> siteIds){
+    LOG("Creating cluster from vector of sites",1);
     auto cluster_ptr = shared_ptr<KMC_Cluster>(new KMC_Cluster());
-    cluster_ptr->addSite(sites_[siteId1]);
-    cluster_ptr->addSite(sites_[siteId2]);
+    vector<SitePtr> sites;
+    for(auto siteId : siteIds ) sites.push_back(sites_[siteId]);
+
+    cluster_ptr->addSites(sites);
+
     if(seed_set_){
       cluster_ptr->setRandomSeed(seed_);
       ++seed_;
@@ -155,37 +166,99 @@ namespace kmccoursegrain {
     clusters_[cluster_ptr->getId()] = cluster_ptr;
   }
 
-  void KMC_CourseGrainSystem::mergeSiteToCluster_(
-    const int siteId,
-    const int clusterId){
+  void KMC_CourseGrainSystem::mergeSitesToCluster_(vector<int> siteIds,int favoredClusterId){
+  
+    LOG("Merging sites to cluster",1);
+    vector<SitePtr> isolated_sites;
+    for(auto siteId : siteIds) {
+      int clusterId = sites_[siteId]->getClusterId();
+      if(clusterId==constants::unassignedId){
+        isolated_sites.push_back(sites_[siteId]);
+      }else if(clusterId!=favoredClusterId){
+        clusters_[favoredClusterId]->migrateSitesFrom(clusters_[clusterId]);
+        clusters_.erase(clusterId);
+      }
+    }
+    clusters_[favoredClusterId]->addSites(isolated_sites);
 
-    LOG("Merging site to cluster",1);
-   
-    clusters_[clusterId]->addSite(sites_[siteId]);
   }
 
-  void KMC_CourseGrainSystem::mergeClusters_(
-      const int clusterId1,
-      const int clusterId2){
-    LOG("Merging clusters",1);
+  bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(vector<int> siteIds){
 
-    if(clusterId1==clusterId2){
-      throw invalid_argument("You cannot merge two clusters with the same Id");
-    }
+    auto graph_ptr = createGraph_(siteIds);
+    map<pair<int,int>,double> verticesAndtimes = maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
 
-    if(clusterId1<clusterId2){
-      clusters_[clusterId1]->migrateSitesFrom(clusters_[clusterId2]);
-      clusters_.erase(clusterId2); 
-    }else{
-      clusters_[clusterId2]->migrateSitesFrom(clusters_[clusterId1]);
-      clusters_.erase(clusterId1); 
+    double maxtime = 0.0;
+    for( auto verticesAndTime : verticesAndtimes){
+      if(verticesAndTime.second>maxtime) maxtime = verticesAndTime.second;
     }
+    auto minTimeConstant = getMinimumTimeConstantFromSitesToNeighbors_(siteIds);
+    return minTimeConstant>(2*maxtime);
   }
+  
+  double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(vector<int> siteIds){
 
-  bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition(vector<int> siteIds){
+    set<int> internalSiteIds(siteIds.begin(),siteIds.end());
+
+    double minimumTimeConstant=-1.0;
+    bool initialized =false;
     for(auto siteId : siteIds){
-
+      auto neighborSiteIds = sites_[siteId]->getNeighborSiteIds();  
+      for( auto neighId : neighborSiteIds){
+        if(!internalSiteIds.count(neighId)){
+          auto timeConstant = 1.0/sites_[siteId]->getRateToNeighbor(neighId);
+          if(!initialized){
+            initialized=true;
+            minimumTimeConstant = timeConstant;
+          }else if(timeConstant<minimumTimeConstant){
+            minimumTimeConstant = timeConstant;
+          }
+        }
+      }
     }
+    return minimumTimeConstant;
+  }
+
+  shared_ptr<Graph<string>> KMC_CourseGrainSystem::createGraph_(vector<int> siteIds){
+
+    // Need edges to be directed and weighted
+    list<weak_ptr<Edge>> edges;
+    std::map<int,weak_ptr<GraphNode<string>>> nds;
+    for(auto siteId : siteIds){
+      for(auto potential_neighId : siteIds){
+        if(sites_[siteId]->isNeighbor(potential_neighId)){
+          auto time = 1.0l/sites_[siteId]->getRateToNeighbor(potential_neighId);
+          auto edge = shared_ptr<EdgeDirectedWeighted>(new EdgeDirectedWeighted(siteId,potential_neighId,time));
+
+          edges.push_back(edge);
+        }
+        if(sites_[potential_neighId]->isNeighbor(siteId)){
+          auto time = 1.0/sites_[potential_neighId]->getRateToNeighbor(siteId);
+          auto edge = shared_ptr<EdgeDirectedWeighted>( new EdgeDirectedWeighted(potential_neighId,siteId,time));
+          edges.push_back(edge);
+        }
+      }
+      if(nds.count(siteId)==0){
+        auto gn = shared_ptr<GraphNode<string>>(new GraphNode<string>(""));
+        nds[siteId] = gn;
+      }
+    }
+
+    return shared_ptr<Graph<string>>(new Graph<string>(edges,nds));
+  }
+
+  int KMC_CourseGrainSystem::getFavoredClusterId_(vector<int> siteIds){
+
+    int favoredClusterId = constants::unassignedId;
+    for( auto siteId : siteIds){
+      int clusterId = sites_[siteId]->getClusterId();
+      if(favoredClusterId==constants::unassignedId){
+        favoredClusterId = clusterId;
+      }else if( clusterId!=constants::unassignedId && clusterId<favoredClusterId){
+        favoredClusterId = clusterId;
+      }
+    }
+    return favoredClusterId;
   }
 
   void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr& particle){
@@ -209,99 +282,34 @@ namespace kmccoursegrain {
         }
       }
 
-      // Get frequencies of visitiation of the currently occupied site and 
-      // the site it just hopped from  
-//      int siteId1 = siteFrequencies.at(0).at(0);
-//      int siteId2 = siteFrequencies.at(1).at(0);
-//      int frequency1 = siteFrequencies.at(0).at(2);
-//      int frequency2 = siteFrequencies.at(1).at(2);
-      // If it has exceeded the threshold
+      if(relevantSites.size()>1){
 
-//      if(frequency1 > courseGrainingThreshold_ &&
-//          frequency2 > courseGrainingThreshold_){
 
-        if(relevantSites.size()>1){
+        bool satisfy = sitesSatisfyEquilibriumCondition_(relevantSites); 
+        int favoredClusterId = getFavoredClusterId_(relevantSites); 
+        if(satisfy){
 
-        // Determine if the sites are already part of a cluster
-//        int clusterId1 = sites_[siteId1]->getClusterId();
-//        int clusterId2 = sites_[siteId2]->getClusterId();
-          vector<int> sitePartOfCluster(relevantSites.size(),constants::unassignedId);
-
-          int favoredCluster_ = constants::unassignedId;
-          for( int index=0; index<relevantSites.size();++index){
-            auto clusterId = sites_[relevantSites.at(index)].getClusterId();
-            if(clusterId!=constants::unassignedId){
-              sitePartOfCluster.at(index)==clusterId;
-              if(favoredCluster_==constants::unassignedId){
-                favoredCluster_ = clusterId;
-              }else if(clusterId<favoredCluster_){
-                favoredCluster_ = clusterId;
-              }
-            }
-          }
-
-          if(favoredCluster_==constants::unassignedId){
+          if(favoredClusterId==constants::unassignedId){
             // None of the sites are part of a cluster 
-            // Now we want to determine if the sites satisfy the equilibrium 
-            // conditions
-            sitesSatisfyEquilibriumCondition(relevantSites); 
+            createCluster_(relevantSites);
+            int clusterId = sites_[relevantSites.at(0)]->getClusterId();
+            // Remove the particles memory of visiting the second site
+            for(int index = 1;index < static_cast<int>(relevantSites.size());++index){
+              particle->removeMemory(relevantSites.at(index));
+            }
+            particle->resetVisitationFrequency(relevantSites.at(0));
+            particle->setClusterSiteBelongsTo(relevantSites.at(0),clusterId);
+          }else{
+            mergeSitesToCluster_(relevantSites,favoredClusterId);
+            for(int index=1; index < static_cast<int>(relevantSites.size());++index){
+              particle->removeMemory(relevantSites.at(index));
+            }
+            particle->resetVisitationFrequency(relevantSites.at(0));
+            particle->setClusterSiteBelongsTo(relevantSites.at(0),favoredClusterId);
           }
-/*
-        // If neither is part of a cluster create one
-        if(clusterId1==constants::unassignedId &&
-           clusterId2==constants::unassignedId){
 
-          createCluster_(siteId1,siteId2);
-         
-          clusterId1 = sites_[siteId1]->getClusterId();
-          // Remove the particles memory of visiting the second site
-          particle->removeMemory(siteId2);
-          particle->resetVisitationFrequency(siteId1);
-          particle->setClusterSiteBelongsTo(siteId1,clusterId1);
-
-        }else if(clusterId1==constants::unassignedId &&
-                 clusterId2!=constants::unassignedId){
-
-          // site 1 is not part of a cluster but site 2 is 
-          // join site 1 to cluster of site 2
-          mergeSiteToCluster_(siteId1,clusterId2);
-          particle->removeMemory(siteId2);
-          particle->resetVisitationFrequency(siteId1);
-          particle->setClusterSiteBelongsTo(siteId1, clusterId2);
-
-        }else if(clusterId1!=constants::unassignedId &&
-                 clusterId2==constants::unassignedId){
-
-          // site 1 is part of a cluster but site 2 is not
-          // join site 2 to cluster of site 1
-          mergeSiteToCluster_(siteId2,clusterId1);
-          // Only keep the most current memory in this case this is site1 which
-          // is already part of the correct cluster so we don't have to do much
-          particle->removeMemory(siteId2);
-          particle->resetVisitationFrequency(siteId1);
-
-        }else if(clusterId1!=clusterId2){
-          // both sites are exist on two different clusters
-          // merge the cluster with the larger id with the cluster
-          // that has the smaller id
-          mergeClusters_(clusterId1,clusterId2);
-
-          particle->removeMemory(siteId2);
-          particle->resetVisitationFrequency(siteId1);
-
-          // Only need to change the cluster the particle belongs to if it has a
-          // smaller id
-          if(clusterId2<clusterId1){
-            particle->setClusterSiteBelongsTo(siteId1,clusterId2); 
-          }
-        }else{
-
-          // Reset the particles visitation frequency
-          particle->resetVisitationFrequency(siteId1);
-          particle->resetVisitationFrequency(siteId2);
         }
-
-      }*/
+      }
     }
   }
 

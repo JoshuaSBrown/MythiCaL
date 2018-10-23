@@ -4,7 +4,7 @@ enable_language(CXX)
 
 project(kmc_course_grain)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -16,6 +16,12 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
+
+########################################################
+# Add and build other dependent libraries first        #
+########################################################
+
+add_subdirectory(UGLY)
 ########################################################
 # Basic system tests (standard libraries, headers etc) #
 ########################################################
