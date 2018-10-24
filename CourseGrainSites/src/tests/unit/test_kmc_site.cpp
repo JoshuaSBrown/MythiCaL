@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "../libkmccoursegrain/kmc_site.hpp"
+#include "../../libkmccoursegrain/kmc_site.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;

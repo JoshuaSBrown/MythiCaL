@@ -4,8 +4,8 @@
 #include <memory>
 #include <cmath>
 
-#include "../libkmccoursegrain/kmc_cluster.hpp"
-#include "../libkmccoursegrain/kmc_site.hpp"
+#include "../../libkmccoursegrain/kmc_cluster.hpp"
+#include "../../libkmccoursegrain/kmc_site.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -44,8 +44,9 @@ int main(void){
 	//Testing the Threshold Setter
   cout << "Testing: Threshold setter and getter" << endl;
 	{
-		setThreshold(10);
-		assert(getThreshold()==10);
+    KMC_Cluster cl;
+		cl.setThreshold(10);
+		assert(cl.getThreshold()==10);
 	}
 
   cout << "Testing: addSite" << endl;

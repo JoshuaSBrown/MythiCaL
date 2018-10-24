@@ -3,8 +3,8 @@
 #include <vector>
 #include <memory>
 
-#include "../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
-#include "../../include/kmccoursegrain/kmc_particle.hpp"
+#include "../../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
+#include "../../../include/kmccoursegrain/kmc_particle.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;

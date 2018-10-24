@@ -15,7 +15,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-
+#IF(CXXTEST_ADD_PERFORMANCE)
+#  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+#ENDIF(CXXTEST_ADD_PERFORMANCE)
 
 ########################################################
 # Add and build other dependent libraries first        #
@@ -58,9 +60,16 @@ set_target_properties(kmc_course_grain PROPERTIES LINKER_LANGUAGE CXX)
 # Check if testing is on #
 ##########################
 option(BUILD_SHARED_LIBS "Build shared libs" ON)
-option(ENABLE_TESTING "Build and enable testing stuff" OFF)
+
+option(ENABLE_TESTING "Build and enable unit testing" OFF)
 if(ENABLE_TESTING)
   enable_testing()
-  add_subdirectory(CourseGrainSites/src/tests)
+  message("Unit testing enabled")
+  add_subdirectory(CourseGrainSites/src/tests/unit)
 endif(ENABLE_TESTING)
 
+if(CXXTEST_ADD_PERFORMANCE)
+  enable_testing()
+  message("Performance testing enabled")
+  add_subdirectory(CourseGrainSites/src/tests/performance)
+endif(CXXTEST_ADD_PERFORMANCE)
