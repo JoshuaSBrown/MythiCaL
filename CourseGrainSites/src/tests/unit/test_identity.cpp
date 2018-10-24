@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "../libkmccoursegrain/identity.hpp"
+#include "../../libkmccoursegrain/identity.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;

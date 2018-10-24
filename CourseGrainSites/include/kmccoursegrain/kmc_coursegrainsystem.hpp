@@ -46,7 +46,7 @@ class KMC_CourseGrainSystem{
     KMC_CourseGrainSystem() : 
       seed_set_(false), 
       courseGrainingThreshold_(20),
-      equlibriumThreshold_(100.0) {};
+      clusterResolution_(20){};
 
     /**
      * \brief This will correctly initialize the system 
@@ -164,6 +164,10 @@ class KMC_CourseGrainSystem{
      * \param[in] thershold
      **/
     void setCourseGrainThreshold(int threshold);
+
+    int getClusterResolution() { return clusterResolution_; }
+    void setClusterResolution(int clusterResolution) { clusterResolution_=clusterResolution;}
+
   private:
 
     /// Depicts whether a random seed has been set, to yield reproducable data
@@ -176,8 +180,11 @@ class KMC_CourseGrainSystem{
     /// cluster
     int courseGrainingThreshold_;
 
-    double equlibriumThreshold_;
-
+    /// The resolution of the clusters essentially how many hops will a particle
+    /// move within the cluster before it is likely to leave, the point of this
+    /// is to at least to a small degree conserve the noise.
+    int clusterResolution_;
+    
     /// Stores smart pointers to all the sites
     std::map<int,SitePtr> sites_;    
 
@@ -185,11 +192,23 @@ class KMC_CourseGrainSystem{
     std::map<int,ClusterPtr> clusters_;
 
     void courseGrainSiteIfNeeded_(ParticlePtr& particle);
+
+    /**
+     * \brief Determines if it is appropriate to coursegrain the sites
+     *
+     * This function looks to see if the Markov property holds for the sites of
+     * interest, it also checks to see that the desired cluster Resolution is 
+     * small enough such that it makes since to course grain. If the resolution
+     * is too high than you might as well use a Crude Monte Carlo as you will 
+     * no be benefitting form the course graining.
+     **/
     bool sitesSatisfyEquilibriumCondition_(std::vector<int> siteIds);
     int getFavoredClusterId_(std::vector<int> siteIds);
     void createCluster_(std::vector<int> siteIds);
     void mergeSitesToCluster_(std::vector<int> siteIds,int clusterId);
     double getMinimumTimeConstantFromSitesToNeighbors_(std::vector<int> siteIds);
+    std::vector<int> getRelevantSites_(std::vector<std::vector<int>> memories);
+    void updateSiteAndClusterThresholds_(std::vector<int> relevantSites);
 };
 
 }

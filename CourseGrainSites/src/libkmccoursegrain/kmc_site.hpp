@@ -209,6 +209,20 @@ namespace kmccoursegrain {
        **/
       friend std::ostream& 
         operator<<(std::ostream& os, const kmccoursegrain::KMC_Site& site);
+
+      /**
+       * \brief Sets the threshold of the site
+       *
+       * This value determines when a site should be merged with a cluster or if
+       * two sites should be merged. It is changed during the runtime to ensure 
+       * that an attempt to merge does not occur too often, because it is 
+       * expensive.
+       **/
+      void setThreshold(int n) { threshold_=n;}
+
+      /// returns the threshold
+      int getThreshold() const { return threshold_;}
+
     private:
 
       /**
@@ -231,6 +245,9 @@ namespace kmccoursegrain {
        * \brief Stores the id of the cluster the site is a part of
        **/
       int clusterId_;
+
+      /// The threshold
+      int threshold_;
 
       /**
        * \brief Keeps track of whether a site is currently occupied 

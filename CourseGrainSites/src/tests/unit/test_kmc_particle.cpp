@@ -2,8 +2,8 @@
 #include <cmath>
 #include <cassert>
 
-#include "../../include/kmccoursegrain/kmc_particle.hpp"
-#include "../../include/kmccoursegrain/kmc_constants.hpp"
+#include "../../../include/kmccoursegrain/kmc_particle.hpp"
+#include "../../../include/kmccoursegrain/kmc_constants.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;

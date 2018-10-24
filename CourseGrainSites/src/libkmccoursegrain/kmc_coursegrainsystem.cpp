@@ -38,6 +38,7 @@ namespace kmccoursegrain {
     for(auto it = ratesOfAllSites.begin();it!=ratesOfAllSites.end();++it){
       auto site = shared_ptr<KMC_Site>(new KMC_Site);
       site->setId(it->first);
+      site->setThreshold(courseGrainingThreshold_);
       site->setRatesToNeighbors(it->second);
       if(seed_set_) {
         site->setRandomSeed(seed_);
@@ -168,7 +169,8 @@ namespace kmccoursegrain {
     for(auto siteId : siteIds ) sites.push_back(sites_[siteId]);
 
     cluster_ptr->addSites(sites);
-
+    cluster_ptr->setResolution(clusterResolution_);
+    cluster_ptr->setThreshold(courseGrainingThreshold_);
     if(seed_set_){
       cluster_ptr->setRandomSeed(seed_);
       ++seed_;
@@ -218,6 +220,7 @@ namespace kmccoursegrain {
     }
 
     auto minTimeConstant = getMinimumTimeConstantFromSitesToNeighbors_(siteIds);
+    
     return minTimeConstant>(2*maxtime);
   }
   
@@ -293,6 +296,35 @@ namespace kmccoursegrain {
     return favoredClusterId;
   }
 
+  vector<int> KMC_CourseGrainSystem::getRelevantSites_(vector<vector<int>> memories){
+    vector<int> relevantSites;
+    for(auto memory : memories ){
+      int threshold;
+      if(memory.at(1)!=constants::unassignedId){
+        threshold = clusters_[memory.at(1)]->getThreshold();
+      }else{
+        threshold = sites_[memory.at(0)]->getThreshold();
+      }
+      if(memory.at(2)>threshold){
+        relevantSites.push_back(memory.at(0));
+      }else{
+        break;
+      }
+    }
+    return relevantSites;
+  }
+
+  void KMC_CourseGrainSystem::updateSiteAndClusterThresholds_(vector<int> relevantSites){
+    for(auto siteId : relevantSites){
+      int clusterId = sites_[siteId]->getClusterId();
+      if(clusterId!=constants::unassignedId){
+        clusters_[clusterId]->setThreshold(clusters_[clusterId]->getThreshold()*2);
+      }else{
+        sites_[siteId]->setThreshold(sites_[siteId]->getThreshold()*2);
+      }
+    }
+  }
+
   void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr& particle){
 
     LOG("Course graining sites if needed",1);
@@ -305,20 +337,17 @@ namespace kmccoursegrain {
       // Determine how many sites are above the threshold, stores the ones that
       // are over the threshold and appear in consecutive order from the most 
       // recently visited
-      vector<int> relevantSites;
-      for(auto memory : memories ){
-        if(memory.at(2)>courseGrainingThreshold_){
-          relevantSites.push_back(memory.at(0));
-        }else{
-          break;
-        }
-      }
+      vector<int> relevantSites = getRelevantSites_(memories);
 
       if(relevantSites.size()>1){
 
+        int total_hops= 0;
+        for(auto memory : memories) total_hops+=memory.at(2);
+
         bool satisfy = sitesSatisfyEquilibriumCondition_(relevantSites); 
+ 
         int favoredClusterId = getFavoredClusterId_(relevantSites); 
-        if(satisfy){
+        if(satisfy && total_hops>clusterResolution_){
 
           if(favoredClusterId==constants::unassignedId){
             // None of the sites are part of a cluster 
@@ -339,7 +368,12 @@ namespace kmccoursegrain {
             particle->resetVisitationFrequency(relevantSites.at(0));
             particle->setClusterSiteBelongsTo(relevantSites.at(0),favoredClusterId);
           }
-
+          particle->setMemoryCapacity(2);
+        }else{
+//          updateSiteAndClusterThresholds_(relevantSites);
+          if(particle->getMemoryCapacity()<6){
+            particle->setMemoryCapacity(particle->getMemoryCapacity()+1);
+          }
         }
       }
     }

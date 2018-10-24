@@ -268,6 +268,18 @@ namespace kmccoursegrain{
       friend std::ostream& 
         operator<<(std::ostream& os, const kmccoursegrain::KMC_Cluster& cluster);
 
+      /**
+       * \brief Sets the threshold of the cluster 
+       *
+       * This value determines when a site should be merged with the cluster it 
+       * is changed during the runtime to ensure that an attempt to merge does
+       * not occur too often, because it is expensive.
+       **/
+      void setThreshold(int n) { threshold_=n;}
+
+      /// returns the threshold
+      int getThreshold() const { return threshold_;}
+
     private:
 
       /************************************************************************
@@ -276,6 +288,9 @@ namespace kmccoursegrain{
 
       /// Relates to how course grained the dwell time will be
       int resolution_;
+
+      /// Threshold that determines if the cluster should be merged with a site
+      int threshold_;
 
       /// Number of iterations used to solve the master equation
       long iterations_;
@@ -425,11 +440,6 @@ namespace kmccoursegrain{
   
   };
 
-  // sets thresh as a static for all functions, not in class cluster
-  void setThreshold(const int n);
-
-  //returns the threshold
-  int getThreshold();
 
 }
 

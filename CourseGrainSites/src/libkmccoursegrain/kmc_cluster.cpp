@@ -16,23 +16,6 @@ namespace kmccoursegrain {
    ****************************************************************************/
 
   static int clusterIdCounter = 0;
-  static int threshold = 0;
-
-  /****************************************************************************
-   * Global Functions
-   ****************************************************************************/
-  void setThreshold(const int n){
-    if(n>0){
-      threshold=n;
-      LOG("Threshold is "+to_string(threshold),1);
-    }else{
-      throw runtime_error("ERROR in setThresh, threshold is negative");
-    }
-  }
-
-  int getThreshold(){
-    return threshold;
-  }
 
   /****************************************************************************
    * Public Facing Functions
