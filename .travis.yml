@@ -2,10 +2,36 @@ sudo: required
 
 language: cpp
 
-compiler:
-  - gcc
-  - clang
+dist: trusty
 
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - gcc-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+            - gcc-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+
+
+before_script:
+  - sudo apt-get install build-essential
+  - eval "${MATRIX_EVAL}"
+  
 install:
   - echo "${TRAVIS_BUILD_DIR}"
   - echo "${TRAVIS_OS_NAME}"
@@ -19,15 +45,6 @@ install:
     CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz"
     mkdir cmake && wget ${CMAKE_URL} && tar -xzf cmake-3.4.1.tar.gz && cd cmake-3.4.1/ && ./configure >/dev/null && make >/dev/null && sudo make install >/dev/null
     fi
-
-#before_script:
-#  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-#  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
-#  - cd "${TRAVIS_BUILD_DIR}"
-#  - git branch
-#  - git checkout -b ${BRANCH}
-#  - git branch
-
 
 script:
   - cd "${TRAVIS_BUILD_DIR}"
