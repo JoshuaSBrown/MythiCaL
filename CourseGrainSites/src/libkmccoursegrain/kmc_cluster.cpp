@@ -63,6 +63,20 @@ namespace kmccoursegrain {
     updateProbabilitiesAndTimeConstant();
   }
 
+  void KMC_Cluster::addSites(vector<SitePtr> newSites){
+    for(auto site : newSites){
+      if(site==nullptr){
+        throw invalid_argument("ERROR in addSite: adding a null site");
+      }
+      if(sitesInCluster_.count(site->getId())){
+        throw invalid_argument("Site has already been added to the cluster");
+      }
+      site->setClusterId(this->getId());
+      sitesInCluster_[site->getId()]=site;
+    }
+    updateProbabilitiesAndTimeConstant();
+  }
+
   void KMC_Cluster::updateProbabilitiesAndTimeConstant(){
     solveMasterEquation_();
     calculateEscapeRatesFromSitesToTheirNeighbors_();
@@ -322,7 +336,7 @@ namespace kmccoursegrain {
 
   bool KMC_Cluster::hopWithinCluster_(){
     double hop = randomDistribution_(randomEngine_);
-    double inOrOutThreshold = static_cast<double>(resolution_)/\
+    double inOrOutThreshold = (static_cast<double>(resolution_)-1.0)/\
                               static_cast<double>(resolution_);
     return (hop<inOrOutThreshold);
   }

@@ -95,13 +95,14 @@ namespace kmccoursegrain{
       /**
        * \brief Adds a site to a cluster
        *
-       * This function adds a site to a cluster. An arbitrary number of sites
-       * may be added. However, an error will be thrown if you attempt to add 
-       * the same site more than once.  
+       * This function adds a site/sites to a cluster. An arbitrary number of 
+       * sites may be added. However, an error will be thrown if you attempt to 
+       * add the same site more than once.  
        *
        * \param[in] site a shared pointer to a site
        **/
       void addSite(SitePtr site);
+      void addSites(std::vector<SitePtr> sites);
 
       /**
        * \brief will update the probabilities and time constant stored in the
@@ -421,8 +422,7 @@ namespace kmccoursegrain{
        **/
       std::map<const int,std::vector<std::pair<const int, double>>>
       getInternalRatesFromNeighborsComingToSite_();
-
-      
+  
   };
 
   // sets thresh as a static for all functions, not in class cluster

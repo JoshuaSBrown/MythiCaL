@@ -90,23 +90,8 @@ namespace kmccoursegrain {
     memory_it->clusterId = clusterId;
   }
 
-  vector<vector<int>> KMC_Particle::getVisitationFrequenciesOfCurrentSites() const {
-
-    vector<vector<int>> frequencies;
-    for(auto memory : memoryQueue_){
-      if( memory.siteId != constants::unassignedId ){
-        frequencies.push_back(vector<int>{
-            memory.siteId, 
-            memory.clusterId,
-            memory.visitFrequency });
-      }
-    }
-
-    return frequencies;
-  }
-
   void KMC_Particle::resetVisitationFrequency(const int siteId){
-    for(auto memory : memoryQueue_){
+    for(Memory& memory : memoryQueue_){
       if(memory.siteId == siteId ) {
         memory.visitFrequency = 0;
         return;
@@ -127,13 +112,15 @@ namespace kmccoursegrain {
     return memoryQueue_.begin()->siteId;
   }
 
-  list<vector<int>> KMC_Particle::getMemory(){
-    list<vector<int>> memories;
+  vector<vector<int>> KMC_Particle::getMemory(){
+    vector<vector<int>> memories;
     for(auto memory : memoryQueue_){
-      memories.push_back(vector<int>{
-          memory.siteId,
-          memory.clusterId,
-          memory.visitFrequency});
+      if( memory.siteId != constants::unassignedId ){
+        memories.push_back(vector<int>{
+            memory.siteId, 
+            memory.clusterId,
+            memory.visitFrequency });
+      }
     }
     return memories;
   }
@@ -181,7 +168,7 @@ namespace kmccoursegrain {
     memoryQueue_.splice(memoryQueue_.begin(),memoryQueue_,memory_it);
   }
 
-  void KMC_Particle::refreshMemoryOfCluster_(const int clusterId){
+ void KMC_Particle::refreshMemoryOfCluster_(const int clusterId){
     auto memory_it = getMemoryIteratorCluster_(clusterId);
     ++(memory_it->visitFrequency);
     memoryQueue_.splice(memoryQueue_.begin(),memoryQueue_,memory_it);

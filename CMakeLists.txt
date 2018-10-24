@@ -4,7 +4,7 @@ enable_language(CXX)
 
 project(kmc_course_grain)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -16,20 +16,18 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
+
+########################################################
+# Add and build other dependent libraries first        #
+########################################################
+
+add_subdirectory(UGLY)
 ########################################################
 # Basic system tests (standard libraries, headers etc) #
 ########################################################
 
-include(CheckIncludeFile)
-foreach(HEADER assert.h math.h stdio.h stdlib.h string.h)
-  check_include_file(${HEADER} FOUND_${HEADER})
-  if(NOT FOUND_${HEADER})
-    message(FATAL_ERROR "Could not find needed header - ${HEADER}")
-  endif(NOT FOUND_${HEADER})
-endforeach(HEADER)
-
 include(CheckIncludeFileCXX)
-foreach(HEADER cmath fstream functional iostream limits list map ostream sstream stack stdexcept string vector)
+foreach(HEADER cmath cassert fstream functional iostream limits list map ostream sstream stack stdexcept string vector)
   check_include_file_cxx(${HEADER} FOUND_${HEADER})
   if(NOT FOUND_${HEADER})
     message(FATAL_ERROR "Could not find needed header - ${HEADER}")
@@ -46,11 +44,11 @@ foreach(FUNC sqrt)
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/kmcoursegrain/*.hpp)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-install(FILES ${HEADERS} DESTINATION include/kmccoursegrain)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include/kmcoursegrain/*.hpp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include)
+install(FILES ${HEADERS} DESTINATION CourseGrainSites/include/kmccoursegrain)
 
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/libkmccoursegrain/*.cpp)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/*.cpp)
 add_library(kmc_course_grain ${SOURCES})
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
@@ -63,6 +61,6 @@ option(BUILD_SHARED_LIBS "Build shared libs" ON)
 option(ENABLE_TESTING "Build and enable testing stuff" OFF)
 if(ENABLE_TESTING)
   enable_testing()
-  add_subdirectory(src/tests)
+  add_subdirectory(CourseGrainSites/src/tests)
 endif(ENABLE_TESTING)
 
