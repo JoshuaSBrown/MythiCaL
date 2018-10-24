@@ -140,8 +140,20 @@ class KMC_CourseGrainSystem{
     /**
      * \brief Remove the particle from the system
      **/
-
     void removeParticleFromSystem(ParticlePtr particle);
+
+    /**
+     * \brief Determine if the site is part of a cluster
+     *
+     * Will return the id of the cluster the site is a part of or if the site
+     * is not part of the cluster it will return constants::unassignedId
+     *
+     * \param[in] siteId 
+     *
+     * \return clusterId
+     **/
+    int getClusterIdOfSite(int siteId);
+
     /**
      * \brief Threshold for course graining sites
      *

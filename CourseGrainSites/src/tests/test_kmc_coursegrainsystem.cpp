@@ -414,13 +414,19 @@ int main(void){
 
         ++global_index;        
       }
+  
+      cout << "Rates from sites to their neighbors" << endl;
+      for( auto rat : ratesFromSiteToNeighbors){
+        cout << idsOfEachSite.at(index) << "->" << rat.first << " " <<  *rat.second << endl;
+      }
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
+    CGsystem.setCourseGrainThreshold(10);
     CGsystem.initializeSystem(ratesToNeighbors);
-
+    
     class Electron : public KMC_Particle {};
     
     // Store the number of hops to each site 1-14
@@ -429,14 +435,14 @@ int main(void){
     // Store the escape time from the cluster for each electron
     vector<double> escapeTimes;
 
-    int NumberElectrons = 1000;
+    int NumberElectrons = 10000;
 
     for(int i=0; i<NumberElectrons;++i){
       Electron electron;
-      electron.setMemoryCapacity(4);
+      electron.setMemoryCapacity(6);
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite);
+      electron.occupySite(initialSite,CGsystem.getClusterIdOfSite(initialSite));
       auto electron_ptr = make_shared<Electron>(electron);
       vector<shared_ptr<KMC_Particle>> electrons;
       electrons.push_back(electron_ptr);
@@ -448,6 +454,7 @@ int main(void){
         timeOnSites.at(electron_ptr->getIdOfSiteCurrentlyOccupying()-1)+=electron_ptr->getDwellTime();
         totalTimeOnCluster+=electron_ptr->getDwellTime(); 
       }
+
       CGsystem.removeParticleFromSystem(electron_ptr);
       escapeTimes.push_back(totalTimeOnCluster);
     }
@@ -475,21 +482,22 @@ int main(void){
     for(int i=0; i<5;++i){
       cout << "Probability hop to site " << (i+1) << " " << probabilityOnSite.at(i) << endl;
     }
+    
     assert(probabilityOnSite.at(0)>0.139);
     assert(probabilityOnSite.at(0)<0.142);
    
     assert(probabilityOnSite.at(1)>0.258); 
-    assert(probabilityOnSite.at(1)<0.262); 
+    assert(probabilityOnSite.at(1)<0.267); 
 
     assert(probabilityOnSite.at(2)>0.020);
     assert(probabilityOnSite.at(2)<0.023);
 
-    assert(probabilityOnSite.at(3)>0.336);
+    assert(probabilityOnSite.at(3)>0.330);
     assert(probabilityOnSite.at(3)<0.338);
 
     assert(probabilityOnSite.at(4)>0.237);
     assert(probabilityOnSite.at(4)<0.251);
-
+    
     int totalneigh = 0;
     totalneigh+= hopsToSites.at(5);
     totalneigh+= hopsToSites.at(6);
@@ -526,6 +534,32 @@ int main(void){
       cout << "Probability hop to neigh " << (i+6) << " " << probabilityOnNeigh.at(i) << endl;
     }
 
+    assert(probabilityOnNeigh.at(0)<0.11);
+    assert(probabilityOnNeigh.at(0)>0.09);
+
+    assert(probabilityOnNeigh.at(1)<0.008);
+    assert(probabilityOnNeigh.at(1)>0.006);
+
+    assert(probabilityOnNeigh.at(2)<0.18);
+    assert(probabilityOnNeigh.at(2)>0.16);
+
+    assert(probabilityOnNeigh.at(3)<0.18);
+    assert(probabilityOnNeigh.at(3)>0.16);
+
+    assert(probabilityOnNeigh.at(4)<0.26);
+    assert(probabilityOnNeigh.at(4)>0.23);
+
+    assert(probabilityOnNeigh.at(5)<0.065);
+    assert(probabilityOnNeigh.at(5)>0.05);
+
+    assert(probabilityOnNeigh.at(6)<0.05);
+    assert(probabilityOnNeigh.at(6)>0.03);
+
+    assert(probabilityOnNeigh.at(7)<0.18);
+    assert(probabilityOnNeigh.at(7)>0.16);
+
+    assert(probabilityOnNeigh.at(8)<0.026);
+    assert(probabilityOnNeigh.at(8)>0.02);
 
     double totalTimeOnSites = 0.0;
     totalTimeOnSites+=timeOnSites.at(0);

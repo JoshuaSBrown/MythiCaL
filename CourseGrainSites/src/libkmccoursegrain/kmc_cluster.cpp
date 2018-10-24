@@ -205,26 +205,27 @@ namespace kmccoursegrain {
         sumRatesOffCluster+=rate.second;
       }
     }
-
     auto sumDwell = 0.0;
     for( auto site : sitesInCluster_ ){
       sumDwell += site.second->getTimeConstant();
     }
 
     map<const int, double> probabilityHopToNeighbor;
-    double total = 0.0;
     for(auto rateToNeigh : ratesToNeighbors){
       int siteHoppingFrom = rateToNeigh.first;
       for( auto rate : rateToNeigh.second ){
         int siteHoppingTo = rate.first;
+        
+        
         if(probabilityHopToNeighbor.count(siteHoppingTo)){
           probabilityHopToNeighbor[siteHoppingTo] +=\
             probabilityOnSite_[siteHoppingFrom]*\
             sitesInCluster_[siteHoppingFrom]->getTimeConstant()/\
             sumDwell*\
             sitesInCluster_[siteHoppingFrom]->\
-              getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
+            getRateToNeighbor(siteHoppingTo)/\
             sumRatesOffCluster;
+
         }else{
 
           probabilityHopToNeighbor[siteHoppingTo] =\
@@ -232,16 +233,21 @@ namespace kmccoursegrain {
             sitesInCluster_[siteHoppingFrom]->getTimeConstant()/\
             sumDwell*\
             sitesInCluster_[siteHoppingFrom]->\
-              getProbabilityOfHoppingToNeighboringSite(siteHoppingTo)/\
+              getRateToNeighbor(siteHoppingTo)/\
             sumRatesOffCluster;
+
         }
-        total += probabilityHopToNeighbor[siteHoppingTo];
       }
     }
 
+    double total = 0.0;
+    for(auto neighborProb : probabilityHopToNeighbor ){
+      total+=neighborProb.second;
+    }
     for(auto neighborProb : probabilityHopToNeighbor ){
       probabilityHopToNeighbor[neighborProb.first] = neighborProb.second/total;
     }
+
     probabilityHopToNeighbor_ = probabilityHopToNeighbor;
 
   }

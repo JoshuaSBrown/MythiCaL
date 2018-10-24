@@ -93,6 +93,10 @@ namespace kmccoursegrain {
     sites_[siteId]->vacateSite();
   }
 
+  int KMC_CourseGrainSystem::getClusterIdOfSite(int siteId){
+    return sites_[siteId]->getClusterId();
+  }
+
   void KMC_CourseGrainSystem::hop(ParticlePtr particle){
 
     LOG("Particle is hopping in system",1);
@@ -135,7 +139,6 @@ namespace kmccoursegrain {
         courseGrainSiteIfNeeded_(particle);
 
       }else{
-
         sites_[siteId]->vacateSite();
         sites_[siteToHopTo]->occupySite();
 
@@ -173,7 +176,9 @@ namespace kmccoursegrain {
     clusters_[cluster_ptr->getId()] = cluster_ptr;
   }
 
-  void KMC_CourseGrainSystem::mergeSitesToCluster_(vector<int> siteIds,int favoredClusterId){
+  void 
+    KMC_CourseGrainSystem::mergeSitesToCluster_(
+        vector<int> siteIds,int favoredClusterId){
   
     LOG("Merging sites to cluster",1);
     vector<SitePtr> isolated_sites;
@@ -190,7 +195,9 @@ namespace kmccoursegrain {
 
   }
 
-  bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(vector<int> siteIds){
+  bool 
+    KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(
+        vector<int> siteIds){
 
     LOG("Checking if sites satisfy equilibrium condition",1);
     auto edges = createEdges_(sites_,siteIds);
@@ -199,19 +206,24 @@ namespace kmccoursegrain {
     map<int,weak_ptr<GraphNode<string>>> nodes_weak;
     for(auto map_iter : nodes ) nodes_weak[map_iter.first] = map_iter.second;
  
-    auto graph_ptr = shared_ptr<Graph<string>>(new Graph<string>(edges_weak,nodes_weak));
+    auto graph_ptr = shared_ptr<Graph<string>>\
+                     (new Graph<string>(edges_weak,nodes_weak));
 
-    map<pair<int,int>,double> verticesAndtimes = maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
+    map<pair<int,int>,double> verticesAndtimes = \
+      maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
 
     double maxtime = 0.0;
     for( auto verticesAndTime : verticesAndtimes){
       if(verticesAndTime.second>maxtime) maxtime = verticesAndTime.second;
     }
+
     auto minTimeConstant = getMinimumTimeConstantFromSitesToNeighbors_(siteIds);
     return minTimeConstant>(2*maxtime);
   }
   
-  double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(vector<int> siteIds){
+  double 
+    KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
+      vector<int> siteIds){
     
     LOG("Get the minimum time constant",1);
     set<int> internalSiteIds(siteIds.begin(),siteIds.end());
@@ -236,6 +248,7 @@ namespace kmccoursegrain {
   }
 
   map<int,shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds){
+    LOG("Creating nodes",1);
     map<int,shared_ptr<GraphNode<string>>> nds;
     for(auto siteId : siteIds){
       if(nds.count(siteId)==0){
@@ -317,6 +330,7 @@ namespace kmccoursegrain {
             }
             particle->resetVisitationFrequency(relevantSites.at(0));
             particle->setClusterSiteBelongsTo(relevantSites.at(0),clusterId);
+
           }else{
             mergeSitesToCluster_(relevantSites,favoredClusterId);
             for(int index=1; index < static_cast<int>(relevantSites.size());++index){
