@@ -472,10 +472,23 @@ int main(void){
     value = static_cast<double>(hopsToSites.at(4))/static_cast<double>(totalsites);
     probabilityOnSite.push_back(value);
 
-    cout << "Hopping percent frequency on sites does not need to match" << endl;
     for(int i=0; i<5;++i){
       cout << "Probability hop to site " << (i+1) << " " << probabilityOnSite.at(i) << endl;
     }
+    assert(probabilityOnSite.at(0)>0.139);
+    assert(probabilityOnSite.at(0)<0.142);
+   
+    assert(probabilityOnSite.at(1)>0.258); 
+    assert(probabilityOnSite.at(1)<0.262); 
+
+    assert(probabilityOnSite.at(2)>0.020);
+    assert(probabilityOnSite.at(2)<0.023);
+
+    assert(probabilityOnSite.at(3)>0.336);
+    assert(probabilityOnSite.at(3)<0.338);
+
+    assert(probabilityOnSite.at(4)>0.237);
+    assert(probabilityOnSite.at(4)<0.251);
 
     int totalneigh = 0;
     totalneigh+= hopsToSites.at(5);

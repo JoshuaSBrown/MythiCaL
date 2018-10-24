@@ -173,14 +173,10 @@ class KMC_CourseGrainSystem{
     std::map<int,ClusterPtr> clusters_;
 
     void courseGrainSiteIfNeeded_(ParticlePtr& particle);
-//    void mergeSiteToCluster_(const int siteId, const int clusterId);
-//    void createCluster_(const int siteId1,const int siteId2);
-//    void mergeClusters_(const int clusterId1, const int clusterId2);
     bool sitesSatisfyEquilibriumCondition_(std::vector<int> siteIds);
     int getFavoredClusterId_(std::vector<int> siteIds);
     void createCluster_(std::vector<int> siteIds);
     void mergeSitesToCluster_(std::vector<int> siteIds,int clusterId);
-    std::shared_ptr<ugly::Graph<std::string>> createGraph_(std::vector<int> siteIds);
     double getMinimumTimeConstantFromSitesToNeighbors_(std::vector<int> siteIds);
 };
 

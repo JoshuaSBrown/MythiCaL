@@ -227,14 +227,13 @@ int main(void){
 
     cluster.setRandomSeed(1);
     
-    assert(cluster.pickNewSiteId()==3); 
+    assert(cluster.pickNewSiteId()==5); 
     assert(cluster.pickNewSiteId()==3); 
     assert(cluster.pickNewSiteId()==2); 
     assert(cluster.pickNewSiteId()==2); 
     assert(cluster.pickNewSiteId()==3); 
     assert(cluster.pickNewSiteId()==2); 
     assert(cluster.pickNewSiteId()==1); 
-    assert(cluster.pickNewSiteId()==3); 
   }
 
 	return 0;

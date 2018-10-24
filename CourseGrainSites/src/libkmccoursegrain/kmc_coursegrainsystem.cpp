@@ -18,6 +18,13 @@ using namespace ugly;
 using namespace ugly::graphalgorithms;
 
 namespace kmccoursegrain {
+  /****************************************************************************
+   * Private Internal Function Declarations
+   ****************************************************************************/
+
+  list<shared_ptr<Edge>> createEdges_(map<int,SitePtr> sites_, vector<int> siteIds);
+
+  map<int,shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds);
 
   /****************************************************************************
    * Public Facing Functions
@@ -185,7 +192,15 @@ namespace kmccoursegrain {
 
   bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(vector<int> siteIds){
 
-    auto graph_ptr = createGraph_(siteIds);
+    LOG("Checking if sites satisfy equilibrium condition",1);
+    auto edges = createEdges_(sites_,siteIds);
+    auto nodes = createNodes_(siteIds);
+    list<weak_ptr<Edge>> edges_weak(edges.begin(),edges.end());
+    map<int,weak_ptr<GraphNode<string>>> nodes_weak;
+    for(auto map_iter : nodes ) nodes_weak[map_iter.first] = map_iter.second;
+ 
+    auto graph_ptr = shared_ptr<Graph<string>>(new Graph<string>(edges_weak,nodes_weak));
+
     map<pair<int,int>,double> verticesAndtimes = maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
 
     double maxtime = 0.0;
@@ -197,7 +212,8 @@ namespace kmccoursegrain {
   }
   
   double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(vector<int> siteIds){
-
+    
+    LOG("Get the minimum time constant",1);
     set<int> internalSiteIds(siteIds.begin(),siteIds.end());
 
     double minimumTimeConstant=-1.0;
@@ -219,36 +235,39 @@ namespace kmccoursegrain {
     return minimumTimeConstant;
   }
 
-  shared_ptr<Graph<string>> KMC_CourseGrainSystem::createGraph_(vector<int> siteIds){
-
-    // Need edges to be directed and weighted
-    list<weak_ptr<Edge>> edges;
-    std::map<int,weak_ptr<GraphNode<string>>> nds;
+  map<int,shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds){
+    map<int,shared_ptr<GraphNode<string>>> nds;
     for(auto siteId : siteIds){
-      for(auto potential_neighId : siteIds){
-        if(sites_[siteId]->isNeighbor(potential_neighId)){
-          auto time = 1.0l/sites_[siteId]->getRateToNeighbor(potential_neighId);
-          auto edge = shared_ptr<EdgeDirectedWeighted>(new EdgeDirectedWeighted(siteId,potential_neighId,time));
-
-          edges.push_back(edge);
-        }
-        if(sites_[potential_neighId]->isNeighbor(siteId)){
-          auto time = 1.0/sites_[potential_neighId]->getRateToNeighbor(siteId);
-          auto edge = shared_ptr<EdgeDirectedWeighted>( new EdgeDirectedWeighted(potential_neighId,siteId,time));
-          edges.push_back(edge);
-        }
-      }
       if(nds.count(siteId)==0){
         auto gn = shared_ptr<GraphNode<string>>(new GraphNode<string>(""));
         nds[siteId] = gn;
       }
     }
+    return nds;
+  }
 
-    return shared_ptr<Graph<string>>(new Graph<string>(edges,nds));
+  list<shared_ptr<Edge>> createEdges_(map<int,SitePtr> sites_, vector<int> siteIds){
+
+    LOG("Creating graph",1);
+    // Need edges to be directed and weighted
+    list<shared_ptr<Edge>> edges;
+    for(auto siteId : siteIds){
+      for(auto potential_neighId : siteIds){
+        if(sites_[siteId]->isNeighbor(potential_neighId)){
+          auto time = 1.0/sites_[siteId]->getRateToNeighbor(potential_neighId);
+          auto edge = shared_ptr<EdgeDirectedWeighted>(new EdgeDirectedWeighted(siteId,potential_neighId,time));
+
+          edges.push_back(edge);
+        }
+      }
+    }
+
+    return edges;
   }
 
   int KMC_CourseGrainSystem::getFavoredClusterId_(vector<int> siteIds){
 
+    LOG("Getting the favored cluster Id",1);
     int favoredClusterId = constants::unassignedId;
     for( auto siteId : siteIds){
       int clusterId = sites_[siteId]->getClusterId();
@@ -266,7 +285,7 @@ namespace kmccoursegrain {
     LOG("Course graining sites if needed",1);
 
     auto memories = particle->getMemory();
-
+ 
     // Determine if the particle has made enough jumps to have a memory
     if(memories.size()>1){
 
@@ -275,7 +294,7 @@ namespace kmccoursegrain {
       // recently visited
       vector<int> relevantSites;
       for(auto memory : memories ){
-        if(memory.at(3)>courseGrainingThreshold_){
+        if(memory.at(2)>courseGrainingThreshold_){
           relevantSites.push_back(memory.at(0));
         }else{
           break;
@@ -283,7 +302,6 @@ namespace kmccoursegrain {
       }
 
       if(relevantSites.size()>1){
-
 
         bool satisfy = sitesSatisfyEquilibriumCondition_(relevantSites); 
         int favoredClusterId = getFavoredClusterId_(relevantSites); 
