@@ -17,8 +17,8 @@ class KMC_Cluster;
 class KMC_Particle;
 
 typedef std::shared_ptr<KMC_Particle> ParticlePtr;
-typedef std::shared_ptr<KMC_Site>     SitePtr;
-typedef std::shared_ptr<KMC_Cluster>  ClusterPtr;
+typedef std::shared_ptr<KMC_Site> SitePtr;
+typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
 
 /**
  * \brief Course Grain System allows abstraction of renormalization of sites
@@ -44,6 +44,8 @@ class KMC_CourseGrainSystem {
    **/
   KMC_CourseGrainSystem()
       : seed_set_(false),
+        max_particle_memory_(6),
+        min_particle_memory_(2),
         courseGrainingThreshold_(20),
         clusterResolution_(20){};
 
@@ -170,16 +172,38 @@ class KMC_CourseGrainSystem {
    * The larger this value is the faster the algorithm will be. However, this is
    * at the cost of reproducing the noise of the simulation. If you are wanting
    * to capture the noise this needs to be higher. However it is lower the more
-   * effiecient your simulations will be. 
+   * effiecient your simulations will be.
    **/
-  int  getClusterResolution() { return clusterResolution_; }
+  int getClusterResolution() { return clusterResolution_; }
   void setClusterResolution(int clusterResolution) {
     clusterResolution_ = clusterResolution;
+  }
+
+  /**
+   * \brief sets the max particle memory 
+   *
+   * If a particle hits a threshold but does not create a cluster the particle
+   * memory will continue to increase by one memory eacth time until it either
+   * creates a cluster or it hits the max number of memories allowed for the
+   * particle.
+   *
+   * \param[in] max number of memories
+   **/
+  void setMaxParticleMemory(int max_memory) { 
+    max_particle_memory_ = max_memory; 
+  }
+
+  void setMinParticleMemory(int min_memory) { 
+    min_particle_memory_ = min_memory; 
   }
 
  private:
   /// Depicts whether a random seed has been set, to yield reproducable data
   bool seed_set_;
+
+  /// Max particle memory 
+  int max_particle_memory_;
+  int min_particle_memory_;
 
   /// The random seed
   unsigned long seed_;
@@ -205,7 +229,7 @@ class KMC_CourseGrainSystem {
    * \brief Determines if it is appropriate to coursegrain the sites
    *
    * This function looks to see if the Markov property holds for the sites of
-   * interest. This is done by creating a graph consisting of the sites that 
+   * interest. This is done by creating a graph consisting of the sites that
    * will be placed in the cluster. Once this is done we determine the fastest
    * time it takes to cross from one side of the cluster to the other. If this
    * time is much less than the transition of the sites in the cluster we know
@@ -223,11 +247,11 @@ class KMC_CourseGrainSystem {
    * If there are several sites that could make a cluster we determine if they
    * are already part of a cluster or not. If they are part of a cluster or more
    * than one cluster is found. We will merge clusters to the cluster will the
-   * smallest cluster id. 
+   * smallest cluster id.
    *
    * \param[in] siteIds site ids that will potentially make up a cluster
    *
-   * \return int value that represents the smallest clsuter id or else it 
+   * \return int value that represents the smallest clsuter id or else it
    * returns constant::unassignedId
    **/
   int getFavoredClusterId_(std::vector<int> siteIds);
