@@ -69,14 +69,14 @@ void KMC_CourseGrainSystem::initializeSystem(
       site->setRandomSeed(seed_);
       ++seed_;
     }
-    sites_[it->first] = move(site);
+    sites_[it->first] = site;
   }
 }
 
 void KMC_CourseGrainSystem::initializeParticles(vector<ParticlePtr> particles) {
 
   LOG("Initializeing particles", 1);
-
+  
   if (sites_.size() == 0) {
     throw runtime_error(
         "You must first initialize the system before you "
@@ -130,7 +130,6 @@ void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
   LOG("Particle is hopping in system", 1);
   auto siteId = particle->getIdOfSiteCurrentlyOccupying();
   int siteToHopTo = particle->getPotentialSite();
-
   if (sites_[siteToHopTo]->siteIsOccupied()) {
     LOG("Site " + to_string(siteToHopTo) + " is occupied", 1);
     if (sites_[siteId]->partOfCluster()) {
@@ -152,8 +151,8 @@ void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
 
   } else {
 
+    LOG("Hopping to " + to_string(siteToHopTo) + " site", 1);
     if (sites_[siteToHopTo]->partOfCluster()) {
-      LOG("Hopping to " + to_string(siteToHopTo) + " site", 1);
       auto clusterId = sites_[siteToHopTo]->getClusterId();
       sites_[siteId]->vacateSite();
       sites_[siteToHopTo]->occupySite();
@@ -187,6 +186,7 @@ void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
 
 void KMC_CourseGrainSystem::createCluster_(vector<int> siteIds) {
   LOG("Creating cluster from vector of sites", 1);
+  cout << "Creating cluster " << endl;
   auto cluster_ptr = shared_ptr<KMC_Cluster>(new KMC_Cluster());
   vector<SitePtr> sites;
   for (auto siteId : siteIds) sites.push_back(sites_[siteId]);
@@ -363,14 +363,12 @@ void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr& particle) {
     // are over the threshold and appear in consecutive order from the most
     // recently visited
     vector<int> relevantSites = getRelevantSites_(memories);
-
     if (relevantSites.size() > 1) {
 
       int total_hops = 0;
       for (auto memory : memories) total_hops += memory.at(2);
 
       bool satisfy = sitesSatisfyEquilibriumCondition_(relevantSites);
-
       int favoredClusterId = getFavoredClusterId_(relevantSites);
       if (satisfy && total_hops > clusterResolution_) {
 
@@ -396,7 +394,7 @@ void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr& particle) {
         }
         particle->setMemoryCapacity(min_particle_memory_);
       } else {
-        if (particle->getMemoryCapacity() < max_particle_memory_) {
+        if (static_cast<int>(particle->getMemoryCapacity()) < max_particle_memory_) {
           particle->setMemoryCapacity(particle->getMemoryCapacity() + 1);
         }
       }
