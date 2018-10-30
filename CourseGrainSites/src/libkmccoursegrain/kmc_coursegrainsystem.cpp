@@ -94,7 +94,6 @@ void KMC_CourseGrainSystem::initializeParticles(vector<ParticlePtr> particles) {
 
     int newId = sites_[siteId]->pickNewSiteId();
     auto hopTime = sites_[siteId]->getDwellTime();
-
     particle->setDwellTime(hopTime);
     particle->setPotentialSite(newId);
   }
@@ -126,10 +125,12 @@ int KMC_CourseGrainSystem::getClusterIdOfSite(int siteId) {
 }
 
 void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
-
   LOG("Particle is hopping in system", 1);
   auto siteId = particle->getIdOfSiteCurrentlyOccupying();
   int siteToHopTo = particle->getPotentialSite();
+
+  ++iteration_;
+
   if (sites_[siteToHopTo]->siteIsOccupied()) {
     LOG("Site " + to_string(siteToHopTo) + " is occupied", 1);
     if (sites_[siteId]->partOfCluster()) {
@@ -163,7 +164,7 @@ void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
       particle->occupySite(siteToHopTo, clusterId);
       particle->setDwellTime(hopTime);
       particle->setPotentialSite(newId);
-      courseGrainSiteIfNeeded_(particle);
+      //courseGrainSiteIfNeeded_(particle);
 
     } else {
       sites_[siteId]->vacateSite();
@@ -175,14 +176,47 @@ void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
       particle->setDwellTime(hopTime);
       particle->setPotentialSite(newId);
 
-      courseGrainSiteIfNeeded_(particle);
+      sites_visited_.insert(newId);
+      //courseGrainSiteIfNeeded_(particle);
     }
+  }
+
+  if(iteration_ > iteration_check_){
+    auto relevantSites = filterSites_();
+    iteration_ = 0;
   }
 }
 
 /****************************************************************************
  * Internal Private Functions
  ****************************************************************************/
+
+vector<vector<int>> KMC_CourseGrainSystem::breakIntoIslands_(vector<int> relevantSites){
+
+  vector<vector<int>> islands;
+  auto edges = createEdges_(sites_,relevantSites);
+  auto nodes = createNodes_(siteIds);
+
+  list<weak_ptr<Edge>> edges_weak(edges.begin(), edges.end());
+  map<int, weak_ptr<GraphNode<string>>> nodes_weak;
+  for (auto map_iter : nodes) nodes_weak[map_iter.first] = map_iter.second;
+
+  auto graph_ptr =
+      shared_ptr<Graph<string>>(new Graph<string>(edges_weak, nodes_weak);
+
+  return islands;
+
+}
+
+vector<int> KMC_CourseGrainSystem::filterSites_(){
+  vector<int> high_frequency_sites;
+  for( auto siteId : sites_visited_ ){
+    if(sites_[siteId]->getVisitFrequency() > 1000){
+      high_frequency_sites.insert(siteId);
+    } 
+  }
+  return high_frequency_sites;
+}
 
 void KMC_CourseGrainSystem::createCluster_(vector<int> siteIds) {
   LOG("Creating cluster from vector of sites", 1);

@@ -2,6 +2,7 @@
 #define KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP
 
 #include <map>
+#include <unordered_set>
 #include <memory>
 #include <vector>
 
@@ -47,7 +48,8 @@ class KMC_CourseGrainSystem {
         max_particle_memory_(6),
         min_particle_memory_(2),
         courseGrainingThreshold_(20),
-        clusterResolution_(20){};
+        clusterResolution_(20),
+        iteration_check_(10000){};
 
   /**
    * \brief This will correctly initialize the system
@@ -217,6 +219,11 @@ class KMC_CourseGrainSystem {
   /// is to at least to a small degree conserve the noise.
   int clusterResolution_;
 
+  int iteration_;
+  int iteration_check_;
+
+  std::unordered_set<int> sites_visited_;
+
   /// Stores smart pointers to all the sites
   std::map<int, SitePtr> sites_;
 
@@ -261,6 +268,8 @@ class KMC_CourseGrainSystem {
   double getMinimumTimeConstantFromSitesToNeighbors_(std::vector<int> siteIds);
   std::vector<int> getRelevantSites_(std::vector<std::vector<int>> memories);
   void updateSiteAndClusterThresholds_(std::vector<int> relevantSites);
+  std::vector<int> filterSites_();
+  std::vector<std::vector<int>> breakIntoIslands_(std::vector<int> relevant_sites);
 };
 }
 #endif  // KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP

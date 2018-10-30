@@ -1,4 +1,6 @@
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+
 foreach(PROG test_kmc_coursegrainsystem 
     test_crude_vs_coursegrain
     test_crude_vs_coursegrain2

@@ -213,6 +213,7 @@ class KMC_Site : public virtual Identity {
   friend std::ostream& operator<<(std::ostream& os,
                                   const kmccoursegrain::KMC_Site& site);
 
+  int getVisitFrequency() { return totalVisitFreq_; }
   /**
    * \brief Sets the threshold of the site
    *

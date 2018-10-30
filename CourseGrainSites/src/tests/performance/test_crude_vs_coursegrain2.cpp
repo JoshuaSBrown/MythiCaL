@@ -5,6 +5,7 @@
 #include <string>
 #include <random>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <cmath>
 #include <cassert>
@@ -174,7 +175,6 @@ int main(int argc, char* argv[]){
                   double deltaE = energies.at(neighId)-energies.at(siteId);
                   double exponent = -pow(reorganization_energy-deltaE,2.0)/(4.0*reorganization_energy*kBT);
                   rates[siteId][neighId] = coef*exp(exponent);
-                  cout << "Rate " << rates[siteId][neighId] << endl;
                 }
               }
             }
@@ -332,7 +332,7 @@ int main(int argc, char* argv[]){
       mt19937 random_number_generator;
       random_number_generator.seed(4);
       uniform_real_distribution<double> distribution(0.0,1.0);
-
+      unordered_map<int,int> frequency;
       assert(particle_global_times.begin()->second<simulation_cutoff_time);
       while(particle_global_times.begin()->second<simulation_cutoff_time){
         int particleId = particle_global_times.begin()->first;
@@ -353,6 +353,11 @@ int main(int argc, char* argv[]){
               siteOccupied.erase(siteId); 
               // Occupy new site
               siteOccupied.insert(neighId);
+              if(frequency.count(neighId)){
+                frequency[neighId]++;
+              }else{
+                frequency[neighId]=1;
+              }
               // Update the particles position
               particle_positions[particleId] = converter.to3D(neighId);
               // Update the sojourn time of the particle
@@ -415,11 +420,9 @@ int main(int argc, char* argv[]){
 
         for(int particle_index=0; particle_index<particles;++particle_index){
           particle_global_times.push_back(pair<int,double>(particle_index,electrons.at(particle_index)->getDwellTime()));
-          cout << electrons.at(particle_index)->getDwellTime() << endl;
         }
         particle_global_times.sort(compareSecondItemOfPair);
       }// Calculate particle dwell times and sort
-      cout << particle_global_times.begin()->second << endl;
       assert(particle_global_times.begin()->second<simulation_cutoff_time);
       while(particle_global_times.begin()->second<simulation_cutoff_time){
         auto particle_index = particle_global_times.begin()->first;
