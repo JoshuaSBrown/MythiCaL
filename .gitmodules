@@ -1,0 +1,3 @@
+[submodule "UGLY"]
+	path = UGLY
+	url = https://github.com/JoshuaSBrown/UGLY.git
