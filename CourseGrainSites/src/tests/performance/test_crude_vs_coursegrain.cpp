@@ -379,7 +379,7 @@ int main(int argc, char* argv[]){
       for(auto site_rates : rates){
         map<const int ,double *> rates_to;
         for( auto neigh_rate : site_rates.second){
-          rates_to_neighbors[site_rates.first][neigh_rate.first] = &neigh_rate.second;
+          rates_to_neighbors[site_rates.first][neigh_rate.first] = &(rates[site_rates.first][neigh_rate.first]);
         }
       }
     }

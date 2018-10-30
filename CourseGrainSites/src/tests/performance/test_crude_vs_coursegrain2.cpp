@@ -5,9 +5,7 @@
 #include <string>
 #include <random>
 #include <map>
-#include <unordered_map>
 #include <set>
-#include <unordered_set>
 #include <cmath>
 #include <cassert>
 #include <algorithm>
@@ -176,6 +174,7 @@ int main(int argc, char* argv[]){
                   double deltaE = energies.at(neighId)-energies.at(siteId);
                   double exponent = -pow(reorganization_energy-deltaE,2.0)/(4.0*reorganization_energy*kBT);
                   rates[siteId][neighId] = coef*exp(exponent);
+                  cout << "Rate " << rates[siteId][neighId] << endl;
                 }
               }
             }
@@ -333,8 +332,8 @@ int main(int argc, char* argv[]){
       mt19937 random_number_generator;
       random_number_generator.seed(4);
       uniform_real_distribution<double> distribution(0.0,1.0);
-      unordered_map<int,int> frequency;
-      
+
+      assert(particle_global_times.begin()->second<simulation_cutoff_time);
       while(particle_global_times.begin()->second<simulation_cutoff_time){
         int particleId = particle_global_times.begin()->first;
         vector<int> particle_position = particle_positions[particleId];
@@ -354,11 +353,6 @@ int main(int argc, char* argv[]){
               siteOccupied.erase(siteId); 
               // Occupy new site
               siteOccupied.insert(neighId);
-              if(frequency.count(neighId)){
-                frequency[neighId]++;
-              }else{
-                frequency[neighId] = 1;
-              }
               // Update the particles position
               particle_positions[particleId] = converter.to3D(neighId);
               // Update the sojourn time of the particle
@@ -381,175 +375,72 @@ int main(int argc, char* argv[]){
   cout << "Running course grained Monte Carlo" << endl;
   high_resolution_clock::time_point course_time_start = high_resolution_clock::now();
   {
-    map<int,double> sojourn_times;
-    map<int,double> sum_rates;
-    // Calculate sojourn times & sum_rates
+    // greating map with pointer to rates
+    map<const int, map<const int, double *>> rates_to_neighbors;
     {
-      for(int x=0; x<distance; ++x){
-        for(int y=0;y<distance;++y){
-          for(int z=0;z<distance;++z){
-            // Define neighbors
-            int xlow = x;
-            int xhigh = x;
-
-            int ylow = y;
-            int yhigh = y;
-
-            int zlow = z;
-            int zhigh = z;
-
-            if(xlow-1>0) --xlow;
-            if(xhigh+1<distance) ++xhigh;
-            if(ylow-1>0) --ylow;
-            if(yhigh+1<distance) ++yhigh;
-            if(zlow-1>0) --zlow;
-            if(zhigh+1<distance) ++zhigh;
-
-            double sum_rate = 0.0;
-            int siteId = converter.to1D(x,y,z); 
-            for( int x2 = xlow; x2<=xhigh; ++x2){
-              for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    sum_rate +=rates[siteId][neighId];
-                  }
-                }
-              }
-            }
-            sojourn_times[siteId] = 1.0/sum_rate;        
-            sum_rates[siteId] = sum_rate;  
-          }
+      for(auto site_rates : rates){
+        for( auto neigh_rate : site_rates.second){
+          rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
         }
       }
-    }// Calculate sojourn times & sum_rates
+    }
 
-    map<int,map<int,double>> cummulitive_probability_to_neighbors;
-    // Calculate crude probability to neighbors
+    class Electron : public KMC_Particle {};
+    // Create the electrons using the KMC_Particle class
+    vector<shared_ptr<KMC_Particle>> electrons;        
     {
-      for(int x=0; x<distance; ++x){
-        for(int y=0;y<distance;++y){
-          for(int z=0;z<distance;++z){
-            // Define neighbors
-            int xlow = x;
-            int xhigh = x;
+      for(int particle_index = 0; particle_index<particles; ++particle_index){
+        auto electron = shared_ptr<Electron>(new Electron);
+        int siteId = converter.to1D(particle_positions[particle_index]);
+        electron->occupySite(siteId);
+        electrons.push_back(electron);
+      }
+    }
+    
+    // Run the course grain simulation
+    {
+      KMC_CourseGrainSystem CGsystem;
+      CGsystem.setRandomSeed(1);
+      CGsystem.setCourseGrainThreshold(20);
+      CGsystem.initializeSystem(rates_to_neighbors);
+      CGsystem.initializeParticles(electrons);
+      CGsystem.setMaxParticleMemory(3);
+      // Calculate Particle dwell times and sort 
+      list<pair<int,double>> particle_global_times;
+      {
 
-            int ylow = y;
-            int yhigh = y;
+        mt19937 random_number_generator;
+        random_number_generator.seed(3);
+        uniform_real_distribution<double> distribution(0.0,1.0);
 
-            int zlow = z;
-            int zhigh = z;
-
-            if(xlow-1>0) --xlow;
-            if(xhigh+1<distance) ++xhigh;
-            if(ylow-1>0) --ylow;
-            if(yhigh+1<distance) ++yhigh;
-            if(zlow-1>0) --zlow;
-            if(zhigh+1<distance) ++zhigh;
-
-            map<int,double> cummulitive_probability;
-            double pval = 0.0;
-            int siteId = converter.to1D(x,y,z); 
-            for( int x2 = xlow; x2<=xhigh; ++x2){
-              for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    cummulitive_probability[neighId]=rates[siteId][neighId]/sum_rates[siteId];
-                    cummulitive_probability[neighId]+=pval;
-                    pval+=rates[siteId][neighId]/sum_rates[siteId];
-                  }
-                }
-              }
-            }
-            assert(cummulitive_probability.size()!=0);
-            cummulitive_probability_to_neighbors[siteId] = cummulitive_probability; 
-            assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
-          }
+        for(int particle_index=0; particle_index<particles;++particle_index){
+          particle_global_times.push_back(pair<int,double>(particle_index,electrons.at(particle_index)->getDwellTime()));
+          cout << electrons.at(particle_index)->getDwellTime() << endl;
         }
-      }
-    }// Calculate crude probability to neighbors
-
-
-    // Calculate Particle dwell times and sort 
-    list<pair<int,double>> particle_global_times;
-    {
-
-      mt19937 random_number_generator;
-      random_number_generator.seed(3);
-      uniform_real_distribution<double> distribution(0.0,1.0);
-
-      for(int particle_index=0; particle_index<particles;++particle_index){
-        auto position = particle_positions[particle_index];
-        auto siteId = converter.to1D(position);
-        particle_global_times.push_back(pair<int,double>(particle_index, sojourn_times[siteId]*log(distribution(random_number_generator))*-1.0));
-      }
-      particle_global_times.sort(compareSecondItemOfPair);
-    }// Calculate particle dwell times and sort
-
-
-    // Run simulation until cutoff simulation time is reached
-    {
-
-      mt19937 random_number_generator;
-      random_number_generator.seed(4);
-      uniform_real_distribution<double> distribution(0.0,1.0);
-      unordered_map<int,int> frequency;
-      int iteration_check = 10000;
-
+        particle_global_times.sort(compareSecondItemOfPair);
+      }// Calculate particle dwell times and sort
+      cout << particle_global_times.begin()->second << endl;
+      assert(particle_global_times.begin()->second<simulation_cutoff_time);
       while(particle_global_times.begin()->second<simulation_cutoff_time){
-
-        int iterations = 0;
-        unordered_set<int> visited_sites;
-        while(iterations<iteration_check){
-          int particleId = particle_global_times.begin()->first;
-          vector<int> particle_position = particle_positions[particleId];
-          int siteId = converter.to1D(particle_position);
-
-          double random_number = distribution(random_number_generator);
-          // Attempt to hop
-          assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
-          for( auto pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
-            if(random_number < pval_iterator.second){
-              int neighId = pval_iterator.first;
-              if(siteOccupied.count(neighId)){
-                // Update the sojourn time particle is unable to make the jump
-                particle_global_times.begin()->second += sojourn_times[siteId]*log(distribution(random_number_generator))*-1.0;
-              }else{
-                // vacate site
-                siteOccupied.erase(siteId); 
-                // Occupy new site
-                siteOccupied.insert(neighId);
-                visited_sites.insert(neighId);
-                if(frequency.count(neighId)){
-                  frequency[neighId]++;
-                }else{
-                  frequency[neighId] = 1;
-                }
-                // Update the particles position
-                particle_positions[particleId] = converter.to3D(neighId);
-                // Update the sojourn time of the particle
-                particle_global_times.begin()->second += sojourn_times[neighId]*log(distribution(random_number_generator))*-1.0;
-              }
-              break;
-            }
-          }
-          // reorder the particles based on which one will move next
-          particle_global_times.sort(compareSecondItemOfPair);
-          ++iterations;
-        }
-
-
+        auto particle_index = particle_global_times.begin()->first;
+        auto electron = electrons.at(particle_index); 
+        CGsystem.hop(electron);
+        // Update the dwell time
+        particle_global_times.begin()->second += electron->getDwellTime();
+        // reorder the particles based on which one will move next
+        particle_global_times.sort(compareSecondItemOfPair);
       }
 
-    } // Run simulation until cutoff simulation time is reached
+    }// End of the Course grain simulation 
+    
+
   } // End of course grain Monte Carlo
   high_resolution_clock::time_point course_time_end = high_resolution_clock::now();
 
-  auto duration_crude = duration_cast<seconds>(setup_time_end-setup_time_start+crude_time_end-crude_time_start).count();
-  auto duration_course = duration_cast<seconds>(setup_time_end-setup_time_start+course_time_end-course_time_start).count();
+  auto duraction_crude = duration_cast<seconds>(setup_time_end-setup_time_start+crude_time_end-crude_time_start).count();
+  auto duraction_course = duration_cast<seconds>(setup_time_end-setup_time_start+course_time_end-course_time_start).count();
 
-  cout << "Crude Monte Carlo Run Time: " << duration_crude << " s " << endl;
-  cout << "Course Monte Carlo Run Time: " << duration_course << " s " << endl;
+  cout << "Crude Monte Carlo Run Time: " << duraction_crude << " s " << endl;
+  cout << "Course Monte Carlo Run Time: " << duraction_course << " s " << endl;
   return 0;
 }
