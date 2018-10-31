@@ -12,7 +12,7 @@ namespace kmccoursegrain {
  * \brief Particle class meant to be inherited
  *
  * This class is meant to be inherited, it keeps track of the current site that
- * is occupied as well as the dwell time and the next potential site. 
+ * is occupied as well as the dwell time and the next potential site.
  **/
 class KMC_Particle {
  public:
@@ -23,7 +23,7 @@ class KMC_Particle {
    *
    * \param[in] siteId id of the site the particle is to occupy
    **/
-  void occupySite(int siteId) { current_site_=siteId;}
+  void occupySite(int siteId) { current_site_ = siteId; }
 
   /**
    * \brief Grabs the id of the site the particle currently resides on
@@ -56,7 +56,6 @@ class KMC_Particle {
   void setDwellTime(const double dwelltime) { dwelltime_ = dwelltime; }
 
  private:
-
   /// The site the particle currently resides on
   int current_site_;
 
@@ -65,7 +64,6 @@ class KMC_Particle {
 
   /// The length of time the particle will remain on the current site
   double dwelltime_;
-
 };
 }
 #endif  // KMCCOURSEGRAIN_KMC_PARTICLE_HPP
