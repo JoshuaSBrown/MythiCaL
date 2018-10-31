@@ -48,12 +48,12 @@ class KMC_Particle {
   /**
    * \brief Get the dwell time
    **/
-  double getDwellTime() const { return dwelltime_; }
+  double getDwellTime() const { return dwell_time_; }
 
   /**
    * \brief Set the dwell time
    **/
-  void setDwellTime(const double dwelltime) { dwelltime_ = dwelltime; }
+  void setDwellTime(const double dwell_time) { dwell_time_ = dwell_time; }
 
  private:
   /// The site the particle currently resides on
@@ -63,7 +63,7 @@ class KMC_Particle {
   int potential_site_;
 
   /// The length of time the particle will remain on the current site
-  double dwelltime_;
+  double dwell_time_;
 };
 }
 #endif  // KMCCOURSEGRAIN_KMC_PARTICLE_HPP
