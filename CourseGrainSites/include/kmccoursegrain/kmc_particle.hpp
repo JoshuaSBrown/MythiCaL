@@ -38,7 +38,7 @@ class KMC_Particle {
    * \param[in] site id the particle will try to move to if it remains
    * unoccupied.
    **/
-  void setPotentialSite(const int siteId) { potentialSite_ = siteId; }
+  void setPotentialSite(const int siteId) { potential_site_ = siteId; }
 
   /**
    * \brief Return the id of the site the particle will attempt to move to
@@ -60,7 +60,7 @@ class KMC_Particle {
   int current_site_;
 
   /// The next site the particle will try to move to
-  int potentialSite_;
+  int potential_site_;
 
   /// The length of time the particle will remain on the current site
   double dwelltime_;
