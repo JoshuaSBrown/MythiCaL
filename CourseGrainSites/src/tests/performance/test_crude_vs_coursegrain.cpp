@@ -5,6 +5,7 @@
 #include <string>
 #include <random>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <cmath>
 #include <cassert>
@@ -331,7 +332,8 @@ int main(int argc, char* argv[]){
       mt19937 random_number_generator;
       random_number_generator.seed(4);
       uniform_real_distribution<double> distribution(0.0,1.0);
-
+      unordered_map<int,int> frequency;
+      assert(particle_global_times.begin()->second<simulation_cutoff_time);
       while(particle_global_times.begin()->second<simulation_cutoff_time){
         int particleId = particle_global_times.begin()->first;
         vector<int> particle_position = particle_positions[particleId];
@@ -351,6 +353,11 @@ int main(int argc, char* argv[]){
               siteOccupied.erase(siteId); 
               // Occupy new site
               siteOccupied.insert(neighId);
+              if(frequency.count(neighId)){
+                frequency[neighId]++;
+              }else{
+                frequency[neighId]=1;
+              }
               // Update the particles position
               particle_positions[particleId] = converter.to3D(neighId);
               // Update the sojourn time of the particle
@@ -377,9 +384,8 @@ int main(int argc, char* argv[]){
     map<const int, map<const int, double *>> rates_to_neighbors;
     {
       for(auto site_rates : rates){
-        map<const int ,double *> rates_to;
         for( auto neigh_rate : site_rates.second){
-          rates_to_neighbors[site_rates.first][neigh_rate.first] = &(rates[site_rates.first][neigh_rate.first]);
+          rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
         }
       }
     }
@@ -417,7 +423,7 @@ int main(int argc, char* argv[]){
         }
         particle_global_times.sort(compareSecondItemOfPair);
       }// Calculate particle dwell times and sort
-
+      assert(particle_global_times.begin()->second<simulation_cutoff_time);
       while(particle_global_times.begin()->second<simulation_cutoff_time){
         auto particle_index = particle_global_times.begin()->first;
         auto electron = electrons.at(particle_index); 
