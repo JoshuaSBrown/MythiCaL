@@ -39,7 +39,7 @@ int main(void){
 
   cout << "Testing: setRatesToNeighbors" << endl;
   {
-    map<const int, double *> neighRates;
+    unordered_map< int, double *> neighRates;
     double rate1 = 400;
     double rate2 = 200;
     double rate3 = 10;
@@ -55,7 +55,7 @@ int main(void){
 
   cout << "Testing: getRateToNeighbor" << endl;
   {
-    map<const int, double *> neighRates;
+    unordered_map< int, double *> neighRates;
     double rate1 = 400;
     double rate2 = 200;
     double rate3 = 10;
@@ -82,10 +82,10 @@ int main(void){
     
     KMC_Site site;
 
-    site.addNeighRate(pair<const int,double *>(1,&rate1));
-    site.addNeighRate(pair<const int,double *>(2,&rate2));
-    site.addNeighRate(pair<const int,double *>(3,&rate3));
-    site.addNeighRate(pair<const int,double * >(4,&rate4));
+    site.addNeighRate(pair< int,double *>(1,&rate1));
+    site.addNeighRate(pair< int,double *>(2,&rate2));
+    site.addNeighRate(pair< int,double *>(3,&rate3));
+    site.addNeighRate(pair< int,double * >(4,&rate4));
 
     assert(static_cast<int>(site.getRateToNeighbor(1))==400);
     assert(static_cast<int>(site.getRateToNeighbor(2))==200);
@@ -94,7 +94,7 @@ int main(void){
 
     bool fail = false;
     try{
-      site.addNeighRate(pair<const int,double * >(4,&rate4));
+      site.addNeighRate(pair< int,double * >(4,&rate4));
     }catch(...){
       fail = true;
     }
@@ -110,20 +110,20 @@ int main(void){
     
     KMC_Site site;
 
-    site.resetNeighRate(pair<const int,double * >(1,&rate1));
-    site.resetNeighRate(pair<const int,double * >(2,&rate2));
-    site.resetNeighRate(pair<const int,double * >(3,&rate3));
-    site.resetNeighRate(pair<const int,double * >(4,&rate4));
+    site.resetNeighRate(pair< int,double * >(1,&rate1));
+    site.resetNeighRate(pair< int,double * >(2,&rate2));
+    site.resetNeighRate(pair< int,double * >(3,&rate3));
+    site.resetNeighRate(pair< int,double * >(4,&rate4));
 
     assert(static_cast<int>(site.getRateToNeighbor(1))==400);
     assert(static_cast<int>(site.getRateToNeighbor(2))==200);
     assert(static_cast<int>(site.getRateToNeighbor(3))==10);
     assert(static_cast<int>(site.getRateToNeighbor(4))==1);
 
-    site.resetNeighRate(pair<const int,double * >(1,&rate4));
-    site.resetNeighRate(pair<const int,double * >(2,&rate3));
-    site.resetNeighRate(pair<const int,double * >(3,&rate2));
-    site.resetNeighRate(pair<const int,double * >(4,&rate1));
+    site.resetNeighRate(pair< int,double * >(1,&rate4));
+    site.resetNeighRate(pair< int,double * >(2,&rate3));
+    site.resetNeighRate(pair< int,double * >(3,&rate2));
+    site.resetNeighRate(pair< int,double * >(4,&rate1));
   
     assert(static_cast<int>(site.getRateToNeighbor(4))==400);
     assert(static_cast<int>(site.getRateToNeighbor(3))==200);
@@ -140,10 +140,10 @@ int main(void){
     
     KMC_Site site;
 
-    site.addNeighRate(pair<const int,double * >(1,&rate1));
-    site.addNeighRate(pair<const int,double * >(2,&rate2));
-    site.addNeighRate(pair<const int,double * >(3,&rate3));
-    site.addNeighRate(pair<const int,double * >(4,&rate4));
+    site.addNeighRate(pair< int,double * >(1,&rate1));
+    site.addNeighRate(pair< int,double * >(2,&rate2));
+    site.addNeighRate(pair< int,double * >(3,&rate3));
+    site.addNeighRate(pair< int,double * >(4,&rate4));
 
     assert(site.isNeighbor(0)==false);
     assert(site.isNeighbor(1)==true);
@@ -174,7 +174,7 @@ int main(void){
 
   cout << "Testing: probability to hop to neighbor" << endl;
   {
-    map<const int, double * > neighRates;
+    unordered_map< int, double * > neighRates;
     double rate1 = 1;
     double rate2 = 1;
     double rate3 = 1;
@@ -196,13 +196,14 @@ int main(void){
     assert(fail);
 
     double probability = site.getProbabilityOfHoppingToNeighboringSite(1);
+    cout << "probability " << probability << endl;
     assert(static_cast<int>(probability*100)==25);
   
   }
 
   cout << "Testing: getNeighborSiteIds" << endl;
   {
-    map<const int, double * > neighRates;
+    unordered_map< int, double * > neighRates;
     double rate1 = 1;
     double rate2 = 1;
     double rate3 = 1;
@@ -237,7 +238,7 @@ int main(void){
 
   cout << "Testing: site output" << endl;
   {
-    map<const int, double * > neighRates;
+    unordered_map< int, double * > neighRates;
     double rate1 = 1;
     double rate2 = 1;
     double rate3 = 1;

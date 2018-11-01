@@ -1,4 +1,5 @@
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <random>
@@ -106,13 +107,19 @@ int KMC_Cluster::pickNewSiteId() {
 
 double KMC_Cluster::getProbabilityOfHoppingToNeighborOfCluster(
     const int neighId) {
-  if (!probabilityHopToNeighbor_.count(neighId)) {
+  
+  auto it = find_if(probabilityHopToNeighbor_.begin(),
+                    probabilityHopToNeighbor_.end(),
+                    [&neighId](const pair<int,double> neigh_and_prob){
+                    return neigh_and_prob.first==neighId;});
+  if (it==probabilityHopToNeighbor_.end()) {
     string err =
         "Cannot get probability of hopping to neighbor, either the"
         " site is not a neighbor or the cluster has not been converged.";
     throw invalid_argument(err);
   }
-  return probabilityHopToNeighbor_[neighId];
+
+  return it->second;
 }
 
 void KMC_Cluster::setConvergenceTolerance(double tolerance) {
@@ -155,10 +162,10 @@ std::ostream& operator<<(std::ostream& os,
 
 // The firsts int is the id of site within cluster
 // second int is the id of the neighbor of site outside of cluster
-map<const int, map<const int, double>>
+unordered_map<int, unordered_map<int, double>>
     KMC_Cluster::getRatesToNeighborsOfCluster_() {
 
-  map<const int, map<const int, double>> externalRates;
+  unordered_map<int, unordered_map<int, double>> externalRates;
 
   for (auto site : sitesInCluster_) {
     for (auto neighId : site.second->getNeighborSiteIds()) {
@@ -194,7 +201,7 @@ void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
     sumDwell += site.second->getTimeConstant();
   }
 
-  map<const int, double> probabilityHopToNeighbor;
+  unordered_map<int, double> probabilityHopToNeighbor;
   for (auto rateToNeigh : ratesToNeighbors) {
     int siteHoppingFrom = rateToNeigh.first;
     for (auto rate : rateToNeigh.second) {
@@ -225,13 +232,22 @@ void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
   for (auto neighborProb : probabilityHopToNeighbor) {
     probabilityHopToNeighbor[neighborProb.first] = neighborProb.second / total;
   }
+  probabilityHopToNeighbor_.clear();
 
-  probabilityHopToNeighbor_ = probabilityHopToNeighbor;
+  copy(probabilityHopToNeighbor.begin(),
+      probabilityHopToNeighbor.end(),
+      back_inserter(probabilityHopToNeighbor_));
+
+  sort(probabilityHopToNeighbor_.begin(),
+      probabilityHopToNeighbor_.end(),
+      [](const pair<int,double>& x,const pair<int,double>&y)->bool{
+        return x.second>y.second;
+      });
 }
 
 void KMC_Cluster::iterate_() {
 
-  map<const int, double> temp_probabilityOnSite;
+  unordered_map<int, double> temp_probabilityOnSite;
 
   double total = 0.0;
   for (auto site : sitesInCluster_) {
@@ -242,6 +258,7 @@ void KMC_Cluster::iterate_() {
               sitesInCluster_[neighsite]
                   ->getProbabilityOfHoppingToNeighboringSite(site.first) *
               probabilityOnSite_[neighsite];
+                  
         } else {
           temp_probabilityOnSite[site.first] =
               sitesInCluster_[neighsite]
@@ -301,16 +318,16 @@ void KMC_Cluster::solveMasterEquation_() {
   calculateProbabilityHopToNeighbors_();
 }
 
-map<const int, vector<pair<const int, double>>>
+unordered_map<int, vector<pair<int, double>>>
     KMC_Cluster::getInternalRatesFromNeighborsComingToSite_() {
 
-  map<const int, vector<pair<const int, double>>> internalRates;
+  unordered_map<int, vector<pair<int, double>>> internalRates;
 
   for (auto site : sitesInCluster_) {
     for (auto neighId : site.second->getNeighborSiteIds()) {
       if (siteIsInCluster(neighId)) {
         auto rateToNeigh = site.second->getRateToNeighbor(neighId);
-        pair<const int, double> rateToSite(site.first, rateToNeigh);
+        pair<int, double> rateToSite(site.first, rateToNeigh);
         internalRates[neighId].push_back(rateToSite);
       }
     }
@@ -357,7 +374,7 @@ void KMC_Cluster::calculateEscapeRatesFromSitesToTheirNeighbors_() {
 
   auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
 
-  map<const int, double> temp;
+  unordered_map<int, double> temp;
 
   for (auto site : ratesToNeighbors) {
     for (auto neigh : site.second) {

@@ -1,5 +1,3 @@
-//#include "cluster.h"
-
 #include "kmc_site.hpp"
 #include "../../include/kmccoursegrain/kmc_constants.hpp"
 #include <chrono>
@@ -10,6 +8,21 @@
 using namespace std;
 
 namespace kmccoursegrain {
+
+  class CustomComparitor
+  {
+    public:
+      int operator()(const pair<double,int>& lhs, const pair<double,int>& rhs)
+      {
+        if(lhs.first==rhs.first){
+          return 0;
+        }
+        if(lhs.second==rhs.second){
+          return lhs.first<rhs.first;
+        }
+        return lhs.second < rhs.second;
+      }
+  };
 
 /*********************************************************************
  * Public Facing Functions
@@ -29,7 +42,7 @@ void KMC_Site::setRandomSeed(const unsigned long seed) {
   randomEngine_ = mt19937(seed);
 }
 
-void KMC_Site::setRatesToNeighbors(map<int const, double*> neighRates) {
+void KMC_Site::setRatesToNeighbors(unordered_map<int, double*> neighRates) {
   for (auto neighAndRate : neighRates) {
     neighRates_[neighAndRate.first] = neighAndRate.second;
   }
@@ -37,7 +50,7 @@ void KMC_Site::setRatesToNeighbors(map<int const, double*> neighRates) {
   calculateProbabilityHopToNeighbors_();
 }
 
-void KMC_Site::addNeighRate(const pair<int const, double*> neighRate) {
+void KMC_Site::addNeighRate(const pair<int, double*> neighRate) {
 
   if (neighRates_.count(neighRate.first)) {
     throw invalid_argument("That neighbor has already been added.");
@@ -47,7 +60,7 @@ void KMC_Site::addNeighRate(const pair<int const, double*> neighRate) {
   calculateProbabilityHopToNeighbors_();
 }
 
-void KMC_Site::resetNeighRate(const pair<int const, double*> neighRate) {
+void KMC_Site::resetNeighRate(const pair<int, double*> neighRate) {
   neighRates_[neighRate.first] = neighRate.second;
   calculateDwellTimeConstant_();
   calculateProbabilityHopToNeighbors_();
@@ -102,9 +115,7 @@ double KMC_Site::getProbabilityOfHoppingToNeighboringSite(
   // Use neighRates because random access of map is faster than vector
   if (neighRates_.count(neighSiteId) == 0) {
     string err = "Error site " + to_string(neighSiteId) +
-                 " is not a neighbor of "
-                 "" +
-                 to_string(getId());
+                 " is not a neighbor of " + to_string(getId());
     throw invalid_argument(err);
   }
 
@@ -113,10 +124,11 @@ double KMC_Site::getProbabilityOfHoppingToNeighboringSite(
       probabilityHopToNeighbor_.end(),
       [&neighSiteId](const pair<int,double>& neigh_and_prob)
       { return neighSiteId==neigh_and_prob.first; }); 
+
   return it->second;
 }
 
-vector<pair<const int, double>> KMC_Site::getProbabilitiesAndIdsOfNeighbors() const {
+vector<pair<int, double>> KMC_Site::getProbabilitiesAndIdsOfNeighbors() const {
   return probabilityHopToNeighbor_;
 }
 
@@ -141,16 +153,16 @@ std::ostream& operator<<(std::ostream& os,
  *********************************************************************/
 void KMC_Site::calculateProbabilityHopToNeighbors_() {
   double sumRates = getSumOfRates_();
-  set<pair<int,double>,compareValueOfPair_> neigh_and_prob;
+  set<pair<int,double>,CustomComparitor> neigh_and_prob;
   for (auto rateToNeigh : neighRates_) {
-    neigh_and_prob.insert(pair<int,double>(rateToNeigh.first,(*rateToNeigh.second) / sumRates));
+    auto values = pair<int,double> (rateToNeigh.first,(*rateToNeigh.second) / sumRates);
+    neigh_and_prob.insert(values);
   }
 
-  probabilityHopToNeighbor_ = vector<pair<int,double>>(neigh_and_prob.begin(),neigh_and_prob.end());
-}
+  probabilityHopToNeighbor_.clear();
+  copy(neigh_and_prob.begin(),neigh_and_prob.end(),back_inserter(probabilityHopToNeighbor_));
 
-bool KMC_Site::compareValueOfPair_(const pair<int,double> &x,const pair<int,double> &y){
-  return x.second<y.second;
+  
 }
 
 void KMC_Site::calculateDwellTimeConstant_() {
@@ -165,4 +177,5 @@ double KMC_Site::getSumOfRates_() {
   }
   return sum;
 }
+
 }

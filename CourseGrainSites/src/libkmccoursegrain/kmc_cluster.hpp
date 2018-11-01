@@ -1,7 +1,7 @@
 #ifndef KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 #define KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <random>
 #include <vector>
@@ -317,20 +317,20 @@ class KMC_Cluster : public virtual Identity {
    * The first integer in the map is the neighbor site id, the double is a
    * probability given as a value between 0 and 1.
    **/
-  std::map<const int, double> probabilityHopToNeighbor_;
+  std::vector<std::pair<int, double>> probabilityHopToNeighbor_;
 
   /**
    * \brief Stores the rates from each site in the cluster to the neighbors
    *
-   * The first int is the site id of the neighbors, the double is a sum of
+   * The first int is the site id of an internal site, the double is a sum of
    * all the rates going to that neighbors.
    **/
-  std::map<const int, double> escapeRateFromSiteToNeighbor_;
+  std::unordered_map<int, double> escapeRateFromSiteToNeighbor_;
 
   /**
    * \brief Stores the pointers to sites that are in the cluster
    **/
-  std::map<const int, SitePtr> sitesInCluster_;
+  std::unordered_map<int, SitePtr> sitesInCluster_;
 
   /**
    * \brief The probability of a particle being on each of the sites
@@ -339,7 +339,7 @@ class KMC_Cluster : public virtual Identity {
    * is a probability between 0 and 1 which is found from solving the
    * Master Eqaution.
    **/
-  std::map<const int, double> probabilityOnSite_;
+  std::unordered_map<int, double> probabilityOnSite_;
 
   /************************************************************************
    * Local Cluster Functions
@@ -405,7 +405,7 @@ class KMC_Cluster : public virtual Identity {
   // First int is the Id of a site within the cluster
   // pair - first int is the id of the site neighboring the cluster
   // double is the rate
-  std::map<const int, std::map<const int, double>>
+  std::unordered_map<int, std::unordered_map<int, double>>
       getRatesToNeighborsOfCluster_();
 
   void iterate_();
@@ -435,7 +435,7 @@ class KMC_Cluster : public virtual Identity {
    *
    * The diagram explains how the contents are stored in the map.
    **/
-  std::map<const int, std::vector<std::pair<const int, double>>>
+  std::unordered_map<int, std::vector<std::pair<int, double>>>
       getInternalRatesFromNeighborsComingToSite_();
 };
 }

@@ -2,7 +2,7 @@
 #define KMCCOURSEGRAIN_KMC_SITE_HPP
 
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <math.h>
 #include <memory>
 #include <random>
@@ -47,7 +47,7 @@ class KMC_Site : public virtual Identity {
    * \param[in] neighRates Stores the site id of the neighbor with a pointer
    * to the rate going to the neighboring site.
    **/
-  void setRatesToNeighbors(std::map<int const, double*> neighRates);
+  void setRatesToNeighbors(std::unordered_map<int, double*> neighRates);
 
   /**
    * \brief Add a rate to a neighboring site
@@ -59,7 +59,7 @@ class KMC_Site : public virtual Identity {
    * \param[in] neighborRate The first int is the site id of neighboring
    * site, this is followed by a pointer to actual rate.
    **/
-  void addNeighRate(const std::pair<const int, double*> neighRate);
+  void addNeighRate(const std::pair<int, double*> neighRate);
 
   /**
    * \brief Reset the rate to a neighboring site
@@ -70,7 +70,7 @@ class KMC_Site : public virtual Identity {
    * \param[in] neighRate the first int is the id of the neighboring site,
    * the double pointer will point to the rate.
    **/
-  void resetNeighRate(const std::pair<const int, double*> neighRate);
+  void resetNeighRate(const std::pair<int, double*> neighRate);
 
   /**
    * \brief Is the site a neighbor
@@ -205,7 +205,7 @@ class KMC_Site : public virtual Identity {
    * probability that a charge located on the site will hop to one of these
    * neighbors
    **/
-  std::vector<std::pair<const int, double>> getProbabilitiesAndIdsOfNeighbors() const;
+  std::vector<std::pair<int, double>> getProbabilitiesAndIdsOfNeighbors() const;
 
   /**
    * \brief Prints the output of the site
@@ -231,12 +231,12 @@ class KMC_Site : public virtual Identity {
   /**
    * \brief Contains the probability of hopping to each neighbor
    **/
-  std::vector<std::pair<int const, double>> probabilityHopToNeighbor_;
+  std::vector<std::pair<int, double>> probabilityHopToNeighbor_;
 
   /**
    * \brief Stores pointers to the rates to each of the neighboring sites
    **/
-  std::map<int const, double*> neighRates_;
+  std::unordered_map<int, double*> neighRates_;
 
   /**
    * \brief Keeps track of the total number of time the site has been
