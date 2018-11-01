@@ -114,13 +114,13 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    map<const int,map<const int,double *>> ratesToNeighbors;
+    map< int,map< int,double *>> ratesToNeighbors;
 
     int global_index = 0;
 
     for( int index=0;index<14;++index){
 
-      map<const int,double*> ratesFromSiteToNeighbors;
+      map< int,double*> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);
@@ -267,13 +267,13 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    map<const int,map<const int,double *>> ratesToNeighbors;
+    map< int,map< int,double *>> ratesToNeighbors;
 
     int global_index = 0;
 
     for( int index=0;index<14;++index){
 
-      map<const int,double*> ratesFromSiteToNeighbors;
+      map< int,double*> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);

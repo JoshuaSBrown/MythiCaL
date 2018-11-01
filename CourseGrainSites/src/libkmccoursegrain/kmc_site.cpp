@@ -90,8 +90,8 @@ vector<int> KMC_Site::getNeighborSiteIds() const {
 }
 
 double KMC_Site::getDwellTime() {
-  double number = randomDistribution_(randomEngine_);
-  return (-log(number) * escapeTimeConstant_);
+  //double number = randomDistribution_(randomEngine_);
+  return escapeTimeConstant_;//(-log(number) * escapeTimeConstant_);
 }
 
 int KMC_Site::pickNewSiteId() {
@@ -137,6 +137,7 @@ std::ostream& operator<<(std::ostream& os,
   os << "Site Id: " << site.getId() << endl;
   os << "Cluster Id: " << site.clusterId_ << endl;
   os << "Total Visit Frequency: " << site.totalVisitFreq_ << endl;
+  os << "Escape Time Constant: " << site.escapeTimeConstant_ << endl;
   os << "Neighbors:Rates" << endl;
   for (auto rate_ptr : site.neighRates_) {
     os << "\t" << rate_ptr.first << ":" << *(rate_ptr.second) << endl;

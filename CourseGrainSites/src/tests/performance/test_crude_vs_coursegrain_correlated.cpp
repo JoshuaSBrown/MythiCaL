@@ -434,10 +434,10 @@ int main(int argc, char* argv[]){
   high_resolution_clock::time_point course_time_start = high_resolution_clock::now();
   {
     // greating map with pointer to rates
-    map<const int, map<const int, double *>> rates_to_neighbors;
+    map< int, map< int, double *>> rates_to_neighbors;
     {
       for(auto site_rates : rates){
-        map<const int ,double *> rates_to;
+        map< int ,double *> rates_to;
         for( auto neigh_rate : site_rates.second){
           rates_to_neighbors[site_rates.first][neigh_rate.first] = &neigh_rate.second;
         }
@@ -463,7 +463,6 @@ int main(int argc, char* argv[]){
       CGsystem.setCourseGrainIterationThreshold(20);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
-      CGsystem.setMaxParticleMemory(3);
       // Calculate Particle dwell times and sort 
       list<pair<int,double>> particle_global_times;
       {

@@ -1,14 +1,17 @@
+
+#include <algorithm>
+#include <iostream>
+#include <stdexcept>
+
 #include "../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
 #include "../../include/kmccoursegrain/kmc_constants.hpp"
 #include "../../include/kmccoursegrain/kmc_particle.hpp"
+
 #include "kmc_cluster.hpp"
 #include "kmc_site.hpp"
 #include "log.hpp"
-#include <iostream>
-#include <map>
-#include <stdexcept>
-#include <algorithm>
 
+#include "../../../UGLY/include/ugly/pair_hash.hpp"
 #include "../../../UGLY/include/ugly/edge_directed_weighted.hpp"
 #include "../../../UGLY/include/ugly/graph.hpp"
 #include "../../../UGLY/include/ugly/graph_algorithms.hpp"
@@ -35,11 +38,8 @@ namespace kmccoursegrain {
  *
  * \return list of edges defining the connections between the sites
  **/
-list<shared_ptr<Edge>> createEdges_(unordered_map<int, SitePtr> sites_,
-                                    vector<int> siteIds);
-list<shared_ptr<Edge>> createEdges_(unordered_map<int, SitePtr> sites_,
-                                    unordered_map<int,int> siteIds);
-
+list<shared_ptr<Edge>> createEdges_(unordered_map<int, SitePtr> sites_, vector<int> siteIds);
+list<shared_ptr<Edge>> createEdges_(unordered_map<int, SitePtr> sites_, unordered_map<int,int> siteIds);
 
 bool compare(const pair<int,int> &x, const pair<int,int> &y){
   return x.second>y.second;
@@ -56,15 +56,15 @@ bool compare(const pair<int,int> &x, const pair<int,int> &y){
  * consists of information stored in the node or vertex in the form of a
  * graphnode
  **/
-map<int, shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds);
-map<int, shared_ptr<GraphNode<string>>> createNodes_(unordered_map<int,int> siteIds);
+unordered_map<int, shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds);
+unordered_map<int, shared_ptr<GraphNode<string>>> createNodes_(unordered_map<int,int> siteIds);
+
 
 /****************************************************************************
  * Public Facing Functions
  ****************************************************************************/
 
-void KMC_CourseGrainSystem::initializeSystem(
-    map<int const, map<int const, double*>> ratesOfAllSites) {
+void KMC_CourseGrainSystem::initializeSystem(unordered_map<int, unordered_map<int, double*>> ratesOfAllSites) {
 
   LOG("Initializeing system", 1);
 
@@ -78,6 +78,7 @@ void KMC_CourseGrainSystem::initializeSystem(
     }
     sites_[it->first] = site;
   }
+
 }
 
 void KMC_CourseGrainSystem::initializeParticles(vector<ParticlePtr> particles) {
@@ -141,7 +142,6 @@ void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
   if (sites_[siteToHopTo]->siteIsOccupied()) {
     LOG("Site " + to_string(siteToHopTo) + " is occupied", 1);
     if (sites_[siteId]->partOfCluster()) {
-      
       auto clusterId = sites_[siteId]->getClusterId();
       int newId = clusters_[clusterId]->pickNewSiteId();
       auto hopTime = clusters_[clusterId]->getDwellTime();
@@ -149,7 +149,6 @@ void KMC_CourseGrainSystem::hop(ParticlePtr particle) {
       particle->setPotentialSite(newId);
 
     } else {
-
       int newId = sites_[siteId]->pickNewSiteId();
       auto hopTime = sites_[siteId]->getDwellTime();
 
@@ -209,7 +208,7 @@ vector<vector<int>> KMC_CourseGrainSystem::breakIntoIslands_(unordered_map<int,i
 
 //  cout << "number of edges " << edges.size() << endl;
   list<weak_ptr<Edge>> edges_weak(edges.begin(), edges.end());
-  map<int, weak_ptr<GraphNode<string>>> nodes_weak;
+  unordered_map<int, weak_ptr<GraphNode<string>>> nodes_weak;
   for (auto map_iter : nodes) nodes_weak[map_iter.first] = map_iter.second;
 
   auto graph_ptr = shared_ptr<Graph<string>>(new Graph<string>(edges_weak, nodes_weak));
@@ -247,7 +246,7 @@ vector<vector<int>> KMC_CourseGrainSystem::breakIntoIslands_(unordered_map<int,i
         auto nodes2 = createNodes_(tempIsland);
 
         list<weak_ptr<Edge>> edges_weak2(edges2.begin(), edges2.end());
-        map<int, weak_ptr<GraphNode<string>>> nodes_weak2;
+        unordered_map<int, weak_ptr<GraphNode<string>>> nodes_weak2;
         for (auto map_iter : nodes2) nodes_weak2[map_iter.first] = map_iter.second;
 
         auto graph_ptr2 = shared_ptr<Graph<string>>(new Graph<string>(edges_weak2, nodes_weak2));
@@ -330,18 +329,18 @@ void KMC_CourseGrainSystem::mergeSitesToCluster_(vector<int> siteIds,
   clusters_[favoredClusterId]->addSites(isolated_sites);
 }
 
-double KMC_CourseGrainSystem::getInternalTimeLimit_(vector<int> siteIds){
+double KMC_CourseGrainSystem::getInternalTimeLimit_(vector<int> siteIds ){
   LOG("Getting the internal time limit of a cluster", 1);
   auto edges = createEdges_(sites_, siteIds);
   auto nodes = createNodes_(siteIds);
   list<weak_ptr<Edge>> edges_weak(edges.begin(), edges.end());
-  map<int, weak_ptr<GraphNode<string>>> nodes_weak;
+  unordered_map<int, weak_ptr<GraphNode<string>>> nodes_weak;
   for (auto map_iter : nodes) nodes_weak[map_iter.first] = map_iter.second;
 
   auto graph_ptr =
       shared_ptr<Graph<string>>(new Graph<string>(edges_weak, nodes_weak));
 
-  map<pair<int, int>, double> verticesAndtimes =
+  unordered_map<pair<int, int>, double,hash_functions::hash> verticesAndtimes =
       maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
 
   double maxtime = 0.0;
@@ -385,9 +384,9 @@ double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
   return minimumTimeConstant;
 }
 
-map<int, shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds) {
+unordered_map<int, shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds) {
   LOG("Creating nodes", 1);
-  map<int, shared_ptr<GraphNode<string>>> nds;
+  unordered_map<int, shared_ptr<GraphNode<string>>> nds;
   for (auto siteId : siteIds) {
     if (nds.count(siteId) == 0) {
       auto gn = shared_ptr<GraphNode<string>>(new GraphNode<string>(""));
@@ -397,9 +396,9 @@ map<int, shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds) {
   return nds;
 }
 
-map<int, shared_ptr<GraphNode<string>>> createNodes_(unordered_map<int,int> siteIds) {
+unordered_map<int, shared_ptr<GraphNode<string>>> createNodes_(unordered_map<int,int> siteIds) {
   LOG("Creating nodes", 1);
-  map<int, shared_ptr<GraphNode<string>>> nds;
+  unordered_map<int, shared_ptr<GraphNode<string>>> nds;
   for (auto siteId : siteIds) {
     if (nds.count(siteId.first) == 0) {
       auto gn = shared_ptr<GraphNode<string>>(new GraphNode<string>(""));
@@ -409,7 +408,7 @@ map<int, shared_ptr<GraphNode<string>>> createNodes_(unordered_map<int,int> site
   return nds;
 }
 
-list<shared_ptr<Edge>> createEdges_(map<int, SitePtr> sites_,
+list<shared_ptr<Edge>> createEdges_(unordered_map<int, SitePtr> sites_,
                                     vector<int> siteIds) {
 
   LOG("Creating graph", 1);
@@ -430,7 +429,7 @@ list<shared_ptr<Edge>> createEdges_(map<int, SitePtr> sites_,
   return edges;
 }
 
-list<shared_ptr<Edge>> createEdges_(map<int, SitePtr> sites_,
+list<shared_ptr<Edge>> createEdges_(unordered_map<int, SitePtr> sites_,
                                     unordered_map<int,int> siteIds) {
 
   LOG("Creating graph", 1);

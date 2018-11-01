@@ -51,6 +51,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include)
 install(FILES ${HEADERS} DESTINATION CourseGrainSites/include/kmccoursegrain)
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/*.cpp)
+message(${SOURCES})
 add_library(kmc_course_grain ${SOURCES})
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 

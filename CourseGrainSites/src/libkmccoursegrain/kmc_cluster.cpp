@@ -65,6 +65,7 @@ void KMC_Cluster::addSites(vector<SitePtr> newSites) {
 void KMC_Cluster::updateProbabilitiesAndTimeConstant() {
   solveMasterEquation_();
   calculateEscapeRatesFromSitesToTheirNeighbors_();
+  calculateProbabilityHopOffInternalSite_();
   calculateEscapeTimeConstant_();
 }
 
@@ -137,8 +138,8 @@ void KMC_Cluster::setConvergenceIterations(long iterations) {
 }
 
 double KMC_Cluster::getDwellTime() {
-  double number = randomDistribution_(randomEngine_);
-  return (-log(number) * escapeTimeConstant_ / resolution_);
+  //double number = randomDistribution_(randomEngine_);
+  return escapeTimeConstant_/resolution_;//(-log(number) * escapeTimeConstant_ / resolution_);
 }
 
 std::ostream& operator<<(std::ostream& os,
@@ -184,6 +185,40 @@ void KMC_Cluster::initializeProbabilityOnSites_() {
         1.0 / (static_cast<double>(sitesInCluster_.size()));
   }
   return;
+}
+
+void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
+
+  unordered_map<int, double> probabilityHopToInternalSite;
+  double total = 0.0;
+  for(auto site_prob : probabilityOnSite_){
+    probabilityHopToInternalSite[site_prob.first] = site_prob.second * sitesInCluster_[site_prob.first]->getTimeConstant();
+
+
+    cout << "site " << site_prob.first << " time constant " << sitesInCluster_[site_prob.first]->getTimeConstant() << " prob " << site_prob.second<< endl;
+    total+=probabilityHopToInternalSite[site_prob.first];
+  }
+
+  // Normalize
+  for(auto site_prob_per_time : probabilityHopToInternalSite){
+    probabilityHopToInternalSite[site_prob_per_time.first]/=total;
+  }
+
+  probabilityHopToInternalSite_.clear();
+  copy(probabilityHopToInternalSite.begin(),
+      probabilityHopToInternalSite.end(),
+      back_inserter(probabilityHopToInternalSite_));
+
+  sort(probabilityHopToInternalSite_.begin(),
+      probabilityHopToInternalSite_.end(),
+      [](const pair<int,double>& x,const pair<int,double>&y)->bool{
+        return x.second>y.second;
+      });
+
+
+  for(auto prob : probabilityHopToInternalSite_){
+    cout << "site " << prob.first << " prob " << prob.second << endl;
+  } 
 }
 
 void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
@@ -315,6 +350,7 @@ void KMC_Cluster::solveMasterEquation_() {
       error = pow(error, 1.0 / 2.0);
     }
   }
+  calculateProbabilityHopToInternalSite_();
   calculateProbabilityHopToNeighbors_();
 }
 
@@ -360,7 +396,7 @@ int KMC_Cluster::pickInternalSite_() {
 
   double number = randomDistribution_(randomEngine_);
   double threshold = 0.0;
-  for (auto pval : probabilityOnSite_) {
+  for (auto pval : probabilityHopToInternalSite_) {
     threshold += pval.second;
     if (number < threshold) return pval.first;
   }
@@ -368,6 +404,39 @@ int KMC_Cluster::pickInternalSite_() {
       "cummulitive probability distribution of sites in the cluster "
       "is flawed or random number is greater than 1";
   throw invalid_argument(err);
+}
+
+void KMC_Cluster::calculateProbabilityHopOffInternalSite_() {
+ 
+  probabilityHopOffInternalSite_.clear();
+
+  auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
+  auto sum_rates_off = 0.0;
+  for(auto site_to_neigh : ratesToNeighbors){
+    for(auto rate : site_to_neigh.second ){
+      sum_rates_off+=rate.second;
+    }
+  }
+  cout << "tot " << sum_rates_off << endl;
+  auto sum_time_constants = 0.0;
+  for(auto site_prob : probabilityOnSite_) {
+    sum_time_constants+=sitesInCluster_[site_prob.first]->getTimeConstant();
+  }
+  cout << "Sum time constants " << sum_time_constants << endl;
+  double total2 = 0.0;
+  for(auto site_prob : probabilityOnSite_ ){
+    probabilityHopOffInternalSite_[site_prob.first] = site_prob.second*escapeRateFromSiteToNeighbor_[site_prob.first]/sum_rates_off*sitesInCluster_[site_prob.first]->getTimeConstant()/sum_time_constants;
+    total2+=probabilityHopOffInternalSite_[site_prob.first];
+
+    cout << "Escape rate from site " << site_prob.first << " " << escapeRateFromSiteToNeighbor_[site_prob.first] << endl;
+  }
+
+  cout << "Hop off values " << endl;
+  for(auto hop_off : probabilityHopOffInternalSite_){
+    probabilityHopOffInternalSite_[hop_off.first] = hop_off.second/total2;
+    cout << "site " << hop_off.first << " hop off " << probabilityHopOffInternalSite_[hop_off.first] << endl;
+  }
+  
 }
 
 void KMC_Cluster::calculateEscapeRatesFromSitesToTheirNeighbors_() {
@@ -378,7 +447,7 @@ void KMC_Cluster::calculateEscapeRatesFromSitesToTheirNeighbors_() {
 
   for (auto site : ratesToNeighbors) {
     for (auto neigh : site.second) {
-      if (temp.count(site.first)) {
+      if (temp.count(site.first)==0) {
         temp[site.first] = neigh.second;
       } else {
         temp[site.first] += neigh.second;
@@ -391,12 +460,9 @@ void KMC_Cluster::calculateEscapeRatesFromSitesToTheirNeighbors_() {
 void KMC_Cluster::calculateEscapeTimeConstant_() {
   auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
   escapeTimeConstant_ = 0.0;
-  for (auto site : ratesToNeighbors) {
-    double sum_rates;
-    for (auto neigh : site.second) {
-      sum_rates += neigh.second; 
-    }
-    escapeTimeConstant_ += 1.0/sum_rates*probabilityOnSite_[site.first];
+
+  for( auto site_prob : probabilityHopOffInternalSite_ ){
+    escapeTimeConstant_ += 1.0/escapeRateFromSiteToNeighbor_[site_prob.first] *site_prob.second ;
   }
 }
 }

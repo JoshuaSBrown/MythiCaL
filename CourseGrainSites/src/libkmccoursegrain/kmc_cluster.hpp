@@ -332,6 +332,8 @@ class KMC_Cluster : public virtual Identity {
    **/
   std::unordered_map<int, SitePtr> sitesInCluster_;
 
+  std::unordered_map<int,double> probabilityHopOffInternalSite_;
+
   /**
    * \brief The probability of a particle being on each of the sites
    *
@@ -340,6 +342,8 @@ class KMC_Cluster : public virtual Identity {
    * Master Eqaution.
    **/
   std::unordered_map<int, double> probabilityOnSite_;
+
+  std::vector<std::pair<int,double>> probabilityHopToInternalSite_;
 
   /************************************************************************
    * Local Cluster Functions
@@ -411,7 +415,8 @@ class KMC_Cluster : public virtual Identity {
   void iterate_();
 
   void calculateProbabilityHopToNeighbors_();
-
+  void calculateProbabilityHopToInternalSite_();
+  void calculateProbabilityHopOffInternalSite_();
   void calculateEscapeRatesFromSitesToTheirNeighbors_();
 
   void initializeProbabilityOnSites_();
