@@ -3,6 +3,9 @@
 #include "kmc_site.hpp"
 #include "../../include/kmccoursegrain/kmc_constants.hpp"
 #include <chrono>
+#include <set>
+#include <utility>
+#include <algorithm>
 
 using namespace std;
 
@@ -94,18 +97,26 @@ int KMC_Site::pickNewSiteId() {
 }
 
 double KMC_Site::getProbabilityOfHoppingToNeighboringSite(
-    const int neighSiteId) {
-  if (probabilityHopToNeighbor_.count(neighSiteId) == 0) {
+    const int neighSiteId) 
+{
+  // Use neighRates because random access of map is faster than vector
+  if (neighRates_.count(neighSiteId) == 0) {
     string err = "Error site " + to_string(neighSiteId) +
                  " is not a neighbor of "
                  "" +
                  to_string(getId());
     throw invalid_argument(err);
   }
-  return probabilityHopToNeighbor_[neighSiteId];
+
+  auto it = find_if(
+      probabilityHopToNeighbor_.begin(),
+      probabilityHopToNeighbor_.end(),
+      [&neighSiteId](const pair<int,double>& neigh_and_prob)
+      { return neighSiteId==neigh_and_prob.first; }); 
+  return it->second;
 }
 
-map<const int, double> KMC_Site::getProbabilitiesAndIdsOfNeighbors() const {
+vector<pair<const int, double>> KMC_Site::getProbabilitiesAndIdsOfNeighbors() const {
   return probabilityHopToNeighbor_;
 }
 
@@ -130,10 +141,16 @@ std::ostream& operator<<(std::ostream& os,
  *********************************************************************/
 void KMC_Site::calculateProbabilityHopToNeighbors_() {
   double sumRates = getSumOfRates_();
+  set<pair<int,double>,compareValueOfPair_> neigh_and_prob;
   for (auto rateToNeigh : neighRates_) {
-    probabilityHopToNeighbor_[rateToNeigh.first] =
-        *(rateToNeigh.second) / sumRates;
+    neigh_and_prob.insert(pair<int,double>(rateToNeigh.first,(*rateToNeigh.second) / sumRates));
   }
+
+  probabilityHopToNeighbor_ = vector<pair<int,double>>(neigh_and_prob.begin(),neigh_and_prob.end());
+}
+
+bool KMC_Site::compareValueOfPair_(const pair<int,double> &x,const pair<int,double> &y){
+  return x.second<y.second;
 }
 
 void KMC_Site::calculateDwellTimeConstant_() {

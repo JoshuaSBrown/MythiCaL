@@ -52,3 +52,9 @@ code
 
  * Classes should begin with a capital letter
  * Private variables and functions should end with an underscore
+
+## Variables
+ 
+ * Unlike function names, the variable names should all be lower case and if 
+   they are composed of more than one word they should be seperated by
+   underscored.

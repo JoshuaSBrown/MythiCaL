@@ -424,7 +424,7 @@ int main(void){
 
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
-    CGsystem.setCourseGrainThreshold(10);
+    CGsystem.setCourseGrainIterationThreshold(1000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Particle {};
@@ -439,10 +439,10 @@ int main(void){
 
     for(int i=0; i<NumberElectrons;++i){
       Electron electron;
-      electron.setMemoryCapacity(6);
+//      electron.setMemoryCapacity(6);
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite,CGsystem.getClusterIdOfSite(initialSite));
+      electron.occupySite(initialSite);
       auto electron_ptr = make_shared<Electron>(electron);
       vector<shared_ptr<KMC_Particle>> electrons;
       electrons.push_back(electron_ptr);

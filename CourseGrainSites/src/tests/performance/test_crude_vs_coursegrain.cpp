@@ -90,15 +90,13 @@ int main(int argc, char* argv[]){
   cout << endl;
 
   /// Create Energies and place them in a vector
-  double time = 1.0;
-  cout << "Simulating time up to " << time << " seconds " << endl;
   cout << "Filling sites with energies from a guassian distribution " << endl;
   cout << "centered at 0.0." << endl;
   cout << "sigma of " << sigma << endl;
   cout << endl;
 
 
-  double simulation_cutoff_time = 1.0E-4;   
+  double simulation_cutoff_time = 1.0E-3;   
   cout << "Simulation cutoff time " << simulation_cutoff_time << " seconds";
   cout << endl;
   cout << endl;
@@ -406,7 +404,7 @@ int main(int argc, char* argv[]){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
-      CGsystem.setCourseGrainThreshold(20);
+      CGsystem.setCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
       CGsystem.setMaxParticleMemory(3);

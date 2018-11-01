@@ -3,6 +3,7 @@
 
 #include <map>
 #include <unordered_set>
+#include <unordered_map>
 #include <memory>
 #include <vector>
 
@@ -45,11 +46,11 @@ class KMC_CourseGrainSystem {
    **/
   KMC_CourseGrainSystem()
       : seed_set_(false),
-        max_particle_memory_(6),
-        min_particle_memory_(2),
-        courseGrainingThreshold_(20),
         clusterResolution_(20),
-        iteration_check_(10000){};
+        iteration_threshold_(10000),
+        max_frequency_(10000),
+        max_sample_frequency_(10000),
+        ratio_threshold_relevant_sites_(10){};
 
   /**
    * \brief This will correctly initialize the system
@@ -132,9 +133,9 @@ class KMC_CourseGrainSystem {
    *
    * Once a particle has been initialized, i.e. it has a dwell time it is
    * located on a site in the system and it has a stored potential site it
-   * will be hopping to. This function be called on it. It will move the
+   * will be hopping to. This function will be called on it. It will move the
    * particle if necessary and will course grain sites/renormalize sites if
-   * the particle begins hopping back and forth between the sites.
+   * necessary.
    *
    * \param[in] particle
    **/
@@ -158,79 +159,80 @@ class KMC_CourseGrainSystem {
   int getClusterIdOfSite(int siteId);
 
   /**
-   * \brief Threshold for course graining sites
+   * \brief Determines how often to check for course graining
    *
-   * This function allows you to set how many times a particle will hop back
-   * and forth between two sites before the sites are renormalized into a
-   * cluster. By default a value of 20 is used.
+   * This function determines the number of iterations that will pass before 
+   * the algorithm will check for course graining 
    *
    * \param[in] thershold
    **/
-  void setCourseGrainThreshold(int threshold);
+  void setCourseGrainIterationThreshold(int threshold);
+  int getCourseGrainIterationThreshold();
 
   /**
    * \brief set and get the course graining resolution
    *
-   * The larger this value is the faster the algorithm will be. However, this is
-   * at the cost of reproducing the noise of the simulation. If you are wanting
-   * to capture the noise this needs to be higher. However it is lower the more
-   * effiecient your simulations will be.
+   * The smaller this value is the faster the algorithm should be. However, this
+   * is at the cost of reproducing the noise of the simulation. If you are 
+   * wanting to capture the noise this needs to be higher. However, it is lower 
+   * the more effiecient the course graining should be.
    **/
-  int getClusterResolution() { return clusterResolution_; }
-  void setClusterResolution(int clusterResolution) {
+  int getCourseGrainResolution() { return clusterResolution_; }
+  void setCourseGrainResolution(int clusterResolution) {
     clusterResolution_ = clusterResolution;
-  }
-
-  /**
-   * \brief sets the max particle memory 
-   *
-   * If a particle hits a threshold but does not create a cluster the particle
-   * memory will continue to increase by one memory eacth time until it either
-   * creates a cluster or it hits the max number of memories allowed for the
-   * particle.
-   *
-   * \param[in] max number of memories
-   **/
-  void setMaxParticleMemory(int max_memory) { 
-    max_particle_memory_ = max_memory; 
-  }
-
-  void setMinParticleMemory(int min_memory) { 
-    min_particle_memory_ = min_memory; 
   }
 
  private:
   /// Depicts whether a random seed has been set, to yield reproducable data
   bool seed_set_;
 
-  /// Max particle memory 
-  int max_particle_memory_;
-  int min_particle_memory_;
-
   /// The random seed
   unsigned long seed_;
 
-  /// Number of times a particle moves back and forth before turned into a
-  /// cluster
-  int courseGrainingThreshold_;
-
-  /// The resolution of the clusters essentially how many hops will a particle
+  /// The resolution of the clusters. Essentially how many hops will a particle
   /// move within the cluster before it is likely to leave, the point of this
   /// is to at least to a small degree conserve the noise.
   int clusterResolution_;
 
+  /// Keeps track of the number of iterations. Is reset after passing the
+  /// iteration threshold. 
   int iteration_;
-  int iteration_check_;
 
+  /// How many interactions occur before course graining is tested
+  int iteration_threshold_;
+
+  /// Keeps track of the number of sites that have been visited, so that course
+  /// graining is not attempted on the same sites over and over again if they
+  /// do not meet the Markov propery criteria. 
   std::unordered_set<int> sites_visited_;
 
   /// Stores smart pointers to all the sites
-  std::map<int, SitePtr> sites_;
+  std::unordered_map<int, SitePtr> sites_;
 
   /// Stores smart pointers to all the clusters
-  std::map<int, ClusterPtr> clusters_;
+  std::unordered_map<int, ClusterPtr> clusters_;
+
+  /// Sampled sites, sites that have already been checked for course graining
+  std::unordered_set<int> sampled_sites_;
 
   void courseGrainSiteIfNeeded_(ParticlePtr& particle);
+
+  /// Max frequency determines the upper limit for how often a site must be 
+  /// visited before it is considered as a potential cluster
+  int max_frequency_;
+
+  /// The max sample frequency is initialized by the max_frequency_ every time
+  /// the number of iteration_ passes the iteration_threshold_. During the 
+  /// iterations it is updated to whatever frequency the sites that have been
+  /// most visited are at
+  int max_sample_frequency_;
+
+  /// The ratio threshold helps determine the sites that are relevant for
+  /// potential course graining. The ratio threshold divides the
+  /// max_sample_frequency_ to determine if a site is relevant. E.g. if the 
+  /// ratio = 10, than if a site is within an order of magnitude of the max 
+  /// number of visits it is considered relevant. 
+  int ratio_threshold_relevant_sites_;
 
   /**
    * \brief Determines if it is appropriate to coursegrain the sites
@@ -246,7 +248,9 @@ class KMC_CourseGrainSystem {
    *
    * \return true if the sites satisfy the condition false otherwise
    **/
-  bool sitesSatisfyEquilibriumCondition_(std::vector<int> siteIds);
+  bool sitesSatisfyEquilibriumCondition_(std::vector<int> siteIds, double maxtime);
+
+  double getInternalTimeLimit_(std::vector<int> siteIds);
 
   /**
    * \brief Determines that the cluster id should be if sites are to be merged
@@ -263,13 +267,11 @@ class KMC_CourseGrainSystem {
    **/
   int getFavoredClusterId_(std::vector<int> siteIds);
 
-  void createCluster_(std::vector<int> siteIds);
+  void createCluster_(std::vector<int> siteIds,double internal_time_limit);
   void mergeSitesToCluster_(std::vector<int> siteIds, int clusterId);
   double getMinimumTimeConstantFromSitesToNeighbors_(std::vector<int> siteIds);
-  std::vector<int> getRelevantSites_(std::vector<std::vector<int>> memories);
-  void updateSiteAndClusterThresholds_(std::vector<int> relevantSites);
-  std::vector<int> filterSites_();
-  std::vector<std::vector<int>> breakIntoIslands_(std::vector<int> relevant_sites);
+  std::unordered_map<int,int> filterSites_();
+  std::vector<std::vector<int>> breakIntoIslands_(std::unordered_map<int,int> relevant_sites);
 };
 }
 #endif  // KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP

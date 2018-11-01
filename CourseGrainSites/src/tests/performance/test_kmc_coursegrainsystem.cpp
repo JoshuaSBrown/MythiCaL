@@ -137,8 +137,6 @@ int main(void){
 
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
-    CGsystem.setCourseGrainThreshold(1);
-    CGsystem.setClusterResolution(10);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Particle {};
@@ -156,7 +154,7 @@ int main(void){
       Electron electron;
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite,CGsystem.getClusterIdOfSite(initialSite));
+      electron.occupySite(initialSite);
       auto electron_ptr = make_shared<Electron>(electron);
       vector<shared_ptr<KMC_Particle>> electrons;
       electrons.push_back(electron_ptr);
@@ -292,8 +290,6 @@ int main(void){
 
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
-    CGsystem.setCourseGrainThreshold(500);
-    CGsystem.setClusterResolution(10);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Particle {};
@@ -311,7 +307,7 @@ int main(void){
       Electron electron;
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite,CGsystem.getClusterIdOfSite(initialSite));
+      electron.occupySite(initialSite);
       auto electron_ptr = make_shared<Electron>(electron);
       vector<shared_ptr<KMC_Particle>> electrons;
       electrons.push_back(electron_ptr);

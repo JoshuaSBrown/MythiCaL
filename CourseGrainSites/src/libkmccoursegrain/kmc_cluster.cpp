@@ -375,10 +375,11 @@ void KMC_Cluster::calculateEscapeTimeConstant_() {
   auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
   escapeTimeConstant_ = 0.0;
   for (auto site : ratesToNeighbors) {
+    double sum_rates;
     for (auto neigh : site.second) {
-      escapeTimeConstant_ +=
-          neigh.second * escapeRateFromSiteToNeighbor_[site.first];
+      sum_rates += neigh.second; 
     }
+    escapeTimeConstant_ += 1.0/sum_rates*probabilityOnSite_[site.first];
   }
 }
 }
