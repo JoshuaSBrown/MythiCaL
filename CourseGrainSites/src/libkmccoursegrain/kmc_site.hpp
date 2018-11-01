@@ -205,7 +205,7 @@ class KMC_Site : public virtual Identity {
    * probability that a charge located on the site will hop to one of these
    * neighbors
    **/
-  std::map<const int, double> getProbabilitiesAndIdsOfNeighbors() const;
+  std::vector<std::pair<const int, double>> getProbabilitiesAndIdsOfNeighbors() const;
 
   /**
    * \brief Prints the output of the site
@@ -231,7 +231,7 @@ class KMC_Site : public virtual Identity {
   /**
    * \brief Contains the probability of hopping to each neighbor
    **/
-  std::map<int const, double> probabilityHopToNeighbor_;
+  std::vector<std::pair<int const, double>> probabilityHopToNeighbor_;
 
   /**
    * \brief Stores pointers to the rates to each of the neighboring sites
