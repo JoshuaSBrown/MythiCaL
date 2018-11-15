@@ -73,7 +73,7 @@ int KMC_CourseGrainSystem::getVisitFrequencyOfSite(int siteId){
   int visits = sites_.getKMC_Site(siteId).getVisitFrequency();
   if(sites_.partOfCluster(siteId)){
     int cluster_id = sites_.getClusterIdOfSite(siteId);
-    visits += clusters_[cluster_id].getVisitFrequency(siteId);
+    visits += clusters_.getKMC_Cluster(cluster_id).getVisitFrequency(siteId);
   }
   return visits;
 }
@@ -181,7 +181,7 @@ void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
 
 bool KMC_CourseGrainSystem::courseGrain_(int siteId){
   BasinExplorer basin_explorer;
-  auto basin_site_ids = basin_explorer.findBasin(sites_,siteId);
+  auto basin_site_ids = basin_explorer.findBasin(sites_,clusters_,siteId);
 
   double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
   if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
@@ -263,11 +263,11 @@ int KMC_CourseGrainSystem::createCluster_(vector<int> siteIds, double internal_t
     cluster.setRandomSeed(seed_);
     ++seed_;
   }
-  clusters_[cluster.getId()] = cluster;
+  clusters_.addKMC_Cluster(cluster);
 
   for(auto siteId : siteIds){
     sites_.setClusterId(siteId,cluster.getId());  
-    topology_features_[siteId] = &(clusters_[cluster.getId()]);
+    topology_features_[siteId] = &(clusters_.getKMC_Cluster(cluster.getId()));
   }
 
   auto sitesFoundInCluster = cluster.getSiteIdsInCluster();
@@ -289,13 +289,13 @@ void KMC_CourseGrainSystem::mergeSitesAndClusters_( unordered_map<int,int> sites
       } else {
         cluster_ids.insert(site_and_cluster.second);
       }
-      topology_features_[site_and_cluster.first] = &(clusters_[favoredClusterId]);
+      topology_features_[site_and_cluster.first] = &(clusters_.getKMC_Cluster(favoredClusterId));
     }
   }
-  clusters_[favoredClusterId].addSites(isolated_sites);
+  clusters_.getKMC_Cluster(favoredClusterId).addSites(isolated_sites);
   for(auto clusterId : cluster_ids ){
-    clusters_[favoredClusterId].migrateSitesFrom(clusters_[clusterId]);
-    clusters_.erase(clusters_.find(clusterId));
+    clusters_.getKMC_Cluster(favoredClusterId).migrateSitesFrom(clusters_.getKMC_Cluster(clusterId));
+    clusters_.erase(clusterId);
   }
 
 }
@@ -362,11 +362,7 @@ double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
 }
 
 vector<vector<int>> KMC_CourseGrainSystem::getClusters(){
-  vector<vector<int>> clusters;
-  for(auto cluster : clusters_){
-    clusters.push_back(cluster.second.getSiteIdsInCluster());
-  }
-  return clusters;
+  return clusters_.getSiteIdsOfClusters();
 }
 
 int KMC_CourseGrainSystem::getFavoredClusterId_(vector<int> siteIds) {

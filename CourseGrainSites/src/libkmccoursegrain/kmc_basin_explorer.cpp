@@ -13,7 +13,10 @@ namespace kmccoursegrain {
   typedef unordered_set<shared_ptr<Edge>> shared_edge_set;
   typedef vector<weak_ptr<Edge>> weak_edge_vec;
 
-  vector<int> BasinExplorer::findBasin(KMC_Site_Container& sites,int siteId){
+  vector<int> BasinExplorer::findBasin(
+      KMC_Site_Container& sites,
+      KMC_Cluster_Container& clusters,
+      int siteId){
     
     auto edges_store = 
       convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( sites, siteId);
@@ -24,8 +27,12 @@ namespace kmccoursegrain {
     gv_largest_known.setStartingVertex(siteId);
 
     fastest_rate_ = sites.getFastestRateOffSite(siteId);
-    slowest_rate_ = fastest_rate_;
-
+    if(sites.partOfCluster(siteId)){
+      auto & cluster = clusters.getKMC_Cluster(sites.getClusterIdOfSite(siteId));
+      slowest_rate_ = cluster.getFastestRateOffCluster();
+    }else{
+      slowest_rate_ = fastest_rate_;
+    }
     current_sites_fastest_rate_ = fastest_rate_;
 
     addEdges_(sites,edges_weak,siteId,gv_largest_known);

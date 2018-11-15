@@ -66,9 +66,12 @@ int main(void){
     site_container.addKMC_Site(site2);
     site_container.addKMC_Site(site3);
     site_container.addKMC_Site(site4);
-  
+
+    // Need at least an empty Cluster container
+    KMC_Cluster_Container clusters;
+
     BasinExplorer basin_explorer; 
-    auto vertices = basin_explorer.findBasin(site_container,2);
+    auto vertices = basin_explorer.findBasin(site_container,clusters,2);
     assert(vertices.size()==2);
 
     bool found2 = false;
@@ -299,20 +302,23 @@ int main(void){
     site_container.addKMC_Site(site15);
     site_container.addKMC_Site(site16);
   
+    // Need at least an empty Cluster container
+    KMC_Cluster_Container clusters;
+
     BasinExplorer basin_explorer; 
-    auto vertices = basin_explorer.findBasin(site_container,6);
+    auto vertices = basin_explorer.findBasin(site_container,clusters,6);
 
     for(auto siteId : vertices){
       cout << "site id " << siteId << endl;
     }
 
-    vertices = basin_explorer.findBasin(site_container,7);
+    vertices = basin_explorer.findBasin(site_container,clusters,7);
 
     for(auto siteId : vertices){
       cout << "site id " << siteId << endl;
     }
 
-    vertices = basin_explorer.findBasin(site_container,11);
+    vertices = basin_explorer.findBasin(site_container,clusters,11);
 
     for(auto siteId : vertices){
       cout << "site id " << siteId << endl;

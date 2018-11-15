@@ -24,7 +24,7 @@ class KMC_Cluster_Container {
     size_t size();
 
     bool exist(int clusterId);
-
+    void erase(int clusterId);
     bool isOccupied(int clusterId);
     void vacate(int clusterId);
     void occupy(int clusterId);
@@ -35,6 +35,9 @@ class KMC_Cluster_Container {
 
     double getFastestRateOffCluster(int clusterId);
     std::vector<int> getSiteIdsOfNeighbors(int clusterId);
+
+    std::vector<std::vector<int>> getSiteIdsOfClusters();
+
   private:
     std::unordered_map<int,KMC_Cluster> clusters_;
 

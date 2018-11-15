@@ -155,6 +155,7 @@ int main(void){
     }
 
     cout << "Running without cluster" << endl;
+    double time_limit = 1000;
     // Without cluster
     {
       KMC_CourseGrainSystem CGsystem;
@@ -176,7 +177,6 @@ int main(void){
       vector<double> time_spent_on_sites(number_of_sites,0.0);
       vector<int> hops_made_to_sites(number_of_sites,0);
 
-      double time_limit = 10000;
       double time = 0.0;
       int hop_count = 0;
       KMC_Particle& electron1 = electrons.at(0);
@@ -214,7 +214,7 @@ int main(void){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
-      CGsystem.setMinCourseGrainIterationThreshold(1000);
+      CGsystem.setMinCourseGrainIterationThreshold(500);
       CGsystem.initializeSystem(ratesToNeighbors);
 
       class Electron : public KMC_Particle {};
@@ -231,7 +231,6 @@ int main(void){
       vector<double> time_spent_on_sites(number_of_sites,0.0);
       vector<int> hops_made_to_sites(number_of_sites,0);
 
-      double time_limit = 10000;
       double time = 0.0;
       int hop_count = 0;
       KMC_Particle& electron1 = electrons.at(0);
@@ -244,30 +243,25 @@ int main(void){
         ++hop_count;
       }    
 
-  /*    auto clusters = CGsystem.getClusters();
+      auto clusters = CGsystem.getClusters();
       assert(clusters.size()==1);
+      assert(clusters.at(0).size()==4);
       bool site6_found = false;
       bool site7_found = false;
+      bool site10_found = false;
+      bool site11_found = false;
       for( auto siteId : clusters.at(0) ){
         if(siteId==6) site6_found = true;
         if(siteId==7) site7_found = true;
+        if(siteId==10) site10_found = true;
+        if(siteId==11) site11_found = true;
       }
+      // Check that the appropriate sites have been found in the cluster
       assert(site6_found);
       assert(site7_found);
-      // Check that the appropriate sites have been found in the cluster
+      assert(site10_found);
+      assert(site11_found);
 
-      double sum_times = 0.0;
-      for(auto time_site : time_spent_on_sites) sum_times+=time_site;
-
-      int siteId=1;
-      double sum_time_ratio = 0.0;
-      vector<double> time_ratios;
-      for(auto time_site : time_spent_on_sites){
-        time_ratios.push_back(time_site/sum_times);
-        ++siteId;
-        sum_time_ratio +=time_site/sum_times;
-      }
-      */
     } // With cluster formation
   }
 

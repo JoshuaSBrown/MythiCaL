@@ -38,6 +38,13 @@ namespace kmccoursegrain {
     return false;
   }
 
+  void KMC_Cluster_Container::erase(int clusterId){
+    auto iter = clusters_.find(clusterId);
+    if(iter!=clusters_.end()){
+      clusters_.erase(iter);
+    }
+  }
+
   bool KMC_Cluster_Container::isOccupied(int clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot determine if cluster is occupied as it"
@@ -94,7 +101,7 @@ namespace kmccoursegrain {
     return clusters_[clusterId].getFastestRateOffCluster();
   }
 
-  std::vector<int> KMC_Cluster_Container::getSiteIdsOfNeighbors(int clusterId){
+  vector<int> KMC_Cluster_Container::getSiteIdsOfNeighbors(int clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot get site ids neighboring cluster as the "
           " cluster is not stored in the container.");
@@ -102,6 +109,13 @@ namespace kmccoursegrain {
     return clusters_[clusterId].getSiteIdsNeighboringCluster();
   }
 
+  vector<vector<int>> KMC_Cluster_Container::getSiteIdsOfClusters(){
+    vector<vector<int>> clusters;
+    for(auto cluster : clusters_){
+      clusters.push_back(cluster.second.getSiteIdsInCluster());
+    }
+    return clusters;
+  }
 
 }
 
