@@ -404,7 +404,7 @@ int main(int argc, char* argv[]){
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
       CGsystem.setMinCourseGrainIterationThreshold(100000);
-      CGsystem.setCourseGrainResolution(resolution);
+      CGsystem.setMaxCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
       // Calculate Particle dwell times and sort 
