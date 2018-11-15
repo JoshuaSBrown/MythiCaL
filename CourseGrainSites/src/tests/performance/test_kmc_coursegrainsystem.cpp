@@ -138,7 +138,7 @@ int main(void){
     
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
-    CGsystem.setCourseGrainIterationThreshold(10000);
+    CGsystem.setMinCourseGrainIterationThreshold(10000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Particle {};
@@ -294,7 +294,7 @@ int main(void){
 
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
-    CGsystem.setCourseGrainIterationThreshold(1000000);
+    CGsystem.setMinCourseGrainIterationThreshold(1000000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Particle {};

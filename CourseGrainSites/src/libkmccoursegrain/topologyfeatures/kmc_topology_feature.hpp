@@ -111,7 +111,10 @@ class KMC_TopologyFeature : public virtual Identity {
   void vacate(int& siteId) { vacate_siteId_ptr_(this,siteId); }
 
   /**
-   * \brief Indicate that the site is now occupied by a particle
+   * \brief The action of occupying a site
+   *
+   * The site visitation frequency is incremented and the site is set to the
+   * occupied status. 
    **/
 
   void occupy() { 
@@ -120,6 +123,14 @@ class KMC_TopologyFeature : public virtual Identity {
   void occupy(int& siteId) { 
     occupy_siteId_ptr_(this,siteId); 
   }
+
+  /**
+   * \brief Set the status of the site to occupied
+   *
+   * Does not increment the visit frequency. 
+   **/
+  void setToOccupiedStatus(){ occupied_=true; }
+  void setToUnoccupiedStatus(){ occupied_=false; }
 
   /**
    * \brief Return the dwell time of the site

@@ -403,7 +403,7 @@ int main(int argc, char* argv[]){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
-      CGsystem.setCourseGrainIterationThreshold(100000);
+      CGsystem.setMinCourseGrainIterationThreshold(100000);
       CGsystem.setCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
