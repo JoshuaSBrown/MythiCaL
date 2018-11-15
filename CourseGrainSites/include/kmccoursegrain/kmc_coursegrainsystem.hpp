@@ -47,7 +47,7 @@ class KMC_CourseGrainSystem {
    **/
   KMC_CourseGrainSystem()
       : seed_set_(false),
-        clusterResolution_(20),
+        max_cluster_resolution_(20),
         minimum_course_graining_resolution_(2),
         iteration_threshold_(10000),
         iteration_threshold_min_(10000){};
@@ -180,9 +180,9 @@ class KMC_CourseGrainSystem {
    * wanting to capture the noise this needs to be higher. However, it is lower 
    * the more effiecient the course graining should be.
    **/
-  int getCourseGrainResolution() { return clusterResolution_; }
-  void setCourseGrainResolution(int clusterResolution) {
-    clusterResolution_ = clusterResolution;
+  int getMaxCourseGrainResolution() { return max_cluster_resolution_; }
+  void setMaxCourseGrainResolution(int max_cluster_resolution) {
+    max_cluster_resolution_ = max_cluster_resolution;
   }
 
  private:
@@ -195,7 +195,7 @@ class KMC_CourseGrainSystem {
   /// The resolution of the clusters. Essentially how many hops will a particle
   /// move within the cluster before it is likely to leave, the point of this
   /// is to at least to a small degree conserve the noise.
-  int clusterResolution_;
+  int max_cluster_resolution_;
 
   /// This should be set to a value of 2, it is used to determine if course 
   /// graining should occur. If the time to hop off the potential sites in
