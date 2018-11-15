@@ -110,13 +110,13 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    map<const int,map<const int,double *>> ratesToNeighbors;
+    unordered_map< int,unordered_map< int,double *>> ratesToNeighbors;
 
     int global_index = 0;
 
     for( int index=0;index<12;++index){
 
-      map<const int,double*> ratesFromSiteToNeighbors;
+      unordered_map< int,double*> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);
@@ -149,6 +149,7 @@ int main(void){
     
     double rate_fast = 100;
     double rate_slow = 1;
+    double rate_very_slow = 0.001;
 
     vector<pair<int,double>> rates;
     rates.push_back(pair<int,double>(2,rate_slow)); // site1->site2
@@ -156,41 +157,41 @@ int main(void){
 
     rates.push_back(pair<int,double>(1,rate_slow)); // site2->site1
     rates.push_back(pair<int,double>(3,rate_slow)); // site2->site3
-    rates.push_back(pair<int,double>(6,rate_fast)); // site2->site6
+    rates.push_back(pair<int,double>(6,rate_slow)); // site2->site6
 
     rates.push_back(pair<int,double>(2,rate_slow)); // site3->site2
     rates.push_back(pair<int,double>(4,rate_slow)); // site3->site4
-    rates.push_back(pair<int,double>(7,rate_fast)); // site3->site7
+    rates.push_back(pair<int,double>(7,rate_slow)); // site3->site7
 
     rates.push_back(pair<int,double>(3,rate_slow)); // site4->site3
     rates.push_back(pair<int,double>(8,rate_slow)); // site4->site8
     
     rates.push_back(pair<int,double>(1,rate_slow)); // site5->site1
-    rates.push_back(pair<int,double>(6,rate_fast)); // site5->site6
+    rates.push_back(pair<int,double>(6,rate_slow)); // site5->site6
     rates.push_back(pair<int,double>(9,rate_slow)); // site5->site9
 
-    rates.push_back(pair<int,double>(2,rate_slow)); // site6->site2
-    rates.push_back(pair<int,double>(5,rate_slow)); // site6->site5
+    rates.push_back(pair<int,double>(2,rate_very_slow)); // site6->site2
+    rates.push_back(pair<int,double>(5,rate_very_slow)); // site6->site5
     rates.push_back(pair<int,double>(7,rate_fast)); // site6->site7 
-    rates.push_back(pair<int,double>(10,rate_slow)); // site6->site10
+    rates.push_back(pair<int,double>(10,rate_very_slow)); // site6->site10
 
-    rates.push_back(pair<int,double>(3,rate_slow)); // site7->site3
+    rates.push_back(pair<int,double>(3,rate_very_slow)); // site7->site3
     rates.push_back(pair<int,double>(6,rate_fast)); // site7->site6
-    rates.push_back(pair<int,double>(8,rate_slow)); // site7->site8
-    rates.push_back(pair<int,double>(11,rate_slow)); // site7->site11
+    rates.push_back(pair<int,double>(8,rate_very_slow)); // site7->site8
+    rates.push_back(pair<int,double>(11,rate_very_slow)); // site7->site11
 
     rates.push_back(pair<int,double>(4,rate_slow)); // site8->site4
-    rates.push_back(pair<int,double>(7,rate_fast)); // site8->site7
+    rates.push_back(pair<int,double>(7,rate_slow)); // site8->site7
     rates.push_back(pair<int,double>(12,rate_slow)); // site8->site12
 
     rates.push_back(pair<int,double>(5,rate_slow)); // site9->site5
     rates.push_back(pair<int,double>(10,rate_slow)); // site9->site10
 
-    rates.push_back(pair<int,double>(6,rate_fast)); // site10->site6
+    rates.push_back(pair<int,double>(6,rate_slow)); // site10->site6
     rates.push_back(pair<int,double>(9,rate_slow)); // site10->site9
     rates.push_back(pair<int,double>(11,rate_slow)); // site10->site11
 
-    rates.push_back(pair<int,double>(7,rate_fast)); // site11->site7
+    rates.push_back(pair<int,double>(7,rate_slow)); // site11->site7
     rates.push_back(pair<int,double>(10,rate_slow)); // site11->site10
     rates.push_back(pair<int,double>(12,rate_slow)); // site11->site12
 
@@ -227,13 +228,13 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    map<const int,map<const int,double *>> ratesToNeighbors;
+    unordered_map< int,unordered_map< int,double *>> ratesToNeighbors;
 
     int global_index = 0;
 
     for( int index=0;index<12;++index){
 
-      map<const int,double*> ratesFromSiteToNeighbors;
+      unordered_map< int,double*> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);
@@ -247,61 +248,122 @@ int main(void){
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
-    KMC_CourseGrainSystem CGsystem;
-    CGsystem.setRandomSeed(1);
-    CGsystem.initializeSystem(ratesToNeighbors);
+    cout << "Running without cluster" << endl;
+    // Without cluster
+    {
+      KMC_CourseGrainSystem CGsystem;
+      CGsystem.setRandomSeed(1);
+      CGsystem.setCourseGrainIterationThreshold(1000000);
+      CGsystem.initializeSystem(ratesToNeighbors);
 
-    class Electron : public KMC_Particle {};
-  
-    Electron electron;
-    // Place the electron on site 1
-    electron.occupySite(1);
+      class Electron : public KMC_Particle {};
 
-    auto electron_ptr = make_shared<Electron>(electron);
-    vector<shared_ptr<KMC_Particle>> electrons;
-    electrons.push_back(electron_ptr);
+      Electron electron;
+      // Place the electron on site 1
+      electron.occupySite(1);
 
-    CGsystem.initializeParticles(electrons);
+      vector<KMC_Particle> electrons;
+      electrons.push_back(electron);
 
-    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==1);
-    assert(electron_ptr->getPotentialSite()==5);
-    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==34);
+      CGsystem.initializeParticles(electrons);
 
-    CGsystem.hop(electron_ptr);
-    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==5);
-    assert(electron_ptr->getPotentialSite()==6);
-    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==1);
+      vector<double> time_spent_on_sites(12,0.0);
+      vector<int> hops_made_to_sites(12,0);
 
-    CGsystem.hop(electron_ptr);
-    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==6);
-    assert(electron_ptr->getPotentialSite()==7);
-    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==15);
+      double time_limit = 10000;
+      double time = 0.0;
+      int hop_count = 0;
+      KMC_Particle& electron1 = electrons.at(0);
+      while(time<time_limit){
+        CGsystem.hop(electron1);
+        time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
+          electron1.getDwellTime();
+        hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
+        time +=electron1.getDwellTime();
+        ++hop_count;
+      }    
 
-    CGsystem.hop(electron_ptr);
-    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron_ptr->getPotentialSite()==6);
-    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==11);
+      auto clusters = CGsystem.getClusters();
+      // There should be no clusters because the threshold has been set so high
+      assert(clusters.size()==0);
 
-    // Enough to trigger the formation of a cluster
-    for(int i=0; i<50;++i){
-      CGsystem.hop(electron_ptr);
-    }    
+      double sum_times = 0.0;
+      for(auto time_site : time_spent_on_sites) sum_times+=time_site;
 
-    cout << static_cast<int>(electron_ptr->getDwellTime()*1000) << endl;
-    CGsystem.hop(electron_ptr);
-    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron_ptr->getPotentialSite()==7);
-    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==183);
+      int siteId=1;
 
-    CGsystem.hop(electron_ptr);
-    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron_ptr->getPotentialSite()==7);
-    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==120);
+      double sum_time_ratio = 0.0;
+      vector<double> time_ratios;
+      for(auto time_site : time_spent_on_sites){
+        time_ratios.push_back(time_site/sum_times);
+        ++siteId;
+        sum_time_ratio +=time_site/sum_times;
+      }
 
-    CGsystem.hop(electron_ptr);
-    assert(electron_ptr->getIdOfSiteCurrentlyOccupying()==7);
-    assert(electron_ptr->getPotentialSite()==6);
-    assert(static_cast<int>(electron_ptr->getDwellTime()*1000)==53);
+    } // Without cluster formation
+
+
+    cout << "Running with Cluster" << endl;
+    // With cluster formation
+    {
+      KMC_CourseGrainSystem CGsystem;
+      CGsystem.setRandomSeed(1);
+      CGsystem.setCourseGrainIterationThreshold(1000);
+      CGsystem.setCourseGrainFrequencyRatio(15);
+      CGsystem.initializeSystem(ratesToNeighbors);
+
+      class Electron : public KMC_Particle {};
+
+      Electron electron;
+      // Place the electron on site 1
+      electron.occupySite(1);
+
+      vector<KMC_Particle> electrons;
+      electrons.push_back(electron);
+
+      CGsystem.initializeParticles(electrons);
+
+      vector<double> time_spent_on_sites(12,0.0);
+      vector<int> hops_made_to_sites(12,0);
+
+      double time_limit = 10000;
+      double time = 0.0;
+      int hop_count = 0;
+      KMC_Particle& electron1 = electrons.at(0);
+      while(time<time_limit){
+        CGsystem.hop(electron1);
+        time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
+          electron.getDwellTime();
+        hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
+        time += electron1.getDwellTime();
+        ++hop_count;
+      }    
+
+      auto clusters = CGsystem.getClusters();
+      assert(clusters.size()==1);
+      bool site6_found = false;
+      bool site7_found = false;
+      for( auto siteId : clusters.at(0) ){
+        if(siteId==6) site6_found = true;
+        if(siteId==7) site7_found = true;
+      }
+      assert(site6_found);
+      assert(site7_found);
+      // Check that the appropriate sites have been found in the cluster
+
+      double sum_times = 0.0;
+      for(auto time_site : time_spent_on_sites) sum_times+=time_site;
+
+      int siteId=1;
+      double sum_time_ratio = 0.0;
+      vector<double> time_ratios;
+      for(auto time_site : time_spent_on_sites){
+        time_ratios.push_back(time_site/sum_times);
+        ++siteId;
+        sum_time_ratio +=time_site/sum_times;
+      }
+
+    } // With cluster formation
   }
 
   cout << "Testing: hop 2" << endl;
@@ -397,13 +459,13 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    map<const int,map<const int,double *>> ratesToNeighbors;
+    unordered_map< int,unordered_map< int,double *>> ratesToNeighbors;
 
     int global_index = 0;
 
     for( int index=0;index<14;++index){
 
-      map<const int,double*> ratesFromSiteToNeighbors;
+      unordered_map< int,double*> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);
@@ -415,170 +477,327 @@ int main(void){
         ++global_index;        
       }
   
-      cout << "Rates from sites to their neighbors" << endl;
-      for( auto rat : ratesFromSiteToNeighbors){
-        cout << idsOfEachSite.at(index) << "->" << rat.first << " " <<  *rat.second << endl;
-      }
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
-    KMC_CourseGrainSystem CGsystem;
-    CGsystem.setRandomSeed(1);
-    CGsystem.setCourseGrainThreshold(10);
-    CGsystem.initializeSystem(ratesToNeighbors);
+    cout << endl;
+    cout << "Without Course graining" << endl;
     
-    class Electron : public KMC_Particle {};
-    
-    // Store the number of hops to each site 1-14
-    vector<int> hopsToSites(14,0);  
-    vector<double> timeOnSites(14,0.0);
-    // Store the escape time from the cluster for each electron
-    vector<double> escapeTimes;
+    // Number of electrons used for both the following crude and course grained
+    // simulation runs
+    int NumberElectrons = 4000;
+    // Will be compared with Course grained version
+    vector<double> probabilityOnNeighCrude; 
+    // Without cluster formation
+    vector<double> portionOfTimeOnSiteNoCluster(5,0.0);
+    {
+      KMC_CourseGrainSystem CGsystem;
+      CGsystem.setRandomSeed(1);
+      CGsystem.setCourseGrainIterationThreshold(1000000);
+      CGsystem.initializeSystem(ratesToNeighbors);
 
-    int NumberElectrons = 10000;
+      class Electron : public KMC_Particle {};
 
-    for(int i=0; i<NumberElectrons;++i){
-      Electron electron;
-      electron.setMemoryCapacity(6);
-      // Alternate placing electrons on sites 1-5
-      int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite,CGsystem.getClusterIdOfSite(initialSite));
-      auto electron_ptr = make_shared<Electron>(electron);
-      vector<shared_ptr<KMC_Particle>> electrons;
-      electrons.push_back(electron_ptr);
-      CGsystem.initializeParticles(electrons);
-      double totalTimeOnCluster = 0.0;
-      while(electron_ptr->getIdOfSiteCurrentlyOccupying()<6){
-        CGsystem.hop(electron_ptr);
-        hopsToSites.at(electron_ptr->getIdOfSiteCurrentlyOccupying()-1)++;
-        timeOnSites.at(electron_ptr->getIdOfSiteCurrentlyOccupying()-1)+=electron_ptr->getDwellTime();
-        totalTimeOnCluster+=electron_ptr->getDwellTime(); 
+      // Store the number of hops to each site 1-14
+      vector<int> hopsToSites(14,0);  
+      vector<double> timeOnSites(14,0.0);
+      // Store the escape time from the cluster for each electron
+      vector<double> escapeTimes;
+
+
+      for(int i=0; i<NumberElectrons;++i){
+        Electron electron;
+        // Alternate placing electrons on sites 1-5
+        int initialSite =  (i%5)+1;
+        electron.occupySite(initialSite);
+        vector<KMC_Particle> electrons;
+        electrons.push_back(electron);
+        CGsystem.initializeParticles(electrons);
+        double totalTimeOnCluster = 0.0;
+        KMC_Particle & electron1 = electrons.at(0);
+
+        while(electron1.getIdOfSiteCurrentlyOccupying()<6){
+          CGsystem.hop(electron1);
+          hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
+          timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
+          totalTimeOnCluster+=electron1.getDwellTime(); 
+        }
+
+        CGsystem.removeParticleFromSystem(electron1);
+        escapeTimes.push_back(totalTimeOnCluster);
       }
 
-      CGsystem.removeParticleFromSystem(electron_ptr);
-      escapeTimes.push_back(totalTimeOnCluster);
-    }
-   
-    int totalsites = 0;
-    totalsites+= hopsToSites.at(0);
-    totalsites+= hopsToSites.at(1);
-    totalsites+= hopsToSites.at(2);
-    totalsites+= hopsToSites.at(3);
-    totalsites+= hopsToSites.at(4);
+      auto clusters = CGsystem.getClusters();
+      // There should be no clusters found because the Threshold is so high
+      assert(clusters.size()==0);
 
-    vector<double> probabilityOnSite; 
+      int totalneigh = 0;
+      totalneigh+= hopsToSites.at(5);
+      totalneigh+= hopsToSites.at(6);
+      totalneigh+= hopsToSites.at(7);
+      totalneigh+= hopsToSites.at(8);
+      totalneigh+= hopsToSites.at(9);
+      totalneigh+= hopsToSites.at(10);
+      totalneigh+= hopsToSites.at(11);
+      totalneigh+= hopsToSites.at(12);
+      totalneigh+= hopsToSites.at(13);
 
-    double value = static_cast<double>(hopsToSites.at(0))/static_cast<double>(totalsites);
-    probabilityOnSite.push_back(value);
-    value = static_cast<double>(hopsToSites.at(1))/static_cast<double>(totalsites);
-    probabilityOnSite.push_back(value);
-    value = static_cast<double>(hopsToSites.at(2))/static_cast<double>(totalsites);
-    probabilityOnSite.push_back(value);
-    value = static_cast<double>(hopsToSites.at(3))/static_cast<double>(totalsites);
-    probabilityOnSite.push_back(value);
-    value = static_cast<double>(hopsToSites.at(4))/static_cast<double>(totalsites);
-    probabilityOnSite.push_back(value);
+      double value = static_cast<double>(hopsToSites.at(5))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(6))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(7))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(8))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(9))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(10))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(11))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(12))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
+      value = static_cast<double>(hopsToSites.at(13))/static_cast<double>(totalneigh);
+      probabilityOnNeighCrude.push_back(value);
 
-    for(int i=0; i<5;++i){
-      cout << "Probability hop to site " << (i+1) << " " << probabilityOnSite.at(i) << endl;
-    }
-    
-    assert(probabilityOnSite.at(0)>0.139);
-    assert(probabilityOnSite.at(0)<0.142);
-   
-    assert(probabilityOnSite.at(1)>0.258); 
-    assert(probabilityOnSite.at(1)<0.267); 
+      cout << "Probability of Hopping to a neighboring site should match" << endl;
+      for(int i=0; i<9;++i){
+        cout << "Probability hop to neigh " << (i+6) << " " << probabilityOnNeighCrude.at(i) << endl;
+      }
 
-    assert(probabilityOnSite.at(2)>0.020);
-    assert(probabilityOnSite.at(2)<0.023);
+      assert(probabilityOnNeighCrude.at(0)<0.11);
+      assert(probabilityOnNeighCrude.at(0)>0.09);
 
-    assert(probabilityOnSite.at(3)>0.330);
-    assert(probabilityOnSite.at(3)<0.338);
+      assert(probabilityOnNeighCrude.at(1)<0.010);
+      assert(probabilityOnNeighCrude.at(1)>0.003);
 
-    assert(probabilityOnSite.at(4)>0.237);
-    assert(probabilityOnSite.at(4)<0.251);
-    
-    int totalneigh = 0;
-    totalneigh+= hopsToSites.at(5);
-    totalneigh+= hopsToSites.at(6);
-    totalneigh+= hopsToSites.at(7);
-    totalneigh+= hopsToSites.at(8);
-    totalneigh+= hopsToSites.at(9);
-    totalneigh+= hopsToSites.at(10);
-    totalneigh+= hopsToSites.at(11);
-    totalneigh+= hopsToSites.at(12);
-    totalneigh+= hopsToSites.at(13);
+      assert(probabilityOnNeighCrude.at(2)<0.19);
+      assert(probabilityOnNeighCrude.at(2)>0.15);
 
-    vector<double> probabilityOnNeigh; 
-    value = static_cast<double>(hopsToSites.at(5))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(6))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(7))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(8))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(9))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(10))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(11))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(12))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
-    value = static_cast<double>(hopsToSites.at(13))/static_cast<double>(totalneigh);
-    probabilityOnNeigh.push_back(value);
+      assert(probabilityOnNeighCrude.at(3)<0.185);
+      assert(probabilityOnNeighCrude.at(3)>0.16);
 
-    cout << "Probability of Hopping to a neighboring site should match" << endl;
-    for(int i=0; i<9;++i){
-      cout << "Probability hop to neigh " << (i+6) << " " << probabilityOnNeigh.at(i) << endl;
-    }
+      assert(probabilityOnNeighCrude.at(4)<0.265);
+      assert(probabilityOnNeighCrude.at(4)>0.23);
 
-    assert(probabilityOnNeigh.at(0)<0.11);
-    assert(probabilityOnNeigh.at(0)>0.09);
+      assert(probabilityOnNeighCrude.at(5)<0.065);
+      assert(probabilityOnNeighCrude.at(5)>0.05);
 
-    assert(probabilityOnNeigh.at(1)<0.008);
-    assert(probabilityOnNeigh.at(1)>0.006);
+      assert(probabilityOnNeighCrude.at(6)<0.05);
+      assert(probabilityOnNeighCrude.at(6)>0.03);
 
-    assert(probabilityOnNeigh.at(2)<0.18);
-    assert(probabilityOnNeigh.at(2)>0.16);
+      assert(probabilityOnNeighCrude.at(7)<0.18);
+      assert(probabilityOnNeighCrude.at(7)>0.16);
 
-    assert(probabilityOnNeigh.at(3)<0.18);
-    assert(probabilityOnNeigh.at(3)>0.16);
+      assert(probabilityOnNeighCrude.at(8)<0.03);
+      assert(probabilityOnNeighCrude.at(8)>0.02);
 
-    assert(probabilityOnNeigh.at(4)<0.26);
-    assert(probabilityOnNeigh.at(4)>0.23);
+      double totalTimeOnSites = 0.0;
+      totalTimeOnSites+=timeOnSites.at(0);
+      totalTimeOnSites+=timeOnSites.at(1);
+      totalTimeOnSites+=timeOnSites.at(2);
+      totalTimeOnSites+=timeOnSites.at(3);
+      totalTimeOnSites+=timeOnSites.at(4);
 
-    assert(probabilityOnNeigh.at(5)<0.065);
-    assert(probabilityOnNeigh.at(5)>0.05);
+      portionOfTimeOnSiteNoCluster.at(0)=timeOnSites.at(0)/totalTimeOnSites;
+      portionOfTimeOnSiteNoCluster.at(1)=timeOnSites.at(1)/totalTimeOnSites;
+      portionOfTimeOnSiteNoCluster.at(2)=timeOnSites.at(2)/totalTimeOnSites;
+      portionOfTimeOnSiteNoCluster.at(3)=timeOnSites.at(3)/totalTimeOnSites;
+      portionOfTimeOnSiteNoCluster.at(4)=timeOnSites.at(4)/totalTimeOnSites;
 
-    assert(probabilityOnNeigh.at(6)<0.05);
-    assert(probabilityOnNeigh.at(6)>0.03);
+      cout << "Time percentage on sites" << endl; 
+      for(int i=0; i<5;++i){
+        cout << "Percent time spent on site " << (i+1) << " ";
+        cout << portionOfTimeOnSiteNoCluster.at(i) << endl;
+      }
 
-    assert(probabilityOnNeigh.at(7)<0.18);
-    assert(probabilityOnNeigh.at(7)>0.16);
+      assert(
+          portionOfTimeOnSiteNoCluster.at(0)>0.075 && 
+          portionOfTimeOnSiteNoCluster.at(0) < 0.09);
+      assert(
+          portionOfTimeOnSiteNoCluster.at(1)>0.02 && 
+          portionOfTimeOnSiteNoCluster.at(1) < 0.03);
+      assert(
+          portionOfTimeOnSiteNoCluster.at(2)>0.54 && 
+          portionOfTimeOnSiteNoCluster.at(2) < 0.56);
+      assert(
+          portionOfTimeOnSiteNoCluster.at(3)>0.19 && 
+          portionOfTimeOnSiteNoCluster.at(3) < 0.21);
+      assert(
+          portionOfTimeOnSiteNoCluster.at(4)>0.13 && 
+          portionOfTimeOnSiteNoCluster.at(4) < 0.15);
+    } // Without Cluster formation
 
-    assert(probabilityOnNeigh.at(8)<0.026);
-    assert(probabilityOnNeigh.at(8)>0.02);
+    cout << endl;
+    cout << "With Course graining" << endl;
+    // With cluster formation
+    {
 
-    double totalTimeOnSites = 0.0;
-    totalTimeOnSites+=timeOnSites.at(0);
-    totalTimeOnSites+=timeOnSites.at(1);
-    totalTimeOnSites+=timeOnSites.at(2);
-    totalTimeOnSites+=timeOnSites.at(3);
-    totalTimeOnSites+=timeOnSites.at(4);
-    
-    vector<double> portionOfTimeOnSite(5,0.0);
-    portionOfTimeOnSite.at(0)=timeOnSites.at(0)/totalTimeOnSites;
-    portionOfTimeOnSite.at(1)=timeOnSites.at(1)/totalTimeOnSites;
-    portionOfTimeOnSite.at(2)=timeOnSites.at(2)/totalTimeOnSites;
-    portionOfTimeOnSite.at(3)=timeOnSites.at(3)/totalTimeOnSites;
-    portionOfTimeOnSite.at(4)=timeOnSites.at(4)/totalTimeOnSites;
-    
-    cout << "Time percentage on sites" << endl; 
-    for(int i=0; i<5;++i){
-      cout << "Percent time spent on site " << (i+1) << " " << portionOfTimeOnSite.at(i) << endl;
-    }
+      // Store the number of hops to each site 1-14
+      vector<int> hopsToSites(14,0);  
+      vector<double> timeOnSites(14,0.0);
+      // Store the escape time from the cluster for each electron
+      vector<double> escapeTimes;
+
+      KMC_CourseGrainSystem CGsystem;
+      CGsystem.setCourseGrainFrequencyRatio(15);
+      CGsystem.setCourseGrainIterationThreshold(10);
+      CGsystem.setRandomSeed(1);
+      CGsystem.initializeSystem(ratesToNeighbors);
+      int cycles = 3;
+      for(int cycle = 0; cycle < cycles ;++cycle ){
+        class Electron : public KMC_Particle {};
+
+
+        for(int i=0; i<NumberElectrons;++i){
+          Electron electron;
+          // Alternate placing electrons on sites 1-5
+          int initialSite =  (i%5)+1;
+          electron.occupySite(initialSite);
+          vector<KMC_Particle> electrons;
+          electrons.push_back(electron);
+          CGsystem.initializeParticles(electrons);
+          double totalTimeOnCluster = 0.0;
+          // First hop is ignored 
+          KMC_Particle & electron1 = electrons.at(0);
+          CGsystem.hop(electron1);
+
+          while(electron1.getIdOfSiteCurrentlyOccupying()<6){
+            hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
+            timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
+            totalTimeOnCluster+=electron1.getDwellTime(); 
+            CGsystem.hop(electron1);
+          }
+
+          hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
+          CGsystem.removeParticleFromSystem(electron1);
+          escapeTimes.push_back(totalTimeOnCluster);
+        }
+
+      }
+
+      auto clusters = CGsystem.getClusters();
+      cout << "Clusters size " << clusters.size() << endl;
+      assert(clusters.size()==1);
+      bool site1_found = false;
+      bool site2_found = false;
+      bool site3_found = false;
+      bool site4_found = false;
+      bool site5_found = false;
+      for( auto siteId : clusters.at(0) ){
+        if(siteId==1) site1_found = true;
+        if(siteId==2) site2_found = true;
+        if(siteId==3) site3_found = true;
+        if(siteId==4) site4_found = true;
+        if(siteId==5) site5_found = true;
+      }
+      assert(site1_found);
+      assert(site2_found);
+      assert(site3_found);
+      assert(site4_found);
+      assert(site5_found);
+
+
+      int totalneigh = 0;
+      totalneigh+= hopsToSites.at(5);
+      totalneigh+= hopsToSites.at(6);
+      totalneigh+= hopsToSites.at(7);
+      totalneigh+= hopsToSites.at(8);
+      totalneigh+= hopsToSites.at(9);
+      totalneigh+= hopsToSites.at(10);
+      totalneigh+= hopsToSites.at(11);
+      totalneigh+= hopsToSites.at(12);
+      totalneigh+= hopsToSites.at(13);
+
+      vector<double> probabilityOnNeigh; 
+      double value = static_cast<double>(hopsToSites.at(5))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(6))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(7))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(8))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(9))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(10))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(11))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(12))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+      value = static_cast<double>(hopsToSites.at(13))/static_cast<double>(totalneigh);
+      probabilityOnNeigh.push_back(value);
+
+      cout << "Probability of Hopping to a neighboring site should match" << endl;
+      for(int i=0; i<9;++i){
+        cout << "Probability hop to neigh " << (i+6) << " " << probabilityOnNeigh.at(i) << endl;
+      }
+
+      assert(probabilityOnNeigh.at(0)<probabilityOnNeighCrude.at(0)*1.2);
+      assert(probabilityOnNeigh.at(0)>probabilityOnNeighCrude.at(0)*0.8);
+
+      assert(probabilityOnNeigh.at(1)<probabilityOnNeighCrude.at(1)*1.2);
+      assert(probabilityOnNeigh.at(1)>probabilityOnNeighCrude.at(1)*0.8);
+
+      assert(probabilityOnNeigh.at(2)<probabilityOnNeighCrude.at(2)*1.2);
+      assert(probabilityOnNeigh.at(2)>probabilityOnNeighCrude.at(2)*0.8);
+
+      assert(probabilityOnNeigh.at(3)<probabilityOnNeighCrude.at(3)*1.2);
+      assert(probabilityOnNeigh.at(3)>probabilityOnNeighCrude.at(3)*0.8);
+
+      assert(probabilityOnNeigh.at(4)<probabilityOnNeighCrude.at(4)*1.2);
+      assert(probabilityOnNeigh.at(4)>probabilityOnNeighCrude.at(4)*0.8);
+
+      assert(probabilityOnNeigh.at(5)<probabilityOnNeighCrude.at(5)*1.2);
+      assert(probabilityOnNeigh.at(5)>probabilityOnNeighCrude.at(5)*0.8);
+
+      assert(probabilityOnNeigh.at(6)<probabilityOnNeighCrude.at(6)*1.2);
+      assert(probabilityOnNeigh.at(6)>probabilityOnNeighCrude.at(6)*0.8);
+
+      assert(probabilityOnNeigh.at(7)<probabilityOnNeighCrude.at(7)*1.2);
+      assert(probabilityOnNeigh.at(7)>probabilityOnNeighCrude.at(7)*0.8);
+
+      assert(probabilityOnNeigh.at(8)<probabilityOnNeighCrude.at(8)*1.2);
+      assert(probabilityOnNeigh.at(8)>probabilityOnNeighCrude.at(8)*0.8);
+
+      double totalTimeOnSites = 0.0;
+      totalTimeOnSites+=timeOnSites.at(0);
+      totalTimeOnSites+=timeOnSites.at(1);
+      totalTimeOnSites+=timeOnSites.at(2);
+      totalTimeOnSites+=timeOnSites.at(3);
+      totalTimeOnSites+=timeOnSites.at(4);
+
+      vector<double> portionOfTimeOnSite(5,0.0);
+      portionOfTimeOnSite.at(0)=timeOnSites.at(0)/totalTimeOnSites;
+      portionOfTimeOnSite.at(1)=timeOnSites.at(1)/totalTimeOnSites;
+      portionOfTimeOnSite.at(2)=timeOnSites.at(2)/totalTimeOnSites;
+      portionOfTimeOnSite.at(3)=timeOnSites.at(3)/totalTimeOnSites;
+      portionOfTimeOnSite.at(4)=timeOnSites.at(4)/totalTimeOnSites;
+
+      cout << "Time percentage on sites" << endl; 
+      for(int i=0; i<5;++i){
+        cout << "Percent time spent on site " << (i+1) << " " << portionOfTimeOnSite.at(i) << endl;
+      }
+
+      assert(
+          portionOfTimeOnSite.at(0)>portionOfTimeOnSiteNoCluster.at(0)*0.8 && 
+          portionOfTimeOnSite.at(0)<portionOfTimeOnSiteNoCluster.at(0)*1.2);
+      assert(
+          portionOfTimeOnSite.at(1)>portionOfTimeOnSiteNoCluster.at(1)*0.8 && 
+          portionOfTimeOnSite.at(1)<portionOfTimeOnSiteNoCluster.at(1)*1.2);
+      assert(
+          portionOfTimeOnSite.at(2)>portionOfTimeOnSiteNoCluster.at(2)*0.8 && 
+          portionOfTimeOnSite.at(2)<portionOfTimeOnSiteNoCluster.at(2)*1.2);
+      assert(
+          portionOfTimeOnSite.at(3)>portionOfTimeOnSiteNoCluster.at(3)*0.8 && 
+          portionOfTimeOnSite.at(3)<portionOfTimeOnSiteNoCluster.at(3)*1.2);
+      assert(
+          portionOfTimeOnSite.at(4)>portionOfTimeOnSiteNoCluster.at(4)*0.8 && 
+          portionOfTimeOnSite.at(4)<portionOfTimeOnSiteNoCluster.at(4)*1.2);
+
+    }// With cluster formation
   }
 
 	return 0;

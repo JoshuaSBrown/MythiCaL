@@ -1,383 +1,383 @@
-#include <stdexcept>
-#include <iostream>
-#include <map>
-#include "log.hpp"
-#include "kmc_cluster.hpp"
-#include "kmc_site.hpp"
-#include "../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
-#include "../../include/kmccoursegrain/kmc_particle.hpp"
-#include "../../include/kmccoursegrain/kmc_constants.hpp"
 
+#include <algorithm>
+#include <iostream>
+#include <stdexcept>
+#include <memory>
+#include <chrono>
+
+#include "../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
+#include "../../include/kmccoursegrain/kmc_constants.hpp"
+#include "../../include/kmccoursegrain/kmc_particle.hpp"
+
+#include "topologyfeatures/kmc_topology_feature.hpp"
+#include "topologyfeatures/kmc_cluster.hpp"
+#include "topologyfeatures/kmc_site.hpp"
+#include "log.hpp"
+#include "kmc_basin_explorer.hpp"
+#include "kmc_graph_library_adapter.hpp"
+
+#include "../../../UGLY/include/ugly/pair_hash.hpp"
 #include "../../../UGLY/include/ugly/edge_directed_weighted.hpp"
 #include "../../../UGLY/include/ugly/graph.hpp"
-#include "../../../UGLY/include/ugly/graph_node.hpp"
 #include "../../../UGLY/include/ugly/graph_algorithms.hpp"
+#include "../../../UGLY/include/ugly/graph_node.hpp"
+#include "../../../UGLY/include/ugly/graphvisitor/graphvisitor_smallest_known_value.hpp"
 
 using namespace std;
+using namespace std::chrono;
 using namespace ugly;
 using namespace ugly::graphalgorithms;
 
 namespace kmccoursegrain {
-  /****************************************************************************
-   * Private Internal Function Declarations
-   ****************************************************************************/
+/****************************************************************************
+ * Private Internal Function Declarations
+ ****************************************************************************/
 
-  list<shared_ptr<Edge>> createEdges_(map<int,SitePtr> sites_, vector<int> siteIds);
+bool compare(const pair<int,double> &x, const pair<int,double> &y){
+  return x.second>y.second;
+}
 
-  map<int,shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds);
+unordered_map<int, shared_ptr<GraphNode<string>>> createNode_(int siteIds);
 
-  /****************************************************************************
-   * Public Facing Functions
-   ****************************************************************************/
+size_t countUniqueClusters(unordered_map<int,int> sites_and_clusters);
+int getFavoredClusterId(unordered_map<int,int> sites_and_clusters);
 
-  void KMC_CourseGrainSystem::initializeSystem(
-      map<int const,map<int const,double* >> ratesOfAllSites){
+/****************************************************************************
+ * Public Facing Functions
+ ****************************************************************************/
 
-    LOG("Initializeing system",1);
+void KMC_CourseGrainSystem::initializeSystem(unordered_map<int, unordered_map<int, double*>> ratesOfAllSites) {
 
-    for(auto it = ratesOfAllSites.begin();it!=ratesOfAllSites.end();++it){
-      auto site = shared_ptr<KMC_Site>(new KMC_Site);
-      site->setId(it->first);
-      site->setThreshold(courseGrainingThreshold_);
-      site->setRatesToNeighbors(it->second);
-      if(seed_set_) {
-        site->setRandomSeed(seed_);
-        ++seed_;
-      }
-      sites_[it->first] = move(site);
-    }
-  }
+  LOG("Initializeing system", 1);
 
-  void 
-  KMC_CourseGrainSystem::initializeParticles(vector<ParticlePtr> particles){
-
-    LOG("Initializeing particles",1);
-
-    if(sites_.size()==0){
-      throw runtime_error("You must first initialize the system before you "
-          "can initialize the particles");
-    }
-
-    for(auto particle : particles){
-      auto siteId = particle->getIdOfSiteCurrentlyOccupying();
-      if(siteId == constants::unassignedId){
-        throw runtime_error("You must first place the particle on a known site"
-            " before the particle can be initialized.");
-      }
-      sites_[siteId]->occupySite();
-
-      int newId = sites_[siteId]->pickNewSiteId();
-      auto hopTime = sites_[siteId]->getDwellTime();
-
-      particle->setDwellTime(hopTime);
-      particle->setPotentialSite(newId);
-    }
-  }
-
-  void KMC_CourseGrainSystem::setCourseGrainThreshold(int threshold){
-    LOG("Setting threshold",1);
-    courseGrainingThreshold_ = threshold;
-  }
-
-  void KMC_CourseGrainSystem::setRandomSeed(const unsigned long seed){
-    if(sites_.size()!=0){
-      throw runtime_error("For the random seed to have an affect, it must be "
-          "set before initializeSystem is called");
-    }
-    seed_=seed;
-    seed_set_=true;
-  }
-
-  void KMC_CourseGrainSystem::removeParticleFromSystem(ParticlePtr particle){
-    LOG("Particle is being removed from system",1);
-    auto siteId = particle->getIdOfSiteCurrentlyOccupying();
-    sites_[siteId]->vacateSite();
-  }
-
-  int KMC_CourseGrainSystem::getClusterIdOfSite(int siteId){
-    return sites_[siteId]->getClusterId();
-  }
-
-  void KMC_CourseGrainSystem::hop(ParticlePtr particle){
-
-    LOG("Particle is hopping in system",1);
-    auto siteId = particle->getIdOfSiteCurrentlyOccupying();
-    int siteToHopTo = particle->getPotentialSite();
-
-    if( sites_[siteToHopTo]->siteIsOccupied() ){
-      LOG("Site "+to_string(siteToHopTo)+" is occupied",1);
-      if( sites_[siteId]->partOfCluster() ){
-
-        auto clusterId = sites_[siteId]->getClusterId();
-        int newId = clusters_[clusterId]->pickNewSiteId();
-        auto hopTime = clusters_[clusterId]->getDwellTime();
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-
-      }else{
-
-        int newId = sites_[siteId]->pickNewSiteId();
-        auto hopTime = sites_[siteId]->getDwellTime();
-
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-      }
-
-    }else{
-
-      if( sites_[siteToHopTo]->partOfCluster() ){
-        LOG("Hopping to "+to_string(siteToHopTo)+" site",1);
-        auto clusterId = sites_[siteToHopTo]->getClusterId();
-        sites_[siteId]->vacateSite();
-        sites_[siteToHopTo]->occupySite();
-
-        int newId = clusters_[clusterId]->pickNewSiteId();
-        auto hopTime = clusters_[clusterId]->getDwellTime();
-
-        particle->occupySite(siteToHopTo,clusterId);
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-        courseGrainSiteIfNeeded_(particle);
-
-      }else{
-        sites_[siteId]->vacateSite();
-        sites_[siteToHopTo]->occupySite();
-
-        int newId = sites_[siteToHopTo]->pickNewSiteId();
-        auto hopTime = sites_[siteToHopTo]->getDwellTime();
-        particle->occupySite(siteToHopTo,constants::unassignedId);
-        particle->setDwellTime(hopTime);
-        particle->setPotentialSite(newId);
-
-        courseGrainSiteIfNeeded_(particle);
-
-      }
-
-    }
-
-  }
-
-  /****************************************************************************
-   * Internal Private Functions
-   ****************************************************************************/
-
-  void 
-  KMC_CourseGrainSystem::createCluster_(vector<int> siteIds){
-    LOG("Creating cluster from vector of sites",1);
-    auto cluster_ptr = shared_ptr<KMC_Cluster>(new KMC_Cluster());
-    vector<SitePtr> sites;
-    for(auto siteId : siteIds ) sites.push_back(sites_[siteId]);
-
-    cluster_ptr->addSites(sites);
-    cluster_ptr->setResolution(clusterResolution_);
-    cluster_ptr->setThreshold(courseGrainingThreshold_);
-    if(seed_set_){
-      cluster_ptr->setRandomSeed(seed_);
+  for (auto it = ratesOfAllSites.begin(); it != ratesOfAllSites.end(); ++it) {
+    KMC_Site site;
+    site.setId(it->first);
+    site.setRatesToNeighbors(it->second);
+    if (seed_set_) {
+      site.setRandomSeed(seed_);
       ++seed_;
     }
-    clusters_[cluster_ptr->getId()] = cluster_ptr;
+    sites_.addKMC_Site(site);
+    topology_features_[it->first] = &(sites_.getKMC_Site(it->first));
   }
 
-  void 
-    KMC_CourseGrainSystem::mergeSitesToCluster_(
-        vector<int> siteIds,int favoredClusterId){
+}
+
+void KMC_CourseGrainSystem::initializeParticles(vector<KMC_Particle>& particles) {
+
+  LOG("Initializeing particles", 1);
   
-    LOG("Merging sites to cluster",1);
-    vector<SitePtr> isolated_sites;
-    for(auto siteId : siteIds) {
-      int clusterId = sites_[siteId]->getClusterId();
-      if(clusterId==constants::unassignedId){
-        isolated_sites.push_back(sites_[siteId]);
-      }else if(clusterId!=favoredClusterId){
-        clusters_[favoredClusterId]->migrateSitesFrom(clusters_[clusterId]);
-        clusters_.erase(clusterId);
+  if (topology_features_.size() == 0) {
+    throw runtime_error(
+        "You must first initialize the system before you "
+        "can initialize the particles");
+  }
+
+  for ( size_t index = 0; index<particles.size(); ++index){
+//  for (KMC_Particle & particle : particles) {
+    auto siteId = particles.at(index).getIdOfSiteCurrentlyOccupying();
+    if (siteId == constants::unassignedId) {
+      throw runtime_error(
+          "You must first place the particle on a known site"
+          " before the particle can be initialized.");
+    }
+    topology_features_[siteId]->occupy();
+
+    int newId = topology_features_[siteId]->pickNewSiteId();
+    auto hopTime = topology_features_[siteId]->getDwellTime();
+    particles.at(index).setDwellTime(hopTime);
+    particles.at(index).setPotentialSite(newId);
+  }
+}
+
+void KMC_CourseGrainSystem::setCourseGrainIterationThreshold(int threshold) {
+  LOG("Setting threshold", 1);
+  iteration_threshold_ = threshold;
+}
+
+void KMC_CourseGrainSystem::setRandomSeed(const unsigned long seed) {
+  if (topology_features_.size() != 0) {
+    throw runtime_error(
+        "For the random seed to have an affect, it must be "
+        "set before initializeSystem is called");
+  }
+  seed_ = seed;
+  seed_set_ = true;
+}
+
+void KMC_CourseGrainSystem::removeParticleFromSystem(KMC_Particle& particle) {
+  LOG("Particle is being removed from system", 1);
+  auto siteId = particle.getIdOfSiteCurrentlyOccupying();
+  sites_.vacate(siteId);
+}
+
+int KMC_CourseGrainSystem::getClusterIdOfSite(int siteId) {
+  return sites_.getClusterIdOfSite(siteId);
+}
+
+void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
+  LOG("Particle is hopping in system", 1);
+  auto siteId = particle.getIdOfSiteCurrentlyOccupying();
+  int siteToHopToId = particle.getPotentialSite();
+
+  KMC_TopologyFeature * feature = topology_features_[siteId];
+  KMC_TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
+
+  int newId;
+  double hopTime;
+  
+  if(!feature_to_hop_to->isOccupied(siteToHopToId)){
+    LOG("Hopping to " + to_string(siteToHopToId) + " site", 1);
+    feature->vacate(siteId);
+    feature_to_hop_to->occupy(siteToHopToId);
+
+    newId   = feature_to_hop_to->pickNewSiteId();
+    hopTime = feature_to_hop_to->getDwellTime();
+ 
+    particle.occupySite(siteToHopToId);
+    particle.setDwellTime(hopTime);
+    particle.setPotentialSite(newId);
+  }else{
+//    siteToHopToId = siteId;
+//    feature->vacate(siteId);
+//    feature_to_hop_to->occupy(siteId);
+
+    newId   = feature_to_hop_to->pickNewSiteId();
+    hopTime = feature_to_hop_to->getDwellTime();
+    
+    particle.setDwellTime(hopTime);
+    particle.setPotentialSite(newId);
+  }
+
+  ++iteration_;
+  if(iteration_ > iteration_threshold_){
+    //int frequency = feature_to_hop_to->getVisitFrequency(siteToHopToId);
+    //  if(frequency > iteration_threshold_/10 ){
+    //if(sampled_sites_.count(site_most_visited_)==0){
+    //  courseGrain_(siteToHopToId);
+//    if(sites_.getKMC_Site(siteToHopToId).getVisitFrequency()>20){
+      if(courseGrain_(siteToHopToId)){
+        iteration_threshold_ = 100000;
+      }else{
+        iteration_threshold_*=2;
+      }
+//    }
+    //}
+    // }*/
+//    iteration_ = 0;
+  }
+}
+
+/****************************************************************************
+ * Internal Private Functions
+ ****************************************************************************/
+
+bool KMC_CourseGrainSystem::courseGrain_(int siteId){
+  BasinExplorer basin_explorer;
+  auto basin_site_ids = basin_explorer.findBasin(sites_,siteId);
+
+  double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
+  if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
+
+    auto sites_and_clusters = getClustersOfSites(basin_site_ids);
+    auto number_clusters = countUniqueClusters(sites_and_clusters);
+
+    if(number_clusters==1 &&
+       sites_and_clusters.begin()->second==constants::unassignedId)
+    {
+      cout << "Creating cluster " << endl;
+      createCluster_(basin_site_ids,internal_time_limit);
+      return true;
+    }else if(number_clusters!=1){
+      cout << "Merging cluster " << endl;
+      // Joint clusters and sites to an existing cluster
+      int favored_clusterId = getFavoredClusterId(sites_and_clusters);
+      mergeSitesAndClusters_(sites_and_clusters,favored_clusterId);
+      return true;
+    }
+  }
+  return false;
+}
+
+size_t countUniqueClusters(unordered_map<int,int> sites_and_clusters){
+  set<int> clusters;
+  for(auto site_and_cluster : sites_and_clusters){
+    clusters.insert(site_and_cluster.second);
+  }
+  return clusters.size();
+}
+
+int getFavoredClusterId(unordered_map<int,int> sites_and_clusters){
+  int clusterId = constants::unassignedId;
+  for(auto site_and_cluster : sites_and_clusters){
+    if(site_and_cluster.second != constants::unassignedId){
+      if(clusterId==constants::unassignedId || 
+          site_and_cluster.second < clusterId){
+        clusterId = site_and_cluster.second;
       }
     }
-    clusters_[favoredClusterId]->addSites(isolated_sites);
+  }
+  return clusterId;
+}
 
+// The first int is the site id the second int is the cluster id 
+unordered_map<int,int> KMC_CourseGrainSystem::getClustersOfSites(vector<int> siteIds){
+  unordered_map<int,int> sites_and_clusters;
+  for(auto siteId : siteIds){
+    if(sites_.partOfCluster(siteId)){
+      sites_and_clusters[siteId]= sites_.getClusterIdOfSite(siteId);
+    }else{
+      sites_and_clusters[siteId]= constants::unassignedId;
+    }
+  }
+  return sites_and_clusters;
+}
+
+int KMC_CourseGrainSystem::createCluster_(vector<int> siteIds, double internal_time_limit) {
+  LOG("Creating cluster from vector of sites", 1);
+
+  KMC_Cluster cluster;
+  cluster.setConvergenceMethod(KMC_Cluster::Method::converge_by_tolerance);
+  cluster.setConvergenceTolerance(0.001);
+  vector<KMC_Site> sites;
+  for (auto siteId : siteIds){
+    sites.push_back(sites_.getKMC_Site(siteId));
+  }
+  cluster.addSites(sites);
+
+  double cluster_time_const = cluster.getTimeConstant();
+  // Cut the resolution in half from what it would otherwise be otherwise not worth doing
+  int res = static_cast<int>(floor(cluster_time_const/(2*internal_time_limit)));
+  int chosen_resolution = res;
+  if(res==0) chosen_resolution=1;
+  if(clusterResolution_<res) chosen_resolution = clusterResolution_; 
+  cluster.setResolution(chosen_resolution);
+  if (seed_set_) {
+    cluster.setRandomSeed(seed_);
+    ++seed_;
+  }
+  clusters_[cluster.getId()] = cluster;
+
+  for(auto siteId : siteIds){
+    sites_.setClusterId(siteId,cluster.getId());  
+    topology_features_[siteId] = &(clusters_[cluster.getId()]);
   }
 
-  bool 
-    KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(
-        vector<int> siteIds){
+  auto sitesFoundInCluster = cluster.getSiteIdsInCluster();
 
-    LOG("Checking if sites satisfy equilibrium condition",1);
-    auto edges = createEdges_(sites_,siteIds);
-    auto nodes = createNodes_(siteIds);
-    list<weak_ptr<Edge>> edges_weak(edges.begin(),edges.end());
-    map<int,weak_ptr<GraphNode<string>>> nodes_weak;
-    for(auto map_iter : nodes ) nodes_weak[map_iter.first] = map_iter.second;
- 
-    auto graph_ptr = shared_ptr<Graph<string>>\
-                     (new Graph<string>(edges_weak,nodes_weak));
+  return cluster.getId();
+}
 
-    map<pair<int,int>,double> verticesAndtimes = \
+void KMC_CourseGrainSystem::mergeSitesAndClusters_( unordered_map<int,int> sites_and_clusters,int favoredClusterId) {
+
+  LOG("Merging sites to cluster", 1);
+  vector<KMC_Site> isolated_sites;
+  unordered_set<int> cluster_ids;
+
+  for (auto site_and_cluster : sites_and_clusters) { 
+
+    if(site_and_cluster.second != favoredClusterId){ 
+      if (site_and_cluster.second == constants::unassignedId) {
+        isolated_sites.push_back(sites_.getKMC_Site(site_and_cluster.first));
+      } else {
+        cluster_ids.insert(site_and_cluster.second);
+      }
+      topology_features_[site_and_cluster.first] = &(clusters_[favoredClusterId]);
+    }
+  }
+  clusters_[favoredClusterId].addSites(isolated_sites);
+  for(auto clusterId : cluster_ids ){
+    clusters_[favoredClusterId].migrateSitesFrom(clusters_[clusterId]);
+    clusters_.erase(clusters_.find(clusterId));
+  }
+
+}
+
+double KMC_CourseGrainSystem::getInternalTimeLimit_(vector<int> siteIds ){
+  LOG("Getting the internal time limit of a cluster", 1);
+
+  auto nodes = convertSitesToEmptySharedNodes(siteIds);
+
+  unordered_map<int, weak_ptr<GraphNode<string>>> nodes_weak;
+  for (auto node_iter : nodes) nodes_weak[node_iter.first] = node_iter.second;
+
+  auto edges = convertSitesOutgoingRatesToTimeSharedWeightedEdges<vector<shared_ptr<Edge>>>(
+      sites_,
+      siteIds);
+
+  list<weak_ptr<Edge>> edges_weak(edges.begin(), edges.end());
+
+  auto graph_ptr =
+      shared_ptr<Graph<string>>(new Graph<string>(edges_weak, nodes_weak));
+
+  unordered_map<pair<int, int>, double,hash_functions::hash> verticesAndtimes =
       maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
 
-    double maxtime = 0.0;
-    for( auto verticesAndTime : verticesAndtimes){
-      if(verticesAndTime.second>maxtime) maxtime = verticesAndTime.second;
-    }
-
-    auto minTimeConstant = getMinimumTimeConstantFromSitesToNeighbors_(siteIds);
-    
-    return minTimeConstant>(2*maxtime);
+  double maxtime = 0.0;
+  for (auto verticesAndTime : verticesAndtimes) {
+    if (verticesAndTime.second > maxtime) maxtime = verticesAndTime.second;
   }
-  
-  double 
-    KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
-      vector<int> siteIds){
-    
-    LOG("Get the minimum time constant",1);
-    set<int> internalSiteIds(siteIds.begin(),siteIds.end());
+  return maxtime;
+}
 
-    double minimumTimeConstant=-1.0;
-    bool initialized =false;
-    for(auto siteId : siteIds){
-      auto neighborSiteIds = sites_[siteId]->getNeighborSiteIds();  
-      for( auto neighId : neighborSiteIds){
-        if(!internalSiteIds.count(neighId)){
-          auto timeConstant = 1.0/sites_[siteId]->getRateToNeighbor(neighId);
-          if(!initialized){
-            initialized=true;
-            minimumTimeConstant = timeConstant;
-          }else if(timeConstant<minimumTimeConstant){
-            minimumTimeConstant = timeConstant;
-          }
-        }
-      }
-    }
-    return minimumTimeConstant;
-  }
+// Its not worth creating a cluster unless the time being at least cut in half
+bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(
+    vector<int> siteIds, double maxtime) {
 
-  map<int,shared_ptr<GraphNode<string>>> createNodes_(vector<int> siteIds){
-    LOG("Creating nodes",1);
-    map<int,shared_ptr<GraphNode<string>>> nds;
-    for(auto siteId : siteIds){
-      if(nds.count(siteId)==0){
-        auto gn = shared_ptr<GraphNode<string>>(new GraphNode<string>(""));
-        nds[siteId] = gn;
-      }
-    }
-    return nds;
-  }
+  LOG("Checking if sites satisfy equilibrium condition", 1);
+  auto minTimeConstant = getMinimumTimeConstantFromSitesToNeighbors_(siteIds);
+  return minTimeConstant > (maxtime*getCourseGrainResolutionMin());
+}
 
-  list<shared_ptr<Edge>> createEdges_(map<int,SitePtr> sites_, vector<int> siteIds){
+double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
+    vector<int> siteIds) {
 
-    LOG("Creating graph",1);
-    // Need edges to be directed and weighted
-    list<shared_ptr<Edge>> edges;
-    for(auto siteId : siteIds){
-      for(auto potential_neighId : siteIds){
-        if(sites_[siteId]->isNeighbor(potential_neighId)){
-          auto time = 1.0/sites_[siteId]->getRateToNeighbor(potential_neighId);
-          auto edge = shared_ptr<EdgeDirectedWeighted>(new EdgeDirectedWeighted(siteId,potential_neighId,time));
+  LOG("Get the minimum time constant", 1);
+  set<int> internalSiteIds(siteIds.begin(), siteIds.end());
 
-          edges.push_back(edge);
-        }
-      }
-    }
-
-    return edges;
-  }
-
-  int KMC_CourseGrainSystem::getFavoredClusterId_(vector<int> siteIds){
-
-    LOG("Getting the favored cluster Id",1);
-    int favoredClusterId = constants::unassignedId;
-    for( auto siteId : siteIds){
-      int clusterId = sites_[siteId]->getClusterId();
-      if(favoredClusterId==constants::unassignedId){
-        favoredClusterId = clusterId;
-      }else if( clusterId!=constants::unassignedId && clusterId<favoredClusterId){
-        favoredClusterId = clusterId;
-      }
-    }
-    return favoredClusterId;
-  }
-
-  vector<int> KMC_CourseGrainSystem::getRelevantSites_(vector<vector<int>> memories){
-    vector<int> relevantSites;
-    for(auto memory : memories ){
-      int threshold;
-      if(memory.at(1)!=constants::unassignedId){
-        threshold = clusters_[memory.at(1)]->getThreshold();
-      }else{
-        threshold = sites_[memory.at(0)]->getThreshold();
-      }
-      if(memory.at(2)>threshold){
-        relevantSites.push_back(memory.at(0));
-      }else{
-        break;
-      }
-    }
-    return relevantSites;
-  }
-
-  void KMC_CourseGrainSystem::updateSiteAndClusterThresholds_(vector<int> relevantSites){
-    for(auto siteId : relevantSites){
-      int clusterId = sites_[siteId]->getClusterId();
-      if(clusterId!=constants::unassignedId){
-        clusters_[clusterId]->setThreshold(clusters_[clusterId]->getThreshold()*2);
-      }else{
-        sites_[siteId]->setThreshold(sites_[siteId]->getThreshold()*2);
-      }
-    }
-  }
-
-  void KMC_CourseGrainSystem::courseGrainSiteIfNeeded_(ParticlePtr& particle){
-
-    LOG("Course graining sites if needed",1);
-
-    auto memories = particle->getMemory();
- 
-    // Determine if the particle has made enough jumps to have a memory
-    if(memories.size()>1){
-
-      // Determine how many sites are above the threshold, stores the ones that
-      // are over the threshold and appear in consecutive order from the most 
-      // recently visited
-      vector<int> relevantSites = getRelevantSites_(memories);
-
-      if(relevantSites.size()>1){
-
-        int total_hops= 0;
-        for(auto memory : memories) total_hops+=memory.at(2);
-
-        bool satisfy = sitesSatisfyEquilibriumCondition_(relevantSites); 
- 
-        int favoredClusterId = getFavoredClusterId_(relevantSites); 
-        if(satisfy && total_hops>clusterResolution_){
-
-          if(favoredClusterId==constants::unassignedId){
-            // None of the sites are part of a cluster 
-            createCluster_(relevantSites);
-            int clusterId = sites_[relevantSites.at(0)]->getClusterId();
-            // Remove the particles memory of visiting the second site
-            for(int index = 1;index < static_cast<int>(relevantSites.size());++index){
-              particle->removeMemory(relevantSites.at(index));
-            }
-            particle->resetVisitationFrequency(relevantSites.at(0));
-            particle->setClusterSiteBelongsTo(relevantSites.at(0),clusterId);
-
-          }else{
-            mergeSitesToCluster_(relevantSites,favoredClusterId);
-            for(int index=1; index < static_cast<int>(relevantSites.size());++index){
-              particle->removeMemory(relevantSites.at(index));
-            }
-            particle->resetVisitationFrequency(relevantSites.at(0));
-            particle->setClusterSiteBelongsTo(relevantSites.at(0),favoredClusterId);
-          }
-          particle->setMemoryCapacity(2);
-        }else{
-//          updateSiteAndClusterThresholds_(relevantSites);
-          if(particle->getMemoryCapacity()<6){
-            particle->setMemoryCapacity(particle->getMemoryCapacity()+1);
-          }
+  double minimumTimeConstant = -1.0;
+  bool initialized = false;
+  for (auto siteId : siteIds) {
+    auto neighborSiteIds = sites_.getSiteIdsOfNeighbors(siteId);
+    for (auto neighId : neighborSiteIds) {
+      if (!internalSiteIds.count(neighId)) {
+        auto timeConstant = 1.0 / sites_.getRateToNeighborOfSite(siteId,neighId);
+        if (!initialized) {
+          initialized = true;
+          minimumTimeConstant = timeConstant;
+        } else if (timeConstant < minimumTimeConstant) {
+          minimumTimeConstant = timeConstant;
         }
       }
     }
   }
+  return minimumTimeConstant;
+}
+
+vector<vector<int>> KMC_CourseGrainSystem::getClusters(){
+  vector<vector<int>> clusters;
+  for(auto cluster : clusters_){
+    clusters.push_back(cluster.second.getSiteIdsInCluster());
+  }
+  return clusters;
+}
+
+int KMC_CourseGrainSystem::getFavoredClusterId_(vector<int> siteIds) {
+
+  LOG("Getting the favored cluster Id", 1);
+  int favoredClusterId = constants::unassignedId;
+  for (auto siteId : siteIds) {
+    int clusterId = sites_.getClusterIdOfSite(siteId);
+    if (favoredClusterId == constants::unassignedId) {
+      favoredClusterId = clusterId;
+    } else if (clusterId != constants::unassignedId &&
+               clusterId < favoredClusterId) {
+      favoredClusterId = clusterId;
+    }
+  }
+  return favoredClusterId;
+}
 
 
 }
