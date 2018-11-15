@@ -64,6 +64,20 @@ void KMC_CourseGrainSystem::initializeSystem(unordered_map<int, unordered_map<in
 
 }
 
+int KMC_CourseGrainSystem::getVisitFrequencyOfSite(int siteId){
+  if(sites_.exist(siteId)==false){
+    throw invalid_argument("Site is not stored in the course grained system you"
+        " cannot retrieve it's visit frequency.");
+  }
+
+  int visits = sites_.getKMC_Site(siteId).getVisitFrequency();
+  if(sites_.partOfCluster(siteId)){
+    int cluster_id = sites_.getClusterIdOfSite(siteId);
+    visits += clusters_[cluster_id].getVisitFrequency(siteId);
+  }
+  return visits;
+}
+
 void KMC_CourseGrainSystem::initializeParticles(vector<KMC_Particle>& particles) {
 
   LOG("Initializeing particles", 1);
@@ -140,9 +154,8 @@ void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
     particle.setDwellTime(hopTime);
     particle.setPotentialSite(newId);
   }else{
-//    siteToHopToId = siteId;
-//    feature->vacate(siteId);
-//    feature_to_hop_to->occupy(siteId);
+    feature->vacate(siteId);
+    feature_to_hop_to->occupy(siteId);
 
     newId   = feature_to_hop_to->pickNewSiteId();
     hopTime = feature_to_hop_to->getDwellTime();
@@ -158,6 +171,7 @@ void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
     }else{
       iteration_threshold_*=2;
     }
+    iteration_ = 0;
   }
 }
 
