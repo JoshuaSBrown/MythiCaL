@@ -25,8 +25,12 @@ static int clusterIdCounter = 0;
  ****************************************************************************/
 void occupyCluster_(KMC_TopologyFeature* feature, int& siteId){
   auto cluster = static_cast<KMC_Cluster *>(feature);
-  cluster->sitesInCluster_[siteId].occupy();
-  cluster->occupy();
+  
+  KMC_Site & site = cluster->sitesInCluster_[siteId];
+  int site_visits = site.getVisitFrequency();
+  site_visits += cluster->resolution_;
+  site.setVisitFrequency(site_visits);
+  site.setToOccupiedStatus(); 
 }
 
 bool isOccupiedCluster_(KMC_TopologyFeature* feature,int& siteId){

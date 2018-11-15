@@ -48,12 +48,9 @@ class KMC_CourseGrainSystem {
   KMC_CourseGrainSystem()
       : seed_set_(false),
         clusterResolution_(20),
-        clusterResolutionMin_(2),
+        minimum_course_graining_resolution_(2),
         iteration_threshold_(10000),
-        site_most_visited_(constants::unassignedId),
-        max_frequency_(1000),
-        max_sample_frequency_(10000),
-        ratio_threshold_relevant_sites_(2){};
+        iteration_threshold_min_(10000){};
 
   /**
    * \brief This will correctly initialize the system
@@ -160,7 +157,7 @@ class KMC_CourseGrainSystem {
    **/
   int getClusterIdOfSite(int siteId);
 
-  void setCourseGrainFrequencyRatio(int ratio) {ratio_threshold_relevant_sites_ = ratio;}
+  int getVisitFrequencyOfSite(int siteId);
 
   /**
    * \brief Determines how often to check for course graining
@@ -170,8 +167,8 @@ class KMC_CourseGrainSystem {
    *
    * \param[in] thershold
    **/
-  void setCourseGrainIterationThreshold(int threshold);
-  int getCourseGrainIterationThreshold();
+  void setMinCourseGrainIterationThreshold(int threshold_min);
+  int getMinCourseGrainIterationThreshold();
 
   std::vector<std::vector<int>> getClusters();
 
@@ -184,7 +181,6 @@ class KMC_CourseGrainSystem {
    * the more effiecient the course graining should be.
    **/
   int getCourseGrainResolution() { return clusterResolution_; }
-  int getCourseGrainResolutionMin() { return clusterResolutionMin_; }
   void setCourseGrainResolution(int clusterResolution) {
     clusterResolution_ = clusterResolution;
   }
@@ -200,7 +196,12 @@ class KMC_CourseGrainSystem {
   /// move within the cluster before it is likely to leave, the point of this
   /// is to at least to a small degree conserve the noise.
   int clusterResolution_;
-  int clusterResolutionMin_;
+
+  /// This should be set to a value of 2, it is used to determine if course 
+  /// graining should occur. If the time to hop off the potential sites in
+  /// the course grained cluster is less than twice as long it is not worth
+  /// course graining. 
+  int minimum_course_graining_resolution_;
 
   /// Keeps track of the number of iterations. Is reset after passing the
   /// iteration threshold. 
@@ -209,10 +210,8 @@ class KMC_CourseGrainSystem {
   /// How many interactions occur before course graining is tested
   int iteration_threshold_;
 
-  /// Keeps track of the number of sites that have been visited, so that course
-  /// graining is not attempted on the same sites over and over again if they
-  /// do not meet the Markov propery criteria. 
-  int site_most_visited_;
+  /// The iteration threshold is reset to the min value if a cluster is found
+  int iteration_threshold_min_;
 
   std::unordered_map<int, KMC_TopologyFeature *> topology_features_;
   /// Stores smart pointers to all the sites
@@ -221,27 +220,7 @@ class KMC_CourseGrainSystem {
   /// Stores smart pointers to all the clusters
   std::unordered_map<int, KMC_Cluster> clusters_;
 
-  /// Sampled sites, sites that have already been checked for course graining
-  std::unordered_set<int> sampled_sites_;
-
   void courseGrainSiteIfNeeded_(KMC_Particle& particle);
-
-  /// Max frequency determines the upper limit for how often a site must be 
-  /// visited before it is considered as a potential cluster
-  int max_frequency_;
-
-  /// The max sample frequency is initialized by the max_frequency_ every time
-  /// the number of iteration_ passes the iteration_threshold_. During the 
-  /// iterations it is updated to whatever frequency the sites that have been
-  /// most visited are at
-  int max_sample_frequency_;
-
-  /// The ratio threshold helps determine the sites that are relevant for
-  /// potential course graining. The ratio threshold divides the
-  /// max_sample_frequency_ to determine if a site is relevant. E.g. if the 
-  /// ratio = 10, than if a site is within an order of magnitude of the max 
-  /// number of visits it is considered relevant. 
-  int ratio_threshold_relevant_sites_;
 
   /**
    * \brief Determines if it is appropriate to coursegrain the sites

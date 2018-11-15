@@ -253,7 +253,7 @@ int main(void){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
-      CGsystem.setCourseGrainIterationThreshold(1000000);
+      CGsystem.setMinCourseGrainIterationThreshold(1000000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
       class Electron : public KMC_Particle {};
@@ -308,8 +308,7 @@ int main(void){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
-      CGsystem.setCourseGrainIterationThreshold(1000);
-      CGsystem.setCourseGrainFrequencyRatio(15);
+      CGsystem.setMinCourseGrainIterationThreshold(1000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
       class Electron : public KMC_Particle {};
@@ -486,21 +485,22 @@ int main(void){
     // Number of electrons used for both the following crude and course grained
     // simulation runs
     int NumberElectrons = 4000;
+    int number_of_sites = 14;
     // Will be compared with Course grained version
     vector<double> probabilityOnNeighCrude; 
     // Without cluster formation
     vector<double> portionOfTimeOnSiteNoCluster(5,0.0);
+    vector<int> hops_to_sites_no_cluster(number_of_sites,0);  
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
-      CGsystem.setCourseGrainIterationThreshold(1000000);
+      CGsystem.setMinCourseGrainIterationThreshold(1000000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
       class Electron : public KMC_Particle {};
 
       // Store the number of hops to each site 1-14
-      vector<int> hopsToSites(14,0);  
-      vector<double> timeOnSites(14,0.0);
+      vector<double> timeOnSites(number_of_sites,0.0);
       // Store the escape time from the cluster for each electron
       vector<double> escapeTimes;
 
@@ -518,7 +518,6 @@ int main(void){
 
         while(electron1.getIdOfSiteCurrentlyOccupying()<6){
           CGsystem.hop(electron1);
-          hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
           timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
           totalTimeOnCluster+=electron1.getDwellTime(); 
         }
@@ -527,38 +526,45 @@ int main(void){
         escapeTimes.push_back(totalTimeOnCluster);
       }
 
+      cout << "Total number of visits to each site" << endl;
+      for(int site_id = 1; site_id <= number_of_sites; ++site_id){
+        int visits = CGsystem.getVisitFrequencyOfSite(site_id);
+        hops_to_sites_no_cluster.at(site_id-1) = visits; 
+        cout << "id: " << site_id << " visits " << visits << endl;
+      }
+    
       auto clusters = CGsystem.getClusters();
       // There should be no clusters found because the Threshold is so high
       assert(clusters.size()==0);
 
       int totalneigh = 0;
-      totalneigh+= hopsToSites.at(5);
-      totalneigh+= hopsToSites.at(6);
-      totalneigh+= hopsToSites.at(7);
-      totalneigh+= hopsToSites.at(8);
-      totalneigh+= hopsToSites.at(9);
-      totalneigh+= hopsToSites.at(10);
-      totalneigh+= hopsToSites.at(11);
-      totalneigh+= hopsToSites.at(12);
-      totalneigh+= hopsToSites.at(13);
+      totalneigh+= hops_to_sites_no_cluster.at(5);
+      totalneigh+= hops_to_sites_no_cluster.at(6);
+      totalneigh+= hops_to_sites_no_cluster.at(7);
+      totalneigh+= hops_to_sites_no_cluster.at(8);
+      totalneigh+= hops_to_sites_no_cluster.at(9);
+      totalneigh+= hops_to_sites_no_cluster.at(10);
+      totalneigh+= hops_to_sites_no_cluster.at(11);
+      totalneigh+= hops_to_sites_no_cluster.at(12);
+      totalneigh+= hops_to_sites_no_cluster.at(13);
 
-      double value = static_cast<double>(hopsToSites.at(5))/static_cast<double>(totalneigh);
+      double value = static_cast<double>(hops_to_sites_no_cluster.at(5))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(6))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(6))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(7))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(7))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(8))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(8))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(9))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(9))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(10))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(10))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(11))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(11))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(12))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(12))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
-      value = static_cast<double>(hopsToSites.at(13))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites_no_cluster.at(13))/static_cast<double>(totalneigh);
       probabilityOnNeighCrude.push_back(value);
 
       cout << "Probability of Hopping to a neighboring site should match" << endl;
@@ -635,14 +641,13 @@ int main(void){
     {
 
       // Store the number of hops to each site 1-14
-      vector<int> hopsToSites(14,0);  
-      vector<double> timeOnSites(14,0.0);
+      vector<int> hops_to_sites(number_of_sites,0);  
+      vector<double> timeOnSites(number_of_sites,0.0);
       // Store the escape time from the cluster for each electron
       vector<double> escapeTimes;
 
       KMC_CourseGrainSystem CGsystem;
-      CGsystem.setCourseGrainFrequencyRatio(15);
-      CGsystem.setCourseGrainIterationThreshold(10);
+      CGsystem.setMinCourseGrainIterationThreshold(10);
       CGsystem.setRandomSeed(1);
       CGsystem.initializeSystem(ratesToNeighbors);
       int cycles = 3;
@@ -664,17 +669,22 @@ int main(void){
           CGsystem.hop(electron1);
 
           while(electron1.getIdOfSiteCurrentlyOccupying()<6){
-            hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
             timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
             totalTimeOnCluster+=electron1.getDwellTime(); 
             CGsystem.hop(electron1);
           }
 
-          hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
           CGsystem.removeParticleFromSystem(electron1);
           escapeTimes.push_back(totalTimeOnCluster);
         }
 
+      }
+
+      cout << "Total number of visits to each site" << endl;
+      for(int site_id = 1; site_id <= number_of_sites; ++site_id){
+        int visits = CGsystem.getVisitFrequencyOfSite(site_id);
+        hops_to_sites.at(site_id-1) = visits; 
+        cout << "id: " << site_id << " visits " << visits << endl;
       }
 
       auto clusters = CGsystem.getClusters();
@@ -700,34 +710,34 @@ int main(void){
 
 
       int totalneigh = 0;
-      totalneigh+= hopsToSites.at(5);
-      totalneigh+= hopsToSites.at(6);
-      totalneigh+= hopsToSites.at(7);
-      totalneigh+= hopsToSites.at(8);
-      totalneigh+= hopsToSites.at(9);
-      totalneigh+= hopsToSites.at(10);
-      totalneigh+= hopsToSites.at(11);
-      totalneigh+= hopsToSites.at(12);
-      totalneigh+= hopsToSites.at(13);
+      totalneigh+= hops_to_sites.at(5);
+      totalneigh+= hops_to_sites.at(6);
+      totalneigh+= hops_to_sites.at(7);
+      totalneigh+= hops_to_sites.at(8);
+      totalneigh+= hops_to_sites.at(9);
+      totalneigh+= hops_to_sites.at(10);
+      totalneigh+= hops_to_sites.at(11);
+      totalneigh+= hops_to_sites.at(12);
+      totalneigh+= hops_to_sites.at(13);
 
       vector<double> probabilityOnNeigh; 
-      double value = static_cast<double>(hopsToSites.at(5))/static_cast<double>(totalneigh);
+      double value = static_cast<double>(hops_to_sites.at(5))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(6))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(6))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(7))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(7))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(8))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(8))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(9))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(9))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(10))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(10))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(11))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(11))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(12))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(12))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
-      value = static_cast<double>(hopsToSites.at(13))/static_cast<double>(totalneigh);
+      value = static_cast<double>(hops_to_sites.at(13))/static_cast<double>(totalneigh);
       probabilityOnNeigh.push_back(value);
 
       cout << "Probability of Hopping to a neighboring site should match" << endl;

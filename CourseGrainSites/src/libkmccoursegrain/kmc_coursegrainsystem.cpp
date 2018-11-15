@@ -91,9 +91,10 @@ void KMC_CourseGrainSystem::initializeParticles(vector<KMC_Particle>& particles)
   }
 }
 
-void KMC_CourseGrainSystem::setCourseGrainIterationThreshold(int threshold) {
-  LOG("Setting threshold", 1);
-  iteration_threshold_ = threshold;
+void KMC_CourseGrainSystem::setMinCourseGrainIterationThreshold(int threshold_min) {
+  LOG("Setting minimum course graining threshold", 1);
+  iteration_threshold_min_ = threshold_min;
+  iteration_threshold_ = threshold_min;
 }
 
 void KMC_CourseGrainSystem::setRandomSeed(const unsigned long seed) {
@@ -152,20 +153,11 @@ void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
 
   ++iteration_;
   if(iteration_ > iteration_threshold_){
-    //int frequency = feature_to_hop_to->getVisitFrequency(siteToHopToId);
-    //  if(frequency > iteration_threshold_/10 ){
-    //if(sampled_sites_.count(site_most_visited_)==0){
-    //  courseGrain_(siteToHopToId);
-//    if(sites_.getKMC_Site(siteToHopToId).getVisitFrequency()>20){
-      if(courseGrain_(siteToHopToId)){
-        iteration_threshold_ = 100000;
-      }else{
-        iteration_threshold_*=2;
-      }
-//    }
-    //}
-    // }*/
-//    iteration_ = 0;
+    if(courseGrain_(siteToHopToId)){
+      iteration_threshold_ = iteration_threshold_min_;
+    }else{
+      iteration_threshold_*=2;
+    }
   }
 }
 
@@ -327,7 +319,7 @@ bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(
 
   LOG("Checking if sites satisfy equilibrium condition", 1);
   auto minTimeConstant = getMinimumTimeConstantFromSitesToNeighbors_(siteIds);
-  return minTimeConstant > (maxtime*getCourseGrainResolutionMin());
+  return minTimeConstant > (maxtime*minimum_course_graining_resolution_);
 }
 
 double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
