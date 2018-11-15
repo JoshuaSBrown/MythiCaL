@@ -7,7 +7,6 @@ project(kmc_course_grain)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
 ########################################################
 # Compiler Flags                                       #
 ########################################################
@@ -15,9 +14,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-#IF(CXXTEST_ADD_PERFORMANCE)
-#  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-#ENDIF(CXXTEST_ADD_PERFORMANCE)
 
 ########################################################
 # Add and build other dependent libraries first        #
@@ -47,12 +43,16 @@ foreach(FUNC sqrt)
 endforeach(FUNC)
 
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include/kmcoursegrain/*.hpp)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include )
+
 install(FILES ${HEADERS} DESTINATION CourseGrainSites/include/kmccoursegrain)
 
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/*.cpp)
-message(${SOURCES})
-add_library(kmc_course_grain ${SOURCES})
+message(${CMAKE_CURRENT_SOURCE_DIR})
+
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/topologyfeatures/*.cpp)
+
+add_library(kmc_course_grain ${SOURCES} )
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
 set_target_properties(kmc_course_grain PROPERTIES LINKER_LANGUAGE CXX)

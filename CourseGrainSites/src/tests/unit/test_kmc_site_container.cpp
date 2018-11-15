@@ -217,5 +217,28 @@ int main(void){
     assert(site_container.getSmallestClusterId(siteIds)==3);
 
   } 
+
+  cout << "Testing: getRateToNeighborOfSite" << endl;
+  {
+    KMC_Site site;
+    KMC_Site site2;
+
+    site.setId(1);
+    site2.setId(2);
+
+    double rate1_2 = 1.0;
+    double rate2_1 = 2.0;
+
+    site.addNeighRate(pair<int,double *>(2,&rate1_2));
+    site2.addNeighRate(pair<int,double *>(1,&rate2_1));
+
+    KMC_Site_Container site_container;
+    site_container.addKMC_Site(site);
+    site_container.addKMC_Site(site2);
+
+    assert(site_container.getRateToNeighborOfSite(1,2)==rate1_2);
+    assert(site_container.getRateToNeighborOfSite(2,1)==rate2_1);
+
+  }
   return 0;
 }

@@ -7,6 +7,13 @@
 #include <memory>
 #include <vector>
 
+#include "../../src/libkmccoursegrain/kmc_site_container.hpp"
+#include "../../src/libkmccoursegrain/topologyfeatures/kmc_site.hpp"
+#include "../../src/libkmccoursegrain/topologyfeatures/kmc_cluster.hpp"
+#include "../../src/libkmccoursegrain/topologyfeatures/kmc_topology_feature.hpp"
+
+#include "kmc_constants.hpp"
+
 namespace ugly {
 template <typename... Ts>
 class Graph;
@@ -14,13 +21,7 @@ class Graph;
 
 namespace kmccoursegrain {
 
-class KMC_Site;
-class KMC_Cluster;
 class KMC_Particle;
-
-typedef std::shared_ptr<KMC_Particle> ParticlePtr;
-typedef std::shared_ptr<KMC_Site> SitePtr;
-typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
 
 /**
  * \brief Course Grain System allows abstraction of renormalization of sites
@@ -47,10 +48,12 @@ class KMC_CourseGrainSystem {
   KMC_CourseGrainSystem()
       : seed_set_(false),
         clusterResolution_(20),
+        clusterResolutionMin_(2),
         iteration_threshold_(10000),
-        max_frequency_(10000),
+        site_most_visited_(constants::unassignedId),
+        max_frequency_(1000),
         max_sample_frequency_(10000),
-        ratio_threshold_relevant_sites_(10){};
+        ratio_threshold_relevant_sites_(2){};
 
   /**
    * \brief This will correctly initialize the system
@@ -102,8 +105,7 @@ class KMC_CourseGrainSystem {
    *
    * Where each of the rateFrom variables is a double
    **/
-  void initializeSystem(
-      std::map<const int, std::map<int const, double*>> ratesOfAllSites);
+  void initializeSystem(std::unordered_map<int, std::unordered_map<int, double*>> ratesOfAllSites);
 
   /**
    * \brief Initialize particle dwell times and future hop site id
@@ -116,7 +118,7 @@ class KMC_CourseGrainSystem {
    *
    * \param[in] particles a vector of pointers to the particles
    **/
-  void initializeParticles(std::vector<ParticlePtr> particles);
+  void initializeParticles(std::vector<KMC_Particle>& particles);
 
   /**
    * \brief Define the seed for the random number generator
@@ -139,12 +141,12 @@ class KMC_CourseGrainSystem {
    *
    * \param[in] particle
    **/
-  void hop(ParticlePtr particle);
+  void hop(KMC_Particle& particle);
 
   /**
    * \brief Remove the particle from the system
    **/
-  void removeParticleFromSystem(ParticlePtr particle);
+  void removeParticleFromSystem(KMC_Particle& particle);
 
   /**
    * \brief Determine if the site is part of a cluster
@@ -158,6 +160,8 @@ class KMC_CourseGrainSystem {
    **/
   int getClusterIdOfSite(int siteId);
 
+  void setCourseGrainFrequencyRatio(int ratio) {ratio_threshold_relevant_sites_ = ratio;}
+
   /**
    * \brief Determines how often to check for course graining
    *
@@ -169,6 +173,8 @@ class KMC_CourseGrainSystem {
   void setCourseGrainIterationThreshold(int threshold);
   int getCourseGrainIterationThreshold();
 
+  std::vector<std::vector<int>> getClusters();
+
   /**
    * \brief set and get the course graining resolution
    *
@@ -178,6 +184,7 @@ class KMC_CourseGrainSystem {
    * the more effiecient the course graining should be.
    **/
   int getCourseGrainResolution() { return clusterResolution_; }
+  int getCourseGrainResolutionMin() { return clusterResolutionMin_; }
   void setCourseGrainResolution(int clusterResolution) {
     clusterResolution_ = clusterResolution;
   }
@@ -193,6 +200,7 @@ class KMC_CourseGrainSystem {
   /// move within the cluster before it is likely to leave, the point of this
   /// is to at least to a small degree conserve the noise.
   int clusterResolution_;
+  int clusterResolutionMin_;
 
   /// Keeps track of the number of iterations. Is reset after passing the
   /// iteration threshold. 
@@ -204,18 +212,19 @@ class KMC_CourseGrainSystem {
   /// Keeps track of the number of sites that have been visited, so that course
   /// graining is not attempted on the same sites over and over again if they
   /// do not meet the Markov propery criteria. 
-  std::unordered_set<int> sites_visited_;
+  int site_most_visited_;
 
+  std::unordered_map<int, KMC_TopologyFeature *> topology_features_;
   /// Stores smart pointers to all the sites
-  std::unordered_map<int, SitePtr> sites_;
+  KMC_Site_Container sites_;
 
   /// Stores smart pointers to all the clusters
-  std::unordered_map<int, ClusterPtr> clusters_;
+  std::unordered_map<int, KMC_Cluster> clusters_;
 
   /// Sampled sites, sites that have already been checked for course graining
   std::unordered_set<int> sampled_sites_;
 
-  void courseGrainSiteIfNeeded_(ParticlePtr& particle);
+  void courseGrainSiteIfNeeded_(KMC_Particle& particle);
 
   /// Max frequency determines the upper limit for how often a site must be 
   /// visited before it is considered as a potential cluster
@@ -267,11 +276,13 @@ class KMC_CourseGrainSystem {
    **/
   int getFavoredClusterId_(std::vector<int> siteIds);
 
-  void createCluster_(std::vector<int> siteIds,double internal_time_limit);
-  void mergeSitesToCluster_(std::vector<int> siteIds, int clusterId);
+  bool courseGrain_(int siteId);
+  std::unordered_map<int,int> getClustersOfSites(std::vector<int> siteIds);
+  int createCluster_(std::vector<int> siteIds,double internal_time_limit);
+  void mergeSitesAndClusters_(std::unordered_map<int,int> sites_and_clusters, int clusterId);
   double getMinimumTimeConstantFromSitesToNeighbors_(std::vector<int> siteIds);
-  std::unordered_map<int,int> filterSites_();
-  std::vector<std::vector<int>> breakIntoIslands_(std::unordered_map<int,int> relevant_sites);
+  std::unordered_map<int,double> filterSites_();
+  std::vector<std::vector<int>> breakIntoIslands_(std::unordered_map<int,double> relevant_sites);
 };
 }
 #endif  // KMCCOURSEGRAIN_KMC_COURSEGRAINSYSTEM_HPP

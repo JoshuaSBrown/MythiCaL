@@ -11,14 +11,16 @@ namespace kmccoursegrain {
 
 class BasinExplorer{
   public:
-    BasinExplorer() : threshold_(0.95) {};
+    BasinExplorer() : threshold_(0.95), max_exploration_count_(5) {};
     void setThreshold(double threshold);
-    std::vector<int> findGradientBasin(KMC_Site_Container& sites,int siteId);
+    void setMaxExplorationCount(int count);
+    std::vector<int> findBasin(KMC_Site_Container& sites,int siteId);
   private:
     double threshold_;
     double fastest_rate_;
     double slowest_rate_;
     double current_sites_fastest_rate_; 
+    size_t max_exploration_count_;
 
     bool rateFastEnough_(double rate);
     double getRate_(KMC_Site_Container& sites, std::weak_ptr<ugly::Edge> edge, int vertex);

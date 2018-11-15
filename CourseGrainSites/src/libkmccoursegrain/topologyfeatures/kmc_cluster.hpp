@@ -1,22 +1,17 @@
 #ifndef KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 #define KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 
-#include <unordered_map>
+#include <list>
 #include <memory>
 #include <random>
 #include <vector>
+#include <unordered_map>
 
-#include <list>
-
-#include "identity.hpp"
+#include "kmc_topology_feature.hpp"
+#include "kmc_site.hpp"
 
 namespace kmccoursegrain {
 
-class KMC_Site;
-class KMC_Cluster;
-
-typedef std::shared_ptr<KMC_Site> SitePtr;
-typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
 /**
  * \brief Course graining of sites is handled by the Cluster class
  *
@@ -28,8 +23,9 @@ typedef std::shared_ptr<KMC_Cluster> ClusterPtr;
  * probability of hopping to sites surrounding the cluster can also be
  * calculated. As well as the dwell time. etc...
  **/
-class KMC_Cluster : public virtual Identity {
- public:
+class KMC_Cluster : public KMC_TopologyFeature {
+
+  public:
   /**
    * \brief Constructor for cluster
    *
@@ -99,8 +95,8 @@ class KMC_Cluster : public virtual Identity {
    *
    * \param[in] site a shared pointer to a site
    **/
-  void addSite(SitePtr site);
-  void addSites(std::vector<SitePtr> sites);
+  void addSite(KMC_Site& site);
+  void addSites(std::vector<KMC_Site>& sites);
 
   /**
    * \brief will update the probabilities and time constant stored in the
@@ -131,7 +127,10 @@ class KMC_Cluster : public virtual Identity {
    *
    * \return A vector of shared pointers to the sites
    **/
-  std::vector<SitePtr> getSitesInCluster() const;
+  std::vector<KMC_Site> getSitesInCluster() const;
+
+  std::vector<int> getSiteIdsInCluster() const;
+  std::vector<int> getSiteIdsNeighboringCluster() const;
 
   /**
    * \brief Returns the number of sites in the cluster
@@ -151,11 +150,6 @@ class KMC_Cluster : public virtual Identity {
   double getProbabilityOfOccupyingInternalSite(const int siteId);
 
   /**
-   * \brief Return the time constant of the cluster
-   **/
-  double getTimeConstant() const;
-
-  /**
    * \brief Move the sites in one cluster to another
    *
    * Here we are moving the sites from one cluster to the other. After doing
@@ -163,7 +157,7 @@ class KMC_Cluster : public virtual Identity {
    *
    * \param[in] cluster a smart pointer to a cluster
    **/
-  void migrateSitesFrom(ClusterPtr cluster);
+  void migrateSitesFrom(KMC_Cluster& cluster);
 
   /**
    * \brief Set the resolution of the cluster
@@ -181,17 +175,6 @@ class KMC_Cluster : public virtual Identity {
    * cluster is
    **/
   void setResolution(const int resolution) { resolution_ = resolution; }
-
-  /**
-   * \brief Specify a seed value for random number generator
-   *
-   * By default the random number generator uses a seed based on the time
-   * however, for the purposes of reproducability or testing a seed value
-   * can be specified if desired.
-   *
-   * \param[in] seed
-   **/
-  void setRandomSeed(const unsigned long seed);
 
   /**
    * \brief Pick the next site a particle will hop too
@@ -261,23 +244,16 @@ class KMC_Cluster : public virtual Identity {
    **/
   double getDwellTime();
 
+  double getFastestRateOffCluster();
+
+  void setVisitFrequency(int frequency, int siteId);
+  int getVisitFrequency(int siteId);
+
   /**
    * \brief Prints the contents of the cluster
    **/
   friend std::ostream& operator<<(std::ostream& os,
                                   const kmccoursegrain::KMC_Cluster& cluster);
-
-  /**
-   * \brief Sets the threshold of the cluster
-   *
-   * This value determines when a site should be merged with the cluster it
-   * is changed during the runtime to ensure that an attempt to merge does
-   * not occur too often, because it is expensive.
-   **/
-  void setThreshold(int n) { threshold_ = n; }
-
-  /// returns the threshold
-  int getThreshold() const { return threshold_; }
 
  private:
   /************************************************************************
@@ -287,29 +263,14 @@ class KMC_Cluster : public virtual Identity {
   /// Relates to how course grained the dwell time will be
   int resolution_;
 
-  /// Threshold that determines if the cluster should be merged with a site
-  int threshold_;
-
   /// Number of iterations used to solve the master equation
   long iterations_;
 
   /// Tolerance used to determine when the master equation has been solved
   double convergenceTolerance_;
 
-  /// Escape time constant from the cluster
-  double escapeTimeConstant_;
-
-  /// Number of times the cluster has been visited
-  int visitFreqCluster_;
-
   /// Type of convergence used to solve the master equation
   Method convergence_method_;
-
-  /// The type of random number generator used
-  std::mt19937 randomEngine_;
-
-  /// Ensure that random numbers are generated from a uniform distribution
-  std::uniform_real_distribution<double> randomDistribution_;
 
   /**
    * \brief Stores the probability of hopping to each of the neighbors
@@ -330,7 +291,7 @@ class KMC_Cluster : public virtual Identity {
   /**
    * \brief Stores the pointers to sites that are in the cluster
    **/
-  std::unordered_map<int, SitePtr> sitesInCluster_;
+  std::unordered_map<int, KMC_Site> sitesInCluster_;
 
   std::unordered_map<int,double> probabilityHopOffInternalSite_;
 
@@ -442,7 +403,13 @@ class KMC_Cluster : public virtual Identity {
    **/
   std::unordered_map<int, std::vector<std::pair<int, double>>>
       getInternalRatesFromNeighborsComingToSite_();
+
+  friend void occupyCluster_(KMC_TopologyFeature*,int&);
+  friend void vacateCluster_(KMC_TopologyFeature*,int&);
+  friend bool isOccupiedCluster_(KMC_TopologyFeature*,int&);
 };
+
+
 }
 
 #endif  // KMCCOURSEGRAIN_KMC_CLUSTER_HPP

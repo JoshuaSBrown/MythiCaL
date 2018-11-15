@@ -55,13 +55,12 @@ int main(int argc, char* argv[]){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
     cerr << endl;
-    cerr << "sigma      - defins the width of the density of states it" << endl;
+    cerr << "sigma      - defines the width of the density of states it" << endl;
     cerr << "             must be a double. " << endl;
     cerr << "distance   - integer defines the width, length and height" << endl;
     cerr << "             of the simulation box in terms of the number" << endl;
     cerr << "             of sites. " << endl;
-    cerr << "threshold  - integer value defines the threshold at which" << endl;
-    cerr << "             course graining will take place." << endl;
+    cerr << "seed       - integer value defines the random number seed" << endl;
     cerr << "resolution - integer value defines how course the couse " << endl;
     cerr << "             the approxiation will be." << endl;
     cerr << "particles  - integer value defines number of particles." << endl;
@@ -75,7 +74,7 @@ int main(int argc, char* argv[]){
 
   double sigma = stod(string(argv[1]));
   int distance = stoi(string(argv[2]));
-  int threshold = stoi(string(argv[3]));
+  int seed     = stoi(string(argv[3]));
   int resolution = stoi(string(argv[4])); 
   int particles = stoi(string(argv[5]));
 
@@ -84,7 +83,7 @@ int main(int argc, char* argv[]){
   cout << endl;
   cout << "sigma:      " << sigma << endl;
   cout << "distance:   " << distance << endl;
-  cout << "threshold:  " << threshold << endl;
+  cout << "seed:       " << seed << endl;
   cout << "resolution: " << resolution << endl; 
   cout << "particles:  " << particles << endl;
   cout << endl;
@@ -96,7 +95,7 @@ int main(int argc, char* argv[]){
   cout << endl;
 
 
-  double simulation_cutoff_time = 1.0E-3;   
+  double simulation_cutoff_time = 2.0E-3;   
   cout << "Simulation cutoff time " << simulation_cutoff_time << " seconds";
   cout << endl;
   cout << endl;
@@ -106,7 +105,7 @@ int main(int argc, char* argv[]){
   vector<double> energies;
   {
     mt19937 random_number_generator;
-    random_number_generator.seed(1);
+    random_number_generator.seed(seed);
     normal_distribution<double> distribution(0.0,sigma);
 
     int totalNumberSites = distance*distance*distance;
@@ -117,8 +116,8 @@ int main(int argc, char* argv[]){
 
   Converter converter(distance);
 
-  map<int,map<int,double>> rates;
-  map<int,vector<int>> neighbors;
+  unordered_map<int,unordered_map<int,double>> rates;
+  unordered_map<int,vector<int>> neighbors;
   {
 
     double reorganization_energy = 0.01;
@@ -185,7 +184,7 @@ int main(int argc, char* argv[]){
 
   // Place particles randomly in the system
   set<int> siteOccupied;
-  map<int,vector<int>> particle_positions;
+  unordered_map<int,vector<int>> particle_positions;
   {
     mt19937 random_number_generator;
     random_number_generator.seed(2);
@@ -217,8 +216,8 @@ int main(int argc, char* argv[]){
   high_resolution_clock::time_point crude_time_start = high_resolution_clock::now();
   {
 
-    map<int,double> sojourn_times;
-    map<int,double> sum_rates;
+    unordered_map<int,double> sojourn_times;
+    unordered_map<int,double> sum_rates;
     // Calculate sojourn times & sum_rates
     {
       for(int x=0; x<distance; ++x){
@@ -260,7 +259,7 @@ int main(int argc, char* argv[]){
       }
     }// Calculate sojourn times & sum_rates
 
-    map<int,map<int,double>> cummulitive_probability_to_neighbors;
+    unordered_map<int,unordered_map<int,double>> cummulitive_probability_to_neighbors;
     // Calculate crude probability to neighbors
     {
       for(int x=0; x<distance; ++x){
@@ -283,7 +282,7 @@ int main(int argc, char* argv[]){
             if(zlow-1>0) --zlow;
             if(zhigh+1<distance) ++zhigh;
 
-            map<int,double> cummulitive_probability;
+            unordered_map<int,double> cummulitive_probability;
             double pval = 0.0;
             int siteId = converter.to1D(x,y,z); 
             for( int x2 = xlow; x2<=xhigh; ++x2){
@@ -379,7 +378,7 @@ int main(int argc, char* argv[]){
   high_resolution_clock::time_point course_time_start = high_resolution_clock::now();
   {
     // greating map with pointer to rates
-    map< int, map< int, double *>> rates_to_neighbors;
+    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
     {
       for(auto site_rates : rates){
         for( auto neigh_rate : site_rates.second){
@@ -390,12 +389,12 @@ int main(int argc, char* argv[]){
 
     class Electron : public KMC_Particle {};
     // Create the electrons using the KMC_Particle class
-    vector<shared_ptr<KMC_Particle>> electrons;        
+    vector<KMC_Particle> electrons;        
     {
       for(int particle_index = 0; particle_index<particles; ++particle_index){
-        auto electron = shared_ptr<Electron>(new Electron);
+        Electron electron;
         int siteId = converter.to1D(particle_positions[particle_index]);
-        electron->occupySite(siteId);
+        electron.occupySite(siteId);
         electrons.push_back(electron);
       }
     }
@@ -403,7 +402,8 @@ int main(int argc, char* argv[]){
     // Run the course grain simulation
     {
       KMC_CourseGrainSystem CGsystem;
-      CGsystem.setRandomSeed(1);
+      CGsystem.setRandomSeed(seed);
+      CGsystem.setCourseGrainIterationThreshold(100000);
       CGsystem.setCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
@@ -416,17 +416,17 @@ int main(int argc, char* argv[]){
         uniform_real_distribution<double> distribution(0.0,1.0);
 
         for(int particle_index=0; particle_index<particles;++particle_index){
-          particle_global_times.push_back(pair<int,double>(particle_index,electrons.at(particle_index)->getDwellTime()));
+          particle_global_times.push_back(pair<int,double>(particle_index,electrons.at(particle_index).getDwellTime()));
         }
         particle_global_times.sort(compareSecondItemOfPair);
       }// Calculate particle dwell times and sort
       assert(particle_global_times.begin()->second<simulation_cutoff_time);
       while(particle_global_times.begin()->second<simulation_cutoff_time){
         auto particle_index = particle_global_times.begin()->first;
-        auto electron = electrons.at(particle_index); 
+        KMC_Particle& electron = electrons.at(particle_index); 
         CGsystem.hop(electron);
         // Update the dwell time
-        particle_global_times.begin()->second += electron->getDwellTime();
+        particle_global_times.begin()->second += electron.getDwellTime();
         // reorder the particles based on which one will move next
         particle_global_times.sort(compareSecondItemOfPair);
       }

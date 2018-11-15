@@ -114,13 +114,13 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    map< int,map< int,double *>> ratesToNeighbors;
+    unordered_map< int,unordered_map< int,double *>> ratesToNeighbors;
 
     int global_index = 0;
 
     for( int index=0;index<14;++index){
 
-      map< int,double*> ratesFromSiteToNeighbors;
+      unordered_map< int,double*> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);
@@ -135,8 +135,10 @@ int main(void){
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
+    
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
+    CGsystem.setCourseGrainIterationThreshold(10000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Particle {};
@@ -147,27 +149,29 @@ int main(void){
     // Store the escape time from the cluster for each electron
     vector<double> escapeTimes;
 
-    int NumberElectrons = 4000;
-
+    int NumberElectrons = 5000;
+    cout << "Cluster performance test starting" << endl;
     clusterStart = high_resolution_clock::now();
     for(int i=0; i<NumberElectrons;++i){
       Electron electron;
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      auto electron_ptr = make_shared<Electron>(electron);
-      vector<shared_ptr<KMC_Particle>> electrons;
-      electrons.push_back(electron_ptr);
+      vector<KMC_Particle> electrons;
+      electrons.push_back(electron);
       CGsystem.initializeParticles(electrons);
+      
+      KMC_Particle & electron1 = electrons.at(0);
       double totalTimeOnCluster = 0.0;
-      while(electron_ptr->getIdOfSiteCurrentlyOccupying()<6){
-        CGsystem.hop(electron_ptr);
-        hopsToSites.at(electron_ptr->getIdOfSiteCurrentlyOccupying()-1)++;
-        timeOnSites.at(electron_ptr->getIdOfSiteCurrentlyOccupying()-1)+=electron_ptr->getDwellTime();
-        totalTimeOnCluster+=electron_ptr->getDwellTime(); 
+      while(electron1.getIdOfSiteCurrentlyOccupying()<6){
+
+        CGsystem.hop(electron1);
+        hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
+        timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
+        totalTimeOnCluster+=electron1.getDwellTime(); 
       }
 
-      CGsystem.removeParticleFromSystem(electron_ptr);
+      CGsystem.removeParticleFromSystem(electron1);
       escapeTimes.push_back(totalTimeOnCluster);
     }
     clusterEnd = high_resolution_clock::now();
@@ -267,13 +271,13 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    map< int,map< int,double *>> ratesToNeighbors;
+    unordered_map< int,unordered_map< int,double *>> ratesToNeighbors;
 
     int global_index = 0;
 
     for( int index=0;index<14;++index){
 
-      map< int,double*> ratesFromSiteToNeighbors;
+      unordered_map< int,double*> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);
@@ -290,6 +294,7 @@ int main(void){
 
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
+    CGsystem.setCourseGrainIterationThreshold(1000000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Particle {};
@@ -300,27 +305,28 @@ int main(void){
     // Store the escape time from the cluster for each electron
     vector<double> escapeTimes;
 
-    int NumberElectrons = 4000;
+    int NumberElectrons = 5000;
 
+    cout << "Site performance test starting" << endl;
     siteStart = high_resolution_clock::now();
     for(int i=0; i<NumberElectrons;++i){
       Electron electron;
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      auto electron_ptr = make_shared<Electron>(electron);
-      vector<shared_ptr<KMC_Particle>> electrons;
-      electrons.push_back(electron_ptr);
+      vector<KMC_Particle> electrons;
+      electrons.push_back(electron);
       CGsystem.initializeParticles(electrons);
       double totalTimeOnCluster = 0.0;
-      while(electron_ptr->getIdOfSiteCurrentlyOccupying()<6){
-        CGsystem.hop(electron_ptr);
-        hopsToSites.at(electron_ptr->getIdOfSiteCurrentlyOccupying()-1)++;
-        timeOnSites.at(electron_ptr->getIdOfSiteCurrentlyOccupying()-1)+=electron_ptr->getDwellTime();
-        totalTimeOnCluster+=electron_ptr->getDwellTime(); 
+      KMC_Particle & electron1 = electrons.at(0);
+      while(electron1.getIdOfSiteCurrentlyOccupying()<6){
+        CGsystem.hop(electron1);
+        hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
+        timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
+        totalTimeOnCluster+=electron1.getDwellTime(); 
       }
 
-      CGsystem.removeParticleFromSystem(electron_ptr);
+      CGsystem.removeParticleFromSystem(electron1);
       escapeTimes.push_back(totalTimeOnCluster);
     }
     siteEnd = high_resolution_clock::now();

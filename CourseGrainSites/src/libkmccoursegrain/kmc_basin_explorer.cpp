@@ -13,7 +13,7 @@ namespace kmccoursegrain {
   typedef unordered_set<shared_ptr<Edge>> shared_edge_set;
   typedef vector<weak_ptr<Edge>> weak_edge_vec;
 
-  vector<int> BasinExplorer::findGradientBasin(KMC_Site_Container& sites,int siteId){
+  vector<int> BasinExplorer::findBasin(KMC_Site_Container& sites,int siteId){
     
     auto edges_store = 
       convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( sites, siteId);
@@ -30,6 +30,8 @@ namespace kmccoursegrain {
 
     addEdges_(sites,edges_weak,siteId,gv_largest_known);
 
+    int exploration_count = 1;
+
     while(gv_largest_known.allEdgesExplored()==false){
       weak_ptr<Edge> next_edge = gv_largest_known.getNextEdge<Edge>();
 
@@ -42,8 +44,13 @@ namespace kmccoursegrain {
       edges_store.insert(edges_tmp.begin(),edges_tmp.end());
 
       addEdges_(sites,edges_weak_tmp,next_vertex,gv_largest_known);
+ 
+      ++exploration_count; 
+      if(gv_largest_known.countExploredVertices()>max_exploration_count_){
+        vector<int> empty_vec;
+        return empty_vec;
+      }
     }
-
     return gv_largest_known.getExploredVertices();
 
   }
@@ -75,6 +82,10 @@ namespace kmccoursegrain {
 
   void BasinExplorer::setThreshold(double threshold){
     threshold_ = threshold;
+  }
+
+  void BasinExplorer::setMaxExplorationCount(int count){
+    max_exploration_count_ = count;
   }
 
   void BasinExplorer::updateFastestRate_(double rate){

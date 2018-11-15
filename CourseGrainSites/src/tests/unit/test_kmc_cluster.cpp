@@ -4,8 +4,8 @@
 #include <memory>
 #include <cmath>
 
-#include "../../libkmccoursegrain/kmc_cluster.hpp"
-#include "../../libkmccoursegrain/kmc_site.hpp"
+#include "../../libkmccoursegrain/topologyfeatures/kmc_cluster.hpp"
+#include "../../libkmccoursegrain/topologyfeatures/kmc_site.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -41,14 +41,6 @@ int main(void){
     assert(fail);
   }  
 
-	//Testing the Threshold Setter
-  cout << "Testing: Threshold setter and getter" << endl;
-	{
-    KMC_Cluster cl;
-		cl.setThreshold(10);
-		assert(cl.getThreshold()==10);
-	}
-
   cout << "Testing: addSite" << endl;
   {
     KMC_Site site;
@@ -57,7 +49,7 @@ int main(void){
     site.addNeighRate(pair<int, double *>(2,&rate));
 
     KMC_Cluster cluster;
-    cluster.addSite(make_shared<KMC_Site>(site));
+    cluster.addSite(site);
     assert(cluster.getNumberOfSitesInCluster()==1);
   }
 
@@ -69,7 +61,7 @@ int main(void){
     
     KMC_Cluster cluster;
     assert(!cluster.siteIsInCluster(1));
-    cluster.addSite(make_shared<KMC_Site>(site));
+    cluster.addSite(site);
     assert(cluster.siteIsInCluster(1));
   }
 
@@ -94,8 +86,8 @@ int main(void){
     site2.addNeighRate(pair<int, double *>(1,&rate2));
   
     KMC_Cluster cluster;
-    cluster.addSite(make_shared<KMC_Site>(site));
-    cluster.addSite(make_shared<KMC_Site>(site2));
+    cluster.addSite(site);
+    cluster.addSite(site2);
 
     assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(1)))==50);
     assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(2)))==50);
@@ -138,9 +130,9 @@ int main(void){
     KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
 
-    cluster.addSite(make_shared<KMC_Site>(site));
-    cluster.addSite(make_shared<KMC_Site>(site2));
-    cluster.addSite(make_shared<KMC_Site>(site3));
+    cluster.addSite(site);
+    cluster.addSite(site2);
+    cluster.addSite(site3);
 
     vector<int> values;
     values.push_back(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(1))));
@@ -183,8 +175,8 @@ int main(void){
     KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
 
-    cluster.addSite(make_shared<KMC_Site>(site2));
-    cluster.addSite(make_shared<KMC_Site>(site3));
+    cluster.addSite(site2);
+    cluster.addSite(site3);
 
     cluster.updateProbabilitiesAndTimeConstant(); 
     // 
@@ -221,9 +213,9 @@ int main(void){
     KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
 
-    cluster.addSite(make_shared<KMC_Site>(site));
-    cluster.addSite(make_shared<KMC_Site>(site2));
-    cluster.addSite(make_shared<KMC_Site>(site3));
+    cluster.addSite(site);
+    cluster.addSite(site2);
+    cluster.addSite(site3);
 
     // Setting the seed will ensure that the results are reproducable
     cluster.updateProbabilitiesAndTimeConstant(); 
@@ -261,9 +253,9 @@ int main(void){
     KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
     cluster.setResolution(2);
-    cluster.addSite(make_shared<KMC_Site>(site));
-    cluster.addSite(make_shared<KMC_Site>(site2));
-    cluster.addSite(make_shared<KMC_Site>(site3));
+    cluster.addSite(site);
+    cluster.addSite(site2);
+    cluster.addSite(site3);
 
     // Setting the seed will ensure that the results are reproducable
 

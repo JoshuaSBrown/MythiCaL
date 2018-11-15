@@ -18,6 +18,7 @@ class Identity {
 
  public:
   Identity() : id_set_(false) {}
+  virtual ~Identity() {};
   int getId() const {
     return (id_set_ ? id_ : throw std::runtime_error("ID not set"));
   }

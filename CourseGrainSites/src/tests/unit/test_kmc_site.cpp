@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "../../libkmccoursegrain/kmc_site.hpp"
+#include "../../libkmccoursegrain/topologyfeatures/kmc_site.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -156,11 +156,11 @@ int main(void){
   cout << "Testing: occupation functions" << endl;
   {
     KMC_Site site;
-    assert(site.siteIsOccupied()==false);
-    site.occupySite();
-    assert(site.siteIsOccupied()==true);
-    site.vacateSite();
-    assert(site.siteIsOccupied()==false);
+    assert(site.isOccupied()==false);
+    site.occupy();
+    assert(site.isOccupied()==true);
+    site.vacate();
+    assert(site.isOccupied()==false);
   }
 
   cout << "Testing: cluster functions " << endl;

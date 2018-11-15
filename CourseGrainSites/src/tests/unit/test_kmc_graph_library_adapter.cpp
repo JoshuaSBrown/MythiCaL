@@ -12,7 +12,7 @@ using namespace kmccoursegrain;
 
 int main(void){
 
-  cout << "Testing: siteToEdgeWeightedByRate" << endl;
+  cout << "Testing: convertSitesOutgoingRatesToUniqueWeightedEdges" << endl;
   {
     KMC_Site site1;
     KMC_Site site2;
@@ -47,7 +47,7 @@ int main(void){
    
     cout << "Test with: list" << endl;
     { 
-      auto edges = convertSitesOutgoingRatesToWeightedEdges<list<unique_ptr<Edge>>>(site_container,2);
+      auto edges = convertSitesOutgoingRatesToUniqueWeightedEdges<list<unique_ptr<Edge>>>(site_container,2);
 
       assert(edges.size()==2);
 
@@ -65,7 +65,7 @@ int main(void){
 
     cout << "Test with: vector" << endl;
     { 
-      auto edges = convertSitesOutgoingRatesToWeightedEdges<vector<unique_ptr<Edge>>>(site_container,2);
+      auto edges = convertSitesOutgoingRatesToUniqueWeightedEdges<vector<unique_ptr<Edge>>>(site_container,2);
 
       assert(edges.size()==2);
 
@@ -83,7 +83,7 @@ int main(void){
 
     cout << "Test with: set" << endl;
     { 
-      auto edges = convertSitesOutgoingRatesToWeightedEdges<set<unique_ptr<Edge>>>(site_container,2);
+      auto edges = convertSitesOutgoingRatesToUniqueWeightedEdges<set<unique_ptr<Edge>>>(site_container,2);
 
       assert(edges.size()==2);
 

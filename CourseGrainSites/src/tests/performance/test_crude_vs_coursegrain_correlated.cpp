@@ -4,7 +4,7 @@
 #include <chrono>
 #include <string>
 #include <random>
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <cmath>
 #include <cassert>
@@ -176,8 +176,8 @@ int main(int argc, char* argv[]){
     }
   }
 
-  map<int,map<int,double>> rates;
-  map<int,vector<int>> neighbors;
+  unordered_map<int,unordered_map<int,double>> rates;
+  unordered_map<int,vector<int>> neighbors;
   {
 
     double reorganization_energy = 0.01;
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]){
 
   // Place particles randomly in the system
   set<int> siteOccupied;
-  map<int,vector<int>> particle_positions;
+  unordered_map<int,vector<int>> particle_positions;
   {
     mt19937 random_number_generator;
     random_number_generator.seed(2);
@@ -276,8 +276,8 @@ int main(int argc, char* argv[]){
   high_resolution_clock::time_point crude_time_start = high_resolution_clock::now();
   {
 
-    map<int,double> sojourn_times;
-    map<int,double> sum_rates;
+    unordered_map<int,double> sojourn_times;
+    unordered_map<int,double> sum_rates;
     // Calculate sojourn times & sum_rates
     {
       for(int x=0; x<distance; ++x){
@@ -321,7 +321,7 @@ int main(int argc, char* argv[]){
       }
     }// Calculate sojourn times & sum_rates
 
-    map<int,map<int,double>> cummulitive_probability_to_neighbors;
+    unordered_map<int,unordered_map<int,double>> cummulitive_probability_to_neighbors;
     // Calculate crude probability to neighbors
     {
       for(int x=0; x<distance; ++x){
@@ -344,7 +344,7 @@ int main(int argc, char* argv[]){
             if(zlow-1>0) --zlow;
             if(zhigh+1<distance) ++zhigh;
 
-            map<int,double> cummulitive_probability;
+            unordered_map<int,double> cummulitive_probability;
             double pval = 0.0;
             int siteId = converter.to1D(x,y,z); 
             for( int x2 = xlow; x2<=xhigh; ++x2){
@@ -434,10 +434,10 @@ int main(int argc, char* argv[]){
   high_resolution_clock::time_point course_time_start = high_resolution_clock::now();
   {
     // greating map with pointer to rates
-    map< int, map< int, double *>> rates_to_neighbors;
+    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
     {
       for(auto site_rates : rates){
-        map< int ,double *> rates_to;
+        unordered_map< int ,double *> rates_to;
         for( auto neigh_rate : site_rates.second){
           rates_to_neighbors[site_rates.first][neigh_rate.first] = &neigh_rate.second;
         }
@@ -446,12 +446,12 @@ int main(int argc, char* argv[]){
 
     class Electron : public KMC_Particle {};
     // Create the electrons using the KMC_Particle class
-    vector<shared_ptr<KMC_Particle>> electrons;        
+    vector<KMC_Particle> electrons;        
     {
       for(int particle_index = 0; particle_index<particles; ++particle_index){
-        auto electron = shared_ptr<Electron>(new Electron);
+        Electron electron;
         int siteId = converter.to1D(particle_positions[particle_index]);
-        electron->occupySite(siteId);
+        electron.occupySite(siteId);
         electrons.push_back(electron);
       }
     }
@@ -472,17 +472,17 @@ int main(int argc, char* argv[]){
         uniform_real_distribution<double> distribution(0.0,1.0);
 
         for(int particle_index=0; particle_index<particles;++particle_index){
-          particle_global_times.push_back(pair<int,double>(particle_index,electrons.at(particle_index)->getDwellTime()));
+          particle_global_times.push_back(pair<int,double>(particle_index,electrons.at(particle_index).getDwellTime()));
         }
         particle_global_times.sort(compareSecondItemOfPair);
       }// Calculate particle dwell times and sort
 
       while(particle_global_times.begin()->second<simulation_cutoff_time){
         auto particle_index = particle_global_times.begin()->first;
-        auto electron = electrons.at(particle_index); 
+        KMC_Particle & electron = electrons.at(particle_index); 
         CGsystem.hop(electron);
         // Update the dwell time
-        particle_global_times.begin()->second += electron->getDwellTime();
+        particle_global_times.begin()->second += electron.getDwellTime();
         // reorder the particles based on which one will move next
         particle_global_times.sort(compareSecondItemOfPair);
       }

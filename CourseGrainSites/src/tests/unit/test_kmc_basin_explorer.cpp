@@ -11,7 +11,7 @@ using namespace kmccoursegrain;
 
 int main(void){
 
-  cout << "Testing: findGradientBasin" << endl;
+  cout << "Testing: findBasin" << endl;
   cout << "Test 1" << endl;
   {
 
@@ -68,7 +68,7 @@ int main(void){
     site_container.addKMC_Site(site4);
   
     BasinExplorer basin_explorer; 
-    auto vertices = basin_explorer.findGradientBasin(site_container,2);
+    auto vertices = basin_explorer.findBasin(site_container,2);
     assert(vertices.size()==2);
 
     bool found2 = false;
@@ -300,19 +300,19 @@ int main(void){
     site_container.addKMC_Site(site16);
   
     BasinExplorer basin_explorer; 
-    auto vertices = basin_explorer.findGradientBasin(site_container,6);
+    auto vertices = basin_explorer.findBasin(site_container,6);
 
     for(auto siteId : vertices){
       cout << "site id " << siteId << endl;
     }
 
-    vertices = basin_explorer.findGradientBasin(site_container,7);
+    vertices = basin_explorer.findBasin(site_container,7);
 
     for(auto siteId : vertices){
       cout << "site id " << siteId << endl;
     }
 
-    vertices = basin_explorer.findGradientBasin(site_container,11);
+    vertices = basin_explorer.findBasin(site_container,11);
 
     for(auto siteId : vertices){
       cout << "site id " << siteId << endl;

@@ -18,7 +18,7 @@ namespace kmccoursegrain {
     }
   }
 
-  KMC_Site KMC_Site_Container::getKMC_Site(int siteId){
+  KMC_Site& KMC_Site_Container::getKMC_Site(int siteId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Site is not stored in the container.");
     }
@@ -42,6 +42,13 @@ namespace kmccoursegrain {
   } 
 
   size_t KMC_Site_Container::size() { return sites_.size(); } 
+
+  void KMC_Site_Container::setClusterId(int siteId, int clusterId){
+    if(sites_.count(siteId)==0){
+      throw invalid_argument("Site is not stored in the container.");
+    }
+    sites_[siteId].setClusterId(clusterId);
+  }
 
   int KMC_Site_Container::getClusterIdOfSite(int siteId) {
     if(sites_.count(siteId)==0){
@@ -150,5 +157,38 @@ namespace kmccoursegrain {
           "the container.");
     }
     return sites_[siteId].getTimeConstant();
+  }
+
+  Rate_Map KMC_Site_Container::getRates(){
+    Rate_Map rate_map;
+    for( auto site : sites_ ){
+      auto rates = site.second.getNeighborsAndRates();
+      rate_map[site.first] = rates;
+    }
+    return rate_map;
+  }
+
+  double KMC_Site_Container::getFastestRateOffSite(int siteId){
+    if(sites_.count(siteId)==0){
+      throw invalid_argument("Cannot get fastest rate off site as it is not "
+          "stored in the container.");
+    }
+    return sites_[siteId].getFastestRate();
+  }
+
+  double KMC_Site_Container::getRateToNeighborOfSite(int siteId, int neighId){
+    if(sites_.count(siteId)==0){
+      throw invalid_argument("Cannot get rate from site to neighbor as site is "
+          "not stored in the container");
+    }
+    return sites_[siteId].getRateToNeighbor(neighId);    
+  }
+
+  vector<int> KMC_Site_Container::getSiteIdsOfNeighbors(int siteId){
+    if(sites_.count(siteId)==0){
+      throw invalid_argument("Cannot get neighbor site ids from site as site is "
+          "not stored in the container");
+    }
+    return sites_[siteId].getNeighborSiteIds();
   }
 }

@@ -19,12 +19,13 @@ class KMC_Site_Container {
 
     void addKMC_Site(KMC_Site& site);
     void addKMC_Sites(std::vector<KMC_Site>& sites);
-    KMC_Site getKMC_Site(int siteId);
+    KMC_Site& getKMC_Site(int siteId);
 
     std::unordered_map<int,KMC_Site> getKMC_Sites(std::vector<int> siteIds);
     std::unordered_map<int,KMC_Site> getKMC_Sites();
     size_t size();
 
+    void setClusterId(int siteId, int clusterId);
     int getClusterIdOfSite(int siteId);
     bool partOfCluster(int siteId);
     int getSmallestClusterId(std::vector<int> siteIds);
@@ -49,7 +50,11 @@ class KMC_Site_Container {
     double getDwellTime(int siteId);
     double getTimeConstant(int siteId);
 
-//    double getRateToNeighborOfSite(int siteId, int neighId);
+    Rate_Map getRates();
+
+    double getFastestRateOffSite(int siteId);
+    double getRateToNeighborOfSite(int siteId, int neighId);
+    std::vector<int> getSiteIdsOfNeighbors(int siteId);
 //    double getProbabilityOfHoppingToNeighbor(int siteId, int neighId);
 //    void moveSitesFrom(KMC_Site_Container& container);
   private:
