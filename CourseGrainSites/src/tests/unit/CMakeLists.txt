@@ -1,10 +1,11 @@
 
-foreach(PROG test_kmc_cluster 
-    test_kmc_cluster_container
-    test_kmc_coursegrainsystem 
-    test_kmc_coursegrainsystem2 
+foreach(PROG 
     test_identity 
     test_kmc_basin_explorer
+    test_kmc_cluster 
+    test_kmc_cluster_container
+    test_kmc_coursegrainsystem
+    test_kmc_coursegrainsystem2
     test_kmc_graph_library_adapter
     test_kmc_particle 
     test_kmc_rate_container
