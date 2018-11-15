@@ -257,7 +257,7 @@ int KMC_CourseGrainSystem::createCluster_(vector<int> siteIds, double internal_t
   int res = static_cast<int>(floor(cluster_time_const/(2*internal_time_limit)));
   int chosen_resolution = res;
   if(res==0) chosen_resolution=1;
-  if(clusterResolution_<res) chosen_resolution = clusterResolution_; 
+  if(max_cluster_resolution_<res) chosen_resolution = max_cluster_resolution_; 
   cluster.setResolution(chosen_resolution);
   if (seed_set_) {
     cluster.setRandomSeed(seed_);
