@@ -61,8 +61,8 @@ int main(int argc, char* argv[]){
     cerr << "             of the simulation box in terms of the number" << endl;
     cerr << "             of sites. " << endl;
     cerr << "seed       - integer value defines the random number seed" << endl;
-    cerr << "resolution - integer value defines how course the couse " << endl;
-    cerr << "             the approxiation will be." << endl;
+    cerr << "resolution - integer value defines how course the " << endl;
+    cerr << "             approxiation will be." << endl;
     cerr << "particles  - integer value defines number of particles." << endl;
     cerr << endl;
     cerr << "To run:" << endl;
