@@ -50,7 +50,7 @@ bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> &
 
 int main(int argc, char* argv[]){
 
-  if(argc!=6){
+  if(argc!=8){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
     cerr << endl;
@@ -59,11 +59,16 @@ int main(int argc, char* argv[]){
     cerr << "distance   - integer defines the width, length and height" << endl;
     cerr << "             of the simulation box in terms of the number" << endl;
     cerr << "             of sites. " << endl;
-    cerr << "threshold  - integer value defines the threshold at which" << endl;
-    cerr << "             course graining will take place." << endl;
+    cerr << "seed       - integer value defines the random number " << endl;
+    cerr << "             generator seed." << endl;
     cerr << "resolution - integer value defines how course the couse " << endl;
     cerr << "             the approxiation will be." << endl;
     cerr << "particles  - integer value defines number of particles." << endl;
+    cerr << "threshold  - integer value defines minimum threshold of " << endl;
+    cerr << "             how often the simulation will try to course " << endl;
+    cerr << "             grain." << endl;
+    cerr << "time       - a double defining how long the simulation " << endl;
+    cerr << "             will run for." << endl;
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
@@ -74,18 +79,22 @@ int main(int argc, char* argv[]){
 
   double sigma = stod(string(argv[1]));
   int distance = stoi(string(argv[2]));
-  int threshold = stoi(string(argv[3]));
+  int seed = stoi(string(argv[3]));
   int resolution = stoi(string(argv[4])); 
   int particles = stoi(string(argv[5]));
+  int threshold = stoi(string(argv[6]));
+  double cutoff_time = stod(string(argv[7]));
 
   cout << endl;
   cout << "Parameters passed in:" << endl;
   cout << endl;
   cout << "sigma:      " << sigma << endl;
   cout << "distance:   " << distance << endl;
-  cout << "threshold:  " << threshold << endl;
-  cout << "resolution: " << resolution << endl; 
+  cout << "seed:       " << seed << endl;
+  cout << "resolution: " << resolution << endl;
   cout << "particles:  " << particles << endl;
+  cout << "threshold:  " << threshold << endl;
+  cout << "time:       " << cutoff_time << endl;
   cout << endl;
 
   /// Create Energies and place them in a vector
@@ -389,10 +398,10 @@ int main(int argc, char* argv[]){
     {
 
       mt19937 random_number_generator;
-      random_number_generator.seed(4);
+      random_number_generator.seed(seed);
       uniform_real_distribution<double> distribution(0.0,1.0);
 
-      while(particle_global_times.begin()->second<simulation_cutoff_time){
+      while(particle_global_times.begin()->second<cutoff_time){
         int particleId = particle_global_times.begin()->first;
         vector<int> particle_position = particle_positions[particleId];
         int siteId = converter.to1D(particle_position);
@@ -459,8 +468,9 @@ int main(int argc, char* argv[]){
     // Run the course grain simulation
     {
       KMC_CourseGrainSystem CGsystem;
-      CGsystem.setRandomSeed(1);
-      CGsystem.setMinCourseGrainIterationThreshold(20);
+      CGsystem.setRandomSeed(seed);
+      CGsystem.setMinCourseGrainIterationThreshold(threshold);
+      CGsystem.setMaxCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
       // Calculate Particle dwell times and sort 
@@ -477,7 +487,7 @@ int main(int argc, char* argv[]){
         particle_global_times.sort(compareSecondItemOfPair);
       }// Calculate particle dwell times and sort
 
-      while(particle_global_times.begin()->second<simulation_cutoff_time){
+      while(particle_global_times.begin()->second<cutoff_time){
         auto particle_index = particle_global_times.begin()->first;
         KMC_Particle & electron = electrons.at(particle_index); 
         CGsystem.hop(electron);

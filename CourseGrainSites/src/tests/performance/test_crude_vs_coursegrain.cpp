@@ -51,7 +51,7 @@ bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> &
 
 int main(int argc, char* argv[]){
 
-  if(argc!=6){
+  if(argc!=8){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
     cerr << endl;
@@ -64,10 +64,15 @@ int main(int argc, char* argv[]){
     cerr << "resolution - integer value defines how course the " << endl;
     cerr << "             approxiation will be." << endl;
     cerr << "particles  - integer value defines number of particles." << endl;
+    cerr << "threahold  - integer value defines minimum threshold of " << endl;
+    cerr << "             how often the simulation will try to course " << endl;
+    cerr << "             grain." << endl;
+    cerr << "time       - a double defining how long the simulation " << endl;
+    cerr << "             will run for." << endl;
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
-    cerr << "./performance_test_crude_vs_coursegraining sigma distance threshold resolution" << endl;
+    cerr << "./performance_test_crude_vs_coursegraining sigma distance seed resolution particles threshold" << endl;
     cerr << endl;
     return -1;
   }
@@ -77,6 +82,8 @@ int main(int argc, char* argv[]){
   int seed     = stoi(string(argv[3]));
   int resolution = stoi(string(argv[4])); 
   int particles = stoi(string(argv[5]));
+  int threshold = stoi(string(argv[6]));
+  double cutoff_time = stod(string(argv[7]));
 
   cout << endl;
   cout << "Parameters passed in:" << endl;
@@ -86,17 +93,14 @@ int main(int argc, char* argv[]){
   cout << "seed:       " << seed << endl;
   cout << "resolution: " << resolution << endl; 
   cout << "particles:  " << particles << endl;
+  cout << "threshold:  " << threshold << endl;
+  cout << "time:       " << cutoff_time << endl;
   cout << endl;
 
   /// Create Energies and place them in a vector
   cout << "Filling sites with energies from a guassian distribution " << endl;
   cout << "centered at 0.0." << endl;
   cout << "sigma of " << sigma << endl;
-  cout << endl;
-
-
-  double simulation_cutoff_time = 2.0E-3;   
-  cout << "Simulation cutoff time " << simulation_cutoff_time << " seconds";
   cout << endl;
   cout << endl;
 
@@ -187,7 +191,7 @@ int main(int argc, char* argv[]){
   unordered_map<int,vector<int>> particle_positions;
   {
     mt19937 random_number_generator;
-    random_number_generator.seed(2);
+    random_number_generator.seed(seed+1);
     uniform_int_distribution<int> distribution(0,distance-1);
     int particle_index = 0;
     while(particle_index<particles){
@@ -311,7 +315,7 @@ int main(int argc, char* argv[]){
     {
 
       mt19937 random_number_generator;
-      random_number_generator.seed(3);
+      random_number_generator.seed(seed+2);
       uniform_real_distribution<double> distribution(0.0,1.0);
 
       for(int particle_index=0; particle_index<particles;++particle_index){
@@ -327,11 +331,11 @@ int main(int argc, char* argv[]){
     {
 
       mt19937 random_number_generator;
-      random_number_generator.seed(4);
+      random_number_generator.seed(seed);
       uniform_real_distribution<double> distribution(0.0,1.0);
       unordered_map<int,int> frequency;
-      assert(particle_global_times.begin()->second<simulation_cutoff_time);
-      while(particle_global_times.begin()->second<simulation_cutoff_time){
+      assert(particle_global_times.begin()->second<cutoff_time);
+      while(particle_global_times.begin()->second<cutoff_time){
         int particleId = particle_global_times.begin()->first;
         vector<int> particle_position = particle_positions[particleId];
         int siteId = converter.to1D(particle_position);
@@ -403,7 +407,7 @@ int main(int argc, char* argv[]){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
-      CGsystem.setMinCourseGrainIterationThreshold(100000);
+      CGsystem.setMinCourseGrainIterationThreshold(threshold);
       CGsystem.setMaxCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
@@ -420,8 +424,8 @@ int main(int argc, char* argv[]){
         }
         particle_global_times.sort(compareSecondItemOfPair);
       }// Calculate particle dwell times and sort
-      assert(particle_global_times.begin()->second<simulation_cutoff_time);
-      while(particle_global_times.begin()->second<simulation_cutoff_time){
+      assert(particle_global_times.begin()->second<cutoff_time);
+      while(particle_global_times.begin()->second<cutoff_time){
         auto particle_index = particle_global_times.begin()->first;
         KMC_Particle& electron = electrons.at(particle_index); 
         CGsystem.hop(electron);
