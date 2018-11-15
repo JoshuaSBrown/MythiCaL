@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../../src/libkmccoursegrain/kmc_site_container.hpp"
+#include "../../src/libkmccoursegrain/kmc_cluster_container.hpp"
 #include "../../src/libkmccoursegrain/topologyfeatures/kmc_site.hpp"
 #include "../../src/libkmccoursegrain/topologyfeatures/kmc_cluster.hpp"
 #include "../../src/libkmccoursegrain/topologyfeatures/kmc_topology_feature.hpp"
@@ -218,7 +219,7 @@ class KMC_CourseGrainSystem {
   KMC_Site_Container sites_;
 
   /// Stores smart pointers to all the clusters
-  std::unordered_map<int, KMC_Cluster> clusters_;
+  KMC_Cluster_Container clusters_;
 
   void courseGrainSiteIfNeeded_(KMC_Particle& particle);
 
