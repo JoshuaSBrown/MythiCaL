@@ -18,3 +18,6 @@ foreach(PROG
   add_test(performance_${PROG} performance_${PROG} 0.07 10 1 10 3)
   set_tests_properties(performance_${PROG} PROPERTIES LABELS "kmccoursegrain")
 endforeach(PROG)
+
+configure_file(test_script_crude_vs_course.sh test_script_crude_vs_course.sh COPYONLY)
+
