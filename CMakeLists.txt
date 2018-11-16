@@ -96,7 +96,7 @@ foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
         add_test(coverage_${NAME_FILE} gcov ${PROG})
       endforeach()
 
-    else(GCOV_EXE)
+    elseif(NOT GCOV_EXE)
       message("Unable to find gcov")
     endif(GCOV_EXE)
   endif(${FLAG_OPT} MATCHES "-coverage")
