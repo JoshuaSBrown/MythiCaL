@@ -15,7 +15,7 @@ The library is designed to work with rates and could for instance be used with:
 
     mkdir build
     cd build
-    cmake ../
+    cmake -DCMAKE_BUILD_TYPE=Release ../
     make 
     make install
 
