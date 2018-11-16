@@ -4,6 +4,10 @@ language: cpp
 
 dist: trusty
 
+env:
+  global:
+    - CODECOV_TOKEN="2f8f46e7-953b-4d71-8529-4f7f4894eeef"
+
 matrix:
   include:
     - os: linux
@@ -16,7 +20,7 @@ matrix:
             - gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - COMPILE_FLAGS="-DENABLE_TESTING=ON"
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCMAKE_CXX_FLAGS=-coverage"
     - os: linux
       addons:
         apt:
@@ -27,7 +31,7 @@ matrix:
             - gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-        - COMPILE_FLAGS="-DENABLE_TESTING=ON"
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCMAKE_CXX_FLAGS=-coverage"
     - os: linux
       addons:
         apt:
@@ -77,3 +81,6 @@ script:
   - cmake "${COMPILE_FLAGS}" ..
   - make
   - make test ARGS="-V"
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
