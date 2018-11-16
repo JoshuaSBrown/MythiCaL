@@ -64,7 +64,7 @@ void KMC_Cluster::addSite(KMC_Site& newSite) {
 //  if (sitesInCluster_.count(newSite.getId())) {
 //    throw invalid_argument("Site has already been added to the cluster");
 //  }
-  assert(sitesInCluster_.count(newSite.getId()) && "Site has already been added to the cluster");
+  assert(sitesInCluster_.count(newSite.getId())==0 && "Site has already been added to the cluster");
   newSite.setClusterId(this->getId());
   sitesInCluster_[newSite.getId()] = newSite;
 
@@ -76,7 +76,7 @@ void KMC_Cluster::addSites(vector<KMC_Site>& newSites) {
 //    if (sitesInCluster_.count(site.getId())) {
 //      throw invalid_argument("Site has already been added to the cluster");
 //    }
-    assert(sitesInCluster_.count(site.getId()) && "Site has already been added to the cluster");
+    assert(sitesInCluster_.count(site.getId())==0 && "Site has already been added to the cluster");
     site.setClusterId(this->getId());
     sitesInCluster_[site.getId()] = site;
   }
@@ -114,7 +114,7 @@ double KMC_Cluster::getProbabilityOfOccupyingInternalSite(const int siteId) {
 //  if (!sitesInCluster_.count(siteId)) {
 //    throw invalid_argument("the provided site is not in the cluster");
 //  }
-  assert(!sitesInCluster_.count(siteId) && "the provided site is not in the cluster");
+  assert(sitesInCluster_.count(siteId) && "the provided site is not in the cluster");
   return probabilityOnSite_[siteId];
 }
 
@@ -155,7 +155,7 @@ double KMC_Cluster::getProbabilityOfHoppingToNeighborOfCluster(
 //        " site is not a neighbor or the cluster has not been converged.";
 //    throw invalid_argument(err);
 //  }
-  assert(it==probabilityHopToNeighbor_.end() &&
+  assert(it!=probabilityHopToNeighbor_.end() &&
     "Cannot get probability of hopping to neighbor, either the"
     " site is not a neighbor or the cluster has not been converged.");
 
@@ -166,7 +166,7 @@ void KMC_Cluster::setConvergenceTolerance(double tolerance) {
 //  if (tolerance < 0.0) {
 //    throw invalid_argument("tolerance must be a positive value");
 //  }
-  assert(tolerance < 0.0 && "tolerance must be a positive value");
+  assert(tolerance >= 0.0 && "tolerance must be a positive value");
   convergenceTolerance_ = tolerance;
 }
 
@@ -174,7 +174,7 @@ void KMC_Cluster::setConvergenceIterations(long iterations) {
 //  if (iterations < 1) {
 //    throw invalid_argument("number of iterations must be greater than 0.");
 //  }
-  assert(iterations<1 && "number of iterations must be greater than 0.");
+  assert(iterations>0 && "number of iterations must be greater than 0.");
   iterations_ = iterations;
 }
 

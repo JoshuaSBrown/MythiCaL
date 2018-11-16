@@ -52,7 +52,7 @@ void KMC_Site::addNeighRate(const pair<int, double*> neighRate) {
 //  if (neighRates_.count(neighRate.first)) {
 //    throw invalid_argument("That neighbor has already been added.");
 //  }
-  assert(neighRates_.count(neighRate.first) && "That neighbor has already been added.");
+  assert(neighRates_.count(neighRate.first)==0 && "That neighbor has already been added.");
   neighRates_[neighRate.first] = neighRate.second;
   calculateDwellTimeConstant_();
   calculateProbabilityHopToNeighbors_();
@@ -78,8 +78,8 @@ double KMC_Site::getRateToNeighbor(const int neighSiteId) {
 //                 to_string(getId());
 //    throw invalid_argument(err);
 //  }
-  assert(neighRates_.count(neighSiteId) == 0 && "Error the site Id " + to_string(neighSiteId) +
-    " is not a neighbor of site " + to_string(getId()));
+//
+  assert(neighRates_.count(neighSiteId)!=0 && "Error the site Id is not a neighbor of the site ");
   return *(neighRates_[neighSiteId]);
 }
 
@@ -129,8 +129,8 @@ double KMC_Site::getProbabilityOfHoppingToNeighboringSite(
 //                 " is not a neighbor of " + to_string(getId());
 //    throw invalid_argument(err);
 //  }
-  assert(neighRates_.count(neighSiteId) == 0 && "Error site " + to_string(neighSiteId) +
-                 " is not a neighbor of " + to_string(getId()));
+  assert(neighRates_.count(neighSiteId) != 0 && "Error site "
+      " is not a neighbor ");
 
   auto it = find_if(
       probabilityHopToNeighbor_.begin(),
