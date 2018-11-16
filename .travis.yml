@@ -16,6 +16,7 @@ matrix:
             - gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON"
     - os: linux
       addons:
         apt:
@@ -26,7 +27,29 @@ matrix:
             - gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - gcc-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON -DCMAKE_BUILD_TYPE=Release"
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+            - gcc-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON -DCMAKE_BUILD_TYPE=Release"
 
 before_script:
   - sudo apt-get install build-essential
@@ -51,6 +74,6 @@ script:
   - mkdir build
   - cd build
   - pwd
-  - cmake -DENABLE_TESTING=ON -DCXXTEST_ADD_PERFORMANCE=ON ..
+  - cmake "${COMPILE_FLAGS}" ..
   - make
   - make test ARGS="-V"
