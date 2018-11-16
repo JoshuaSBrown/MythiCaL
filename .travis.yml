@@ -60,6 +60,7 @@ before_script:
   - eval "${MATRIX_EVAL}"
   
 install:
+  - sudo pip install codecov
   - echo "${TRAVIS_BUILD_DIR}"
   - echo "${TRAVIS_OS_NAME}"
   - ls
