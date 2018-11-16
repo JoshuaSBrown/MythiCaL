@@ -58,9 +58,9 @@ install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
 set_target_properties(kmc_course_grain PROPERTIES LINKER_LANGUAGE CXX)
 
-##########################
-# Check if testing is on #
-##########################
+###############################
+# Check if unit testing is on #
+###############################
 option(BUILD_SHARED_LIBS "Build shared libs" ON)
 
 option(ENABLE_TESTING "Build and enable unit testing" OFF)
@@ -70,8 +70,34 @@ if(ENABLE_TESTING)
   add_subdirectory(CourseGrainSites/src/tests/unit)
 endif(ENABLE_TESTING)
 
+###########################################
+# Check if performance testing is enabled #
+###########################################
+
 if(CXXTEST_ADD_PERFORMANCE)
   enable_testing()
   message("Performance testing enabled")
   add_subdirectory(CourseGrainSites/src/tests/performance)
 endif(CXXTEST_ADD_PERFORMANCE)
+
+#####################################
+# Check if code coverage is enabled #
+#####################################
+
+
+
+foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
+  if(${FLAG_OPT} MATCHES "-coverage")
+    find_program(GCOV_EXE gcov)
+    if(GCOV_EXE)
+      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_course_grain.dir/CourseGrainSites/src/libkmccoursegrain/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_course_grain.dir/CourseGrainSites/src/libkmccoursegrain/topologyfeatures/*gcno)
+      foreach(PROG ${COVERAGE_FILES})
+        get_filename_component(NAME_FILE ${PROG} NAME)
+        add_test(coverage_${NAME_FILE} gcov ${PROG})
+      endforeach()
+
+    else(GCOV_EXE)
+      message("Unable to find gcov")
+    endif(GCOV_EXE)
+  endif(${FLAG_OPT} MATCHES "-coverage")
+endforeach()
