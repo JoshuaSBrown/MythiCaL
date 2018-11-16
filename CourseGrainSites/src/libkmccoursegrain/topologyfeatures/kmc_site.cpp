@@ -3,6 +3,7 @@
 #include <chrono>
 #include <set>
 #include <utility>
+#include <cassert>
 
 #include "kmc_site.hpp"
 #include "../../../include/kmccoursegrain/kmc_constants.hpp"
@@ -48,9 +49,10 @@ void KMC_Site::setRatesToNeighbors(unordered_map<int, double*> neighRates) {
 
 void KMC_Site::addNeighRate(const pair<int, double*> neighRate) {
 
-  if (neighRates_.count(neighRate.first)) {
-    throw invalid_argument("That neighbor has already been added.");
-  }
+//  if (neighRates_.count(neighRate.first)) {
+//    throw invalid_argument("That neighbor has already been added.");
+//  }
+  assert(neighRates_.count(neighRate.first) && "That neighbor has already been added.");
   neighRates_[neighRate.first] = neighRate.second;
   calculateDwellTimeConstant_();
   calculateProbabilityHopToNeighbors_();
@@ -69,13 +71,15 @@ vector<double> KMC_Site::getRateToNeighbors() {
 }
 
 double KMC_Site::getRateToNeighbor(const int neighSiteId) {
-  if (neighRates_.count(neighSiteId) == 0) {
-    string err = "Error the site Id " + to_string(neighSiteId) +
-                 " is not a "
-                 "neighbor of site " +
-                 to_string(getId());
-    throw invalid_argument(err);
-  }
+//  if (neighRates_.count(neighSiteId) == 0) {
+//    string err = "Error the site Id " + to_string(neighSiteId) +
+//                 " is not a "
+//                 "neighbor of site " +
+//                 to_string(getId());
+//    throw invalid_argument(err);
+//  }
+  assert(neighRates_.count(neighSiteId) == 0 && "Error the site Id " + to_string(neighSiteId) +
+    " is not a neighbor of site " + to_string(getId()));
   return *(neighRates_[neighSiteId]);
 }
 
@@ -100,12 +104,16 @@ int KMC_Site::pickNewSiteId() {
     threshold += pval.second;
     if (number < threshold) return pval.first;
   }
-  string err =
-      "Error cummulitive probability distribution is flawed or "
+//  string err =
+//      "Error cummulitive probability distribution is flawed or "
+//      " the random number generator has calculated a value greater than 1, or"
+//      " the site has no neighbors";
+//
+//  throw invalid_argument(err);
+  assert("Error cummulitive probability distribution is flawed or "
       " the random number generator has calculated a value greater than 1, or"
-      " the site has no neighbors";
-
-  throw invalid_argument(err);
+      " the site has no neighbors");
+  return -1;
 }
 
 unordered_map<int,double *> KMC_Site::getNeighborsAndRates(){
@@ -116,11 +124,13 @@ double KMC_Site::getProbabilityOfHoppingToNeighboringSite(
     const int neighSiteId) 
 {
   // Use neighRates because random access of map is faster than vector
-  if (neighRates_.count(neighSiteId) == 0) {
-    string err = "Error site " + to_string(neighSiteId) +
-                 " is not a neighbor of " + to_string(getId());
-    throw invalid_argument(err);
-  }
+//  if (neighRates_.count(neighSiteId) == 0) {
+//    string err = "Error site " + to_string(neighSiteId) +
+//                 " is not a neighbor of " + to_string(getId());
+//    throw invalid_argument(err);
+//  }
+  assert(neighRates_.count(neighSiteId) == 0 && "Error site " + to_string(neighSiteId) +
+                 " is not a neighbor of " + to_string(getId()));
 
   auto it = find_if(
       probabilityHopToNeighbor_.begin(),

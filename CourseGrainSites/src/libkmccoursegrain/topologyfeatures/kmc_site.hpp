@@ -1,6 +1,5 @@
 #ifndef KMCCOURSEGRAIN_KMC_SITE_HPP
 #define KMCCOURSEGRAIN_KMC_SITE_HPP
-
 #include <iostream>
 #include <unordered_map>
 #include <math.h>

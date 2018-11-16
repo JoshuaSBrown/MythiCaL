@@ -1,6 +1,5 @@
 #ifndef KMCCOURSEGRAIN_KMC_PARTICLE_HPP
 #define KMCCOURSEGRAIN_KMC_PARTICLE_HPP
-
 #include "kmc_constants.hpp"
 #include <list>
 #include <map>
