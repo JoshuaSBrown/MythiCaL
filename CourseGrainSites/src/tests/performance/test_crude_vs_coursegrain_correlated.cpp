@@ -105,12 +105,6 @@ int main(int argc, char* argv[]){
   cout << "sigma of " << sigma << endl;
   cout << endl;
 
-
-  double simulation_cutoff_time = 1.0E-4;   
-  cout << "Simulation cutoff time " << simulation_cutoff_time << " seconds";
-  cout << endl;
-  cout << endl;
-
   double percentage_coorilation_seeds = 0.001;
   double correlation_radius = 3.0;
   double max_correlation = correlation_radius*1.5;
@@ -126,6 +120,11 @@ int main(int argc, char* argv[]){
   // Record setup time
   high_resolution_clock::time_point setup_time_start = high_resolution_clock::now();
 
+  // Track the minimum and maximum energies will be used to calculate the fwhm
+  double min_energy;
+  double max_energy;
+  int totalNumberSites = distance*distance*distance;
+
   // Assign energies from gaussian distribution
   vector<double> energies;
   {
@@ -133,11 +132,109 @@ int main(int argc, char* argv[]){
     random_number_generator.seed(1);
     normal_distribution<double> distribution(0.0,sigma);
 
-    int totalNumberSites = distance*distance*distance;
-    for(int i=0;i<totalNumberSites;++i){
-      energies.push_back(distribution(random_number_generator));
+    energies.push_back(distribution(random_number_generator));
+    min_energy = energies.at(0);
+    max_energy = energies.at(0);
+    for(int i=1;i<totalNumberSites;++i){
+      double energy = distribution(random_number_generator);
+      energies.push_back(energy);
+      if(energy<min_energy) min_energy = energy;
+      if(energy>max_energy) max_energy = energy;
     }
   }
+  cout << "Pre correlation min energy " << min_energy << " max energy " << max_energy << endl;
+  // Determine the full width half maximum
+  double pre_correlation_fwhm;
+  int number_of_bins = 20;
+  {
+    vector<double> bins(number_of_bins,0.0);
+    double bin_increment = (max_energy-min_energy)/static_cast<double>(number_of_bins);
+    for( auto energy : energies){
+      double bin_edge = min_energy;
+      for( int i=0; i<number_of_bins;i++){
+        bin_edge+=bin_increment;
+        if(energy<=bin_edge){
+          bins.at(i)++;
+          break;
+        }
+      }
+    }
+
+    int max_count_in_bin = 0;
+    for(auto count : bins){
+      if(count>max_count_in_bin) max_count_in_bin=count;
+    }
+
+
+    // Determine halfway point
+    double half_way_count = static_cast<double>(max_count_in_bin)/static_cast<double>(number_of_bins);
+
+    double lower_intersect;
+    {
+
+      double lower_min_count = 0.0;
+      double lower_min_half = 0.0;
+      double upper_min_count = 0.0;
+      double upper_min_half = 0.0;
+
+      double previous_count = 0.0;
+
+      double bin_edge = min_energy;
+      for(auto count : bins){
+
+        double count_double = static_cast<double>(count);
+        if(count_double>half_way_count){
+          upper_min_count = count_double;
+          upper_min_half = (bin_edge+bin_increment)/2.0;
+          lower_min_count = previous_count;
+          lower_min_half = upper_min_half-bin_increment;
+          break;
+        }
+        bin_edge+=bin_increment;
+        previous_count = count_double;
+      }
+
+      auto slope = (upper_min_count-lower_min_count)/(upper_min_half-lower_min_half);
+      auto constant = lower_min_count-slope*lower_min_half;
+      lower_intersect = (half_way_count-constant)/slope; 
+    }
+
+    double upper_intersect;
+    {
+
+      double lower_max_count = 0.0;
+      double lower_max_half = 0.0;
+      double upper_max_count = 0.0;
+      double upper_max_half = 0.0;
+
+      double previous_count = 0.0;
+
+      double bin_edge = max_energy;
+      for(int index=(number_of_bins-1);index>=0;index--){
+        
+        int count = bins.at(index);
+        double count_double = static_cast<double>(count);
+        if(count_double>half_way_count){
+          lower_max_count = count_double;
+          lower_max_half = (bin_edge-bin_increment)/2.0;
+          upper_max_count = previous_count;
+          upper_max_half = upper_max_half+bin_increment;
+          break;
+        }
+        bin_edge-=bin_increment;
+        previous_count = count_double;
+      }
+
+      auto slope = (upper_max_count-lower_max_count)/(upper_max_half-lower_max_half);
+      auto constant = lower_max_count-slope*lower_max_half;
+      upper_intersect = (half_way_count-constant)/slope; 
+    }
+
+    pre_correlation_fwhm = upper_intersect-lower_intersect;
+
+  }
+
+  cout << "Pre correlation fwhm " << pre_correlation_fwhm << endl;
 
   Converter converter(distance);
   // Correlate energies
@@ -184,6 +281,110 @@ int main(int argc, char* argv[]){
       }
     }
   }
+
+  // Calulate the min and max energies fresh
+  {
+    min_energy = energies.at(0);
+    max_energy = energies.at(0);
+    for(int i=1;i<totalNumberSites;++i){
+      double energy = energies.at(i);
+      if(energy<min_energy) min_energy = energy;
+      if(energy>max_energy) max_energy = energy;
+    }
+  }
+  cout << "Post correlation min energy " << min_energy << " max energy " << max_energy << endl;
+  // Determine the full width half maximum
+  double post_correlation_fwhm;
+  {
+    vector<double> bins(number_of_bins,0.0);
+    double bin_increment = (max_energy-min_energy)/static_cast<double>(number_of_bins);
+    for( auto energy : energies){
+      double bin_edge = min_energy;
+      for( int i=0; i<number_of_bins;i++){
+        bin_edge+=bin_increment;
+        if(energy<=bin_edge){
+          bins.at(i)++;
+          break;
+        }
+      }
+    }
+
+    int max_count_in_bin = 0;
+    for(auto count : bins){
+      if(count>max_count_in_bin) max_count_in_bin=count;
+    }
+
+
+    // Determine halfway point
+    double half_way_count = static_cast<double>(max_count_in_bin)/static_cast<double>(number_of_bins);
+
+    double lower_intersect;
+    {
+
+      double lower_min_count = 0.0;
+      double lower_min_half = 0.0;
+      double upper_min_count = 0.0;
+      double upper_min_half = 0.0;
+
+      double previous_count = 0.0;
+
+      double bin_edge = min_energy;
+      for(auto count : bins){
+
+        double count_double = static_cast<double>(count);
+        if(count_double>half_way_count){
+          upper_min_count = count_double;
+          upper_min_half = (bin_edge+bin_increment)/2.0;
+          lower_min_count = previous_count;
+          lower_min_half = upper_min_half-bin_increment;
+          break;
+        }
+        bin_edge+=bin_increment;
+        previous_count = count_double;
+      }
+
+      auto slope = (upper_min_count-lower_min_count)/(upper_min_half-lower_min_half);
+      auto constant = lower_min_count-slope*lower_min_half;
+      lower_intersect = (half_way_count-constant)/slope; 
+    }
+
+    double upper_intersect;
+    {
+
+      double lower_max_count = 0.0;
+      double lower_max_half = 0.0;
+      double upper_max_count = 0.0;
+      double upper_max_half = 0.0;
+
+      double previous_count = 0.0;
+
+      double bin_edge = max_energy;
+      for(int index=(number_of_bins-1);index>=0;index--){
+        
+        int count = bins.at(index);
+        double count_double = static_cast<double>(count);
+        if(count_double>half_way_count){
+          lower_max_count = count_double;
+          lower_max_half = (bin_edge-bin_increment)/2.0;
+          upper_max_count = previous_count;
+          upper_max_half = upper_max_half+bin_increment;
+          break;
+        }
+        bin_edge-=bin_increment;
+        previous_count = count_double;
+      }
+
+      auto slope = (upper_max_count-lower_max_count)/(upper_max_half-lower_max_half);
+      auto constant = lower_max_count-slope*lower_max_half;
+      upper_intersect = (half_way_count-constant)/slope; 
+    }
+
+    post_correlation_fwhm = upper_intersect-lower_intersect;
+
+  }
+
+  cout << "Post correlation fwhm " << post_correlation_fwhm << endl;
+
 
   unordered_map<int,unordered_map<int,double>> rates;
   unordered_map<int,vector<int>> neighbors;
@@ -309,7 +510,6 @@ int main(int argc, char* argv[]){
             if(zlow-1>0) --zlow;
             if(zhigh+1<distance) ++zhigh;
 
-            double sum_times = 0.0;
             double sum_rate = 0.0;
             int siteId = converter.to1D(x,y,z); 
             for( int x2 = xlow; x2<=xhigh; ++x2){
@@ -317,13 +517,12 @@ int main(int argc, char* argv[]){
                 for( int z2 = zlow; z2<=zhigh; ++z2){
                   int neighId = converter.to1D(x2,y2,z2);
                   if(siteId!=neighId){
-                    sum_times+=1.0/rates[siteId][neighId];
                     sum_rate +=rates[siteId][neighId];
                   }
                 }
               }
             }
-            sojourn_times[siteId] = sum_times;        
+            sojourn_times[siteId] = 1/sum_rate;        
             sum_rates[siteId] = sum_rate;  
           }
         }
@@ -388,7 +587,8 @@ int main(int argc, char* argv[]){
       for(int particle_index=0; particle_index<particles;++particle_index){
         auto position = particle_positions[particle_index];
         auto siteId = converter.to1D(position);
-        particle_global_times.push_back(pair<int,double>(particle_index, sojourn_times[siteId]*log(distribution(random_number_generator))*-1.0));
+        double hop_time = sojourn_times[siteId]*log(distribution(random_number_generator))*-1.0;
+        particle_global_times.push_back(pair<int,double>(particle_index,hop_time));
       }
       particle_global_times.sort(compareSecondItemOfPair);
     }// Calculate particle dwell times and sort
@@ -400,7 +600,7 @@ int main(int argc, char* argv[]){
       mt19937 random_number_generator;
       random_number_generator.seed(seed);
       uniform_real_distribution<double> distribution(0.0,1.0);
-
+      assert(particle_global_times.begin()->second<cutoff_time);
       while(particle_global_times.begin()->second<cutoff_time){
         int particleId = particle_global_times.begin()->first;
         vector<int> particle_position = particle_positions[particleId];
@@ -448,7 +648,7 @@ int main(int argc, char* argv[]){
       for(auto site_rates : rates){
         unordered_map< int ,double *> rates_to;
         for( auto neigh_rate : site_rates.second){
-          rates_to_neighbors[site_rates.first][neigh_rate.first] = &neigh_rate.second;
+          rates_to_neighbors[site_rates.first][neigh_rate.first] = &(rates[site_rates.first][neigh_rate.first]);
         }
       }
     }
@@ -473,6 +673,7 @@ int main(int argc, char* argv[]){
       CGsystem.setMaxCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
+
       // Calculate Particle dwell times and sort 
       list<pair<int,double>> particle_global_times;
       {
@@ -487,6 +688,10 @@ int main(int argc, char* argv[]){
         particle_global_times.sort(compareSecondItemOfPair);
       }// Calculate particle dwell times and sort
 
+      cout << "Cutoff time " << cutoff_time << endl;
+      cout << "Number of particles " << particle_global_times.size() << endl;
+      cout << "particle_global_time begin " << particle_global_times.begin()->second << endl;
+      assert(particle_global_times.begin()->second<cutoff_time); 
       while(particle_global_times.begin()->second<cutoff_time){
         auto particle_index = particle_global_times.begin()->first;
         KMC_Particle & electron = electrons.at(particle_index); 
