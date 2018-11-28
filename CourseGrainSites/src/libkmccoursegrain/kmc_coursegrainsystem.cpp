@@ -53,6 +53,7 @@ void KMC_CourseGrainSystem::initializeSystem(unordered_map<int, unordered_map<in
   for (auto it = ratesOfAllSites.begin(); it != ratesOfAllSites.end(); ++it) {
     KMC_Site site;
     site.setId(it->first);
+    
     site.setRatesToNeighbors(it->second);
     if (seed_set_) {
       site.setRandomSeed(seed_);

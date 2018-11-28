@@ -68,6 +68,7 @@ if(ENABLE_TESTING)
   enable_testing()
   message("Unit testing enabled")
   add_subdirectory(CourseGrainSites/src/tests/unit)
+  add_subdirectory(CourseGrainSites/src/tests/regression)
 endif(ENABLE_TESTING)
 
 ###########################################
@@ -83,8 +84,6 @@ endif(CXXTEST_ADD_PERFORMANCE)
 #####################################
 # Check if code coverage is enabled #
 #####################################
-
-
 
 foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
   if(${FLAG_OPT} MATCHES "-coverage")
