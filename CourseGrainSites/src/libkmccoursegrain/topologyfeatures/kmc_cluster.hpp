@@ -1,6 +1,7 @@
 #ifndef KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 #define KMCCOURSEGRAIN_KMC_CLUSTER_HPP
 
+#include <cassert>
 #include <list>
 #include <memory>
 #include <random>
@@ -174,7 +175,11 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * \param[in] resolution integer value defining how course grained the
    * cluster is
    **/
-  void setResolution(const int resolution) { resolution_ = resolution; }
+  void setResolution(const int resolution) { 
+    // Must be greater than 1
+    assert(resolution>1); 
+    resolution_ = resolution; 
+  }
 
   /**
    * \brief Pick the next site a particle will hop too

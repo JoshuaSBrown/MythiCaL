@@ -31,7 +31,9 @@ void occupyCluster_(KMC_TopologyFeature* feature, int& siteId){
 //  site_visits += cluster->resolution_;
 //  site.setVisitFrequency(site_visits);
   assert(cluster->site_visits_.count(siteId));
+  
   cluster->site_visits_[siteId]++;
+
   site.setToOccupiedStatus(); 
 }
 
@@ -68,7 +70,6 @@ void KMC_Cluster::addSite(KMC_Site& newSite) {
 //  }
   assert(sitesInCluster_.count(newSite.getId())==0 && "Site has already been "
       "added to the cluster");
-
   newSite.setClusterId(this->getId());
   sitesInCluster_[newSite.getId()] = newSite;
 
@@ -87,6 +88,7 @@ void KMC_Cluster::addSites(vector<KMC_Site>& newSites) {
 }
 
 void KMC_Cluster::updateProbabilitiesAndTimeConstant() {
+
   unordered_map<int,int> temporary_visit_frequencies = site_visits_;
 
   solveMasterEquation_();
@@ -135,7 +137,6 @@ double KMC_Cluster::getProbabilityOfOccupyingInternalSite(const int siteId) {
 
 void KMC_Cluster::migrateSitesFrom(KMC_Cluster& cluster) {
 
-  cout << "Migrating sites from one cluster to the other" << endl;
   unordered_map<int,int> visits;
   for (auto& site : cluster.sitesInCluster_) {
     site.second.setClusterId(getId());
