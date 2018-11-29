@@ -65,6 +65,65 @@ int main(void){
     assert(cluster.siteIsInCluster(1));
   }
 
+  cout << "Testing: getVisitFrequency" << endl;
+  {
+
+    double rate = 1.0;
+    KMC_Site site;
+    site.setId(1);
+    site.setVisitFrequency(5);
+    site.addNeighRate(pair<int,double *>(2,&rate));
+    assert(site.getVisitFrequency()==5);
+
+    KMC_Site site2;
+    site2.setId(2);
+    site2.setVisitFrequency(3);
+    site2.addNeighRate(pair<int,double *>(1,&rate));
+    site2.addNeighRate(pair<int,double *>(3,&rate));
+    assert(site2.getVisitFrequency()==3);
+
+    KMC_Cluster cluster;
+    assert(!cluster.siteIsInCluster(1));
+    cluster.addSite(site);
+    cluster.addSite(site2);
+    cluster.updateProbabilitiesAndTimeConstant();
+    assert(cluster.siteIsInCluster(1));
+ 
+    cout << "Frequency " << cluster.getVisitFrequency(1) << endl;
+    assert(cluster.getVisitFrequency(1)==0);
+  }
+ 
+  cout << "Testing: setVisitFrequency" << endl;
+  {
+    double rate = 1.0;
+    KMC_Site site;
+    site.setId(1);
+    site.setVisitFrequency(5);
+    site.addNeighRate(pair<int,double *>(2,&rate));
+    assert(site.getVisitFrequency()==5);
+
+    KMC_Site site2;
+    site2.setId(2);
+    site2.setVisitFrequency(3);
+    site2.addNeighRate(pair<int,double *>(1,&rate));
+    site2.addNeighRate(pair<int,double *>(3,&rate));
+    assert(site2.getVisitFrequency()==3);
+
+    KMC_Cluster cluster;
+    assert(!cluster.siteIsInCluster(1));
+    cluster.addSite(site);
+    cluster.addSite(site2);
+    cluster.updateProbabilitiesAndTimeConstant();
+    assert(cluster.siteIsInCluster(1));
+ 
+    cout << "Frequency " << cluster.getVisitFrequency(1) << endl;
+    assert(cluster.getVisitFrequency(1)==0);
+
+    cluster.setVisitFrequency(3,1);
+    assert(cluster.getVisitFrequency(1)==3);
+    assert(site.getVisitFrequency()==5);
+  }   
+
   cout << "Testing: getProbabilityOfOccupyingInternalSite 1" << endl;
   {
 
@@ -88,6 +147,7 @@ int main(void){
     KMC_Cluster cluster;
     cluster.addSite(site);
     cluster.addSite(site2);
+    cluster.updateProbabilitiesAndTimeConstant();
 
     assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(1)))==50);
     assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(2)))==50);
@@ -133,6 +193,7 @@ int main(void){
     cluster.addSite(site);
     cluster.addSite(site2);
     cluster.addSite(site3);
+    cluster.updateProbabilitiesAndTimeConstant();
 
     vector<int> values;
     values.push_back(round(static_cast<int>(100*cluster.getProbabilityOfOccupyingInternalSite(1))));
@@ -256,7 +317,7 @@ int main(void){
     cluster.addSite(site);
     cluster.addSite(site2);
     cluster.addSite(site3);
-
+    cluster.updateProbabilitiesAndTimeConstant();
     // Setting the seed will ensure that the results are reproducable
 
     cluster.setRandomSeed(1);
@@ -291,6 +352,7 @@ int main(void){
     float percent4 = static_cast<float>(site4chosen)/static_cast<float>(total);
     float percent5 = static_cast<float>(site5chosen)/static_cast<float>(total);
 
+    cout << percent1 << endl;
     assert(percent1<0.15 && percent1>0.14);
     assert(percent2<0.21 && percent2>0.19);
     assert(percent3<0.15 && percent3>0.14);
