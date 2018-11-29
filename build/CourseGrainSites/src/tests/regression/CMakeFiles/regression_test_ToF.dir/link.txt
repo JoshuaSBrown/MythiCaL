@@ -1,1 +1,0 @@
-/usr/bin/c++    -Werror -Wall -Wextra -pedantic   CMakeFiles/regression_test_ToF.dir/test_ToF.cpp.o  -o regression_test_ToF ../../../../libkmc_course_grain.so ../../../../UGLY/libugly.a -Wl,-rpath,/mnt/d/jbrown/Documents/Code/CPP_Code/OPV_CourseGrainSites/build 
