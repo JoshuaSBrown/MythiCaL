@@ -275,10 +275,24 @@ class KMC_Cluster : public KMC_TopologyFeature {
   /**
    * \brief Stores the probability of hopping to each of the neighbors
    *
-   * The first integer in the map is the neighbor site id, the double is a
+   * The first integer in the pair is the neighbor site id, the double is a
    * probability given as a value between 0 and 1.
    **/
   std::vector<std::pair<int, double>> probabilityHopToNeighbor_;
+
+  /**
+   * \brief Stores the internal dwell time of the sites in the cluster
+   *
+   * In other words this stores the dwell times as if there are no rates to
+   * sites neighboring the cluster. 
+   **/
+  std::unordered_map<int,double> internal_dwell_time_;
+
+  /**
+   * \brief Stores the number of times a site in the cluster is visited
+   *
+   **/
+  std::unordered_map<int,int> site_visits_;
 
   /**
    * \brief Stores the rates from each site in the cluster to the neighbors
@@ -373,11 +387,15 @@ class KMC_Cluster : public KMC_TopologyFeature {
   std::unordered_map<int, std::unordered_map<int, double>>
       getRatesToNeighborsOfCluster_();
 
+  std::unordered_map<int, std::unordered_map<int, double>>
+      getRatesBetweenInternalSites_();
+
   void iterate_();
 
   void calculateProbabilityHopToNeighbors_();
   void calculateProbabilityHopToInternalSite_();
   void calculateProbabilityHopOffInternalSite_();
+  void calculateInternalDwellTimes_();
   void calculateEscapeRatesFromSitesToTheirNeighbors_();
 
   void initializeProbabilityOnSites_();

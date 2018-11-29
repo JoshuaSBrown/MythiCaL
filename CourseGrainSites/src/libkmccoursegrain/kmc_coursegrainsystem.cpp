@@ -252,6 +252,7 @@ int KMC_CourseGrainSystem::createCluster_(vector<int> siteIds, double internal_t
     sites.push_back(sites_.getKMC_Site(siteId));
   }
   cluster.addSites(sites);
+  cluster.updateProbabilitiesAndTimeConstant();
 
   double cluster_time_const = cluster.getTimeConstant();
   // Cut the resolution in half from what it would otherwise be otherwise not worth doing
@@ -294,6 +295,7 @@ void KMC_CourseGrainSystem::mergeSitesAndClusters_( unordered_map<int,int> sites
     }
   }
   clusters_.getKMC_Cluster(favoredClusterId).addSites(isolated_sites);
+  clusters_.getKMC_Cluster(favoredClusterId).updateProbabilitiesAndTimeConstant();
   for(auto clusterId : cluster_ids ){
     clusters_.getKMC_Cluster(favoredClusterId).migrateSitesFrom(clusters_.getKMC_Cluster(clusterId));
     clusters_.erase(clusterId);
