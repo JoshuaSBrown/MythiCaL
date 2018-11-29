@@ -131,6 +131,7 @@ int main(void){
     }
 
     KMC_CourseGrainSystem CGsystem;
+    CGsystem.setTimeResolution(10.0);
     CGsystem.initializeSystem(ratesToNeighbors);
   }
 
@@ -248,12 +249,16 @@ int main(void){
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
+    double time_limit = 10000;
     cout << "Running without cluster" << endl;
     // Without cluster
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
-      CGsystem.setMinCourseGrainIterationThreshold(1000000);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
+      int threshold = 100000000;
+      CGsystem.setMinCourseGrainIterationThreshold(threshold);
       CGsystem.initializeSystem(ratesToNeighbors);
 
       class Electron : public KMC_Particle {};
@@ -270,7 +275,6 @@ int main(void){
       vector<double> time_spent_on_sites(12,0.0);
       vector<int> hops_made_to_sites(12,0);
 
-      double time_limit = 10000;
       double time = 0.0;
       int hop_count = 0;
       KMC_Particle& electron1 = electrons.at(0);
@@ -308,6 +312,8 @@ int main(void){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
       CGsystem.setMinCourseGrainIterationThreshold(1000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
@@ -325,7 +331,6 @@ int main(void){
       vector<double> time_spent_on_sites(12,0.0);
       vector<int> hops_made_to_sites(12,0);
 
-      double time_limit = 10000;
       double time = 0.0;
       int hop_count = 0;
       KMC_Particle& electron1 = electrons.at(0);
@@ -480,8 +485,9 @@ int main(void){
     }
 
     cout << endl;
+    double time_limit = 10000;
     cout << "Without Course graining" << endl;
-    
+   
     // Number of electrons used for both the following crude and course grained
     // simulation runs
     int NumberElectrons = 4000;
@@ -494,6 +500,8 @@ int main(void){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
       CGsystem.setMinCourseGrainIterationThreshold(1000000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
@@ -649,6 +657,8 @@ int main(void){
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setMinCourseGrainIterationThreshold(10);
       CGsystem.setRandomSeed(1);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
       CGsystem.initializeSystem(ratesToNeighbors);
       int cycles = 3;
       for(int cycle = 0; cycle < cycles ;++cycle ){
