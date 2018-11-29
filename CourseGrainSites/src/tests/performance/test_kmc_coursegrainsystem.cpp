@@ -138,6 +138,7 @@ int main(void){
     
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
+    CGsystem.setTimeResolution(100.0);
     CGsystem.setMinCourseGrainIterationThreshold(10000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
@@ -294,6 +295,7 @@ int main(void){
 
     KMC_CourseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
+    CGsystem.setTimeResolution(100.0);
     CGsystem.setMinCourseGrainIterationThreshold(1000000);
     CGsystem.initializeSystem(ratesToNeighbors);
     

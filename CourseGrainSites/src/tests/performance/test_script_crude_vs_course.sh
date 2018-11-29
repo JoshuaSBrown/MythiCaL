@@ -1,6 +1,5 @@
 #!/bin/bash
 
-resolution=10
 sigma=0.07
 length=11
 particles=3
@@ -12,7 +11,7 @@ echo "Crude    Course" > time_all.txt
 number_of_seeds=10
 for seed in $(seq 1 $number_of_seeds)
 do
-  ./performance_test_crude_vs_coursegrain $sigma $length $seed $resolution $particles $threshold $time > out.txt
+  ./performance_test_crude_vs_coursegrain $sigma $length $seed  $particles $threshold $time > out.txt
   value_crude=$(cat out.txt | grep "Crude Monte Carlo Run Time" | awk '{print $6}') 
   total_crude=$(( $value_crude+$total_crude ))
   value_course=$(cat out.txt | grep "Course Monte Carlo Run Time" | awk '{print $6}') 
