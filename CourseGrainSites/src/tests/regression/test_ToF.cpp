@@ -60,7 +60,7 @@ bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> &
 
 int main(int argc, char* argv[]){
 
-  if(argc!=10){
+  if(argc!=9){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
     cerr << endl;
@@ -70,8 +70,6 @@ int main(int argc, char* argv[]){
     cerr << "             of the simulation box in terms of the number" << endl;
     cerr << "             of sites. [nm] " << endl;
     cerr << "seed       - integer value defines the random number seed" << endl;
-    cerr << "resolution - integer value defines how course the " << endl;
-    cerr << "             approxiation will be." << endl;
     cerr << "particles  - integer value defines number of particles." << endl;
     cerr << "threshold  - integer value defines minimum threshold of " << endl;
     cerr << "             how often the simulation will try to course " << endl;
@@ -84,7 +82,7 @@ int main(int argc, char* argv[]){
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
-    cerr << "./performance_test_crude_vs_coursegraining sigma distance seed resolution particles threshold" << endl;
+    cerr << "./performance_test_crude_vs_coursegraining sigma distance seed particles threshold" << endl;
     cerr << endl;
     return -1;
   }
@@ -92,13 +90,15 @@ int main(int argc, char* argv[]){
   double sigma = stod(string(argv[1]));
   int distance = stoi(string(argv[2]));
   int seed     = stoi(string(argv[3]));
-  int resolution = stoi(string(argv[4])); 
-  int particles = stoi(string(argv[5]));
-  int threshold = stoi(string(argv[6]));
+  int particles = stoi(string(argv[4]));
+  int threshold = stoi(string(argv[5]));
+  double cutoff_time = stod(string(argv[6]));
+  int sample_rate = stoi(string(argv[7]));
+  double field = stod(string(argv[8]));
 
-  double cutoff_time = stod(string(argv[7]));
-  int sample_rate = stoi(string(argv[8]));
-  double field = stod(string(argv[9]));
+  if(cutoff_time<=0.0){
+    throw invalid_argument("Cutoff time must be greater than 0.0");
+  }
 
   cout << endl;
   cout << "Parameters passed in:" << endl;
@@ -106,7 +106,6 @@ int main(int argc, char* argv[]){
   cout << "sigma:       " << sigma << endl;
   cout << "distance:    " << distance << endl;
   cout << "seed:        " << seed << endl;
-  cout << "resolution:  " << resolution << endl; 
   cout << "particles:   " << particles << endl;
   cout << "threshold:   " << threshold << endl;
   cout << "time:        " << cutoff_time << endl;
@@ -261,15 +260,15 @@ int main(int argc, char* argv[]){
     
     // Run the course grain simulation
     {
-      KMC_CourseGrainSystem CGsystem;
-      CGsystem.setRandomSeed(seed);
-      CGsystem.setMinCourseGrainIterationThreshold(threshold);
-      CGsystem.setMaxCourseGrainResolution(resolution);
-      CGsystem.initializeSystem(rates_to_neighbors);
-      CGsystem.initializeParticles(electrons);
-
       double current_time_sample_increment = cutoff_time/static_cast<double>(sample_rate);
       double sample_time = current_time_sample_increment;
+
+      KMC_CourseGrainSystem CGsystem;
+      CGsystem.setRandomSeed(seed);
+      CGsystem.setTimeResolution(sample_time);
+      CGsystem.setMinCourseGrainIterationThreshold(threshold);
+      CGsystem.initializeSystem(rates_to_neighbors);
+      CGsystem.initializeParticles(electrons);
 
       vector<double> transient_current(sample_rate,0.0);
       // Calculate Particle dwell times and sort 
