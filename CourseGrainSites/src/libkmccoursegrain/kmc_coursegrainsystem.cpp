@@ -46,9 +46,30 @@ int getFavoredClusterId(unordered_map<int,int> sites_and_clusters);
  * Public Facing Functions
  ****************************************************************************/
 
+double KMC_CourseGrainSystem::getTimeResolution() { 
+  if(!time_resolution_set_){
+    throw runtime_error("Cannot get the time resolution as it has not yet "
+        "been set.");
+  }
+  return time_resolution_; 
+}
+
+void KMC_CourseGrainSystem::setTimeResolution(double time_resolution){
+  if(time_resolution<=0.0){
+    throw invalid_argument("The time resolution must be a positive value.");
+  }
+  time_resolution_set_ = true;
+  time_resolution_ = time_resolution;
+}
+
 void KMC_CourseGrainSystem::initializeSystem(unordered_map<int, unordered_map<int, double*>> ratesOfAllSites) {
 
   LOG("Initializeing system", 1);
+
+  if(!time_resolution_set_){
+    throw runtime_error("You must first set the time resolution of the system "
+        "before you can initialize the system.");
+  }
 
   for (auto it = ratesOfAllSites.begin(); it != ratesOfAllSites.end(); ++it) {
     KMC_Site site;
@@ -156,10 +177,10 @@ void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
     particle.setPotentialSite(newId);
   }else{
     feature->vacate(siteId);
-    feature_to_hop_to->occupy(siteId);
+    feature->occupy(siteId);
 
-    newId   = feature_to_hop_to->pickNewSiteId();
-    hopTime = feature_to_hop_to->getDwellTime();
+    newId   = feature->pickNewSiteId();
+    hopTime = feature->getDwellTime();
     
     particle.setDwellTime(hopTime);
     particle.setPotentialSite(newId);
@@ -257,9 +278,15 @@ int KMC_CourseGrainSystem::createCluster_(vector<int> siteIds, double internal_t
   double cluster_time_const = cluster.getTimeConstant();
   // Cut the resolution in half from what it would otherwise be otherwise not worth doing
   int res = static_cast<int>(floor(cluster_time_const/(2*internal_time_limit)));
+//  int max_cluster_resolution = static_cast<int>(floor(time_resolution_/(2*internal_time_limit)));
+  int allowed_resolution = static_cast<int>(floor(cluster_time_const/time_resolution_));
   int chosen_resolution = res;
-  if(res==0) chosen_resolution=1;
-  if(max_cluster_resolution_<res) chosen_resolution = max_cluster_resolution_; 
+
+  // The courser the resolution is the better
+  if(allowed_resolution <  chosen_resolution) chosen_resolution=allowed_resolution;
+
+  if(chosen_resolution<2) chosen_resolution=2;
+//  if(max_cluster_resolution_<res) chosen_resolution = max_cluster_resolution; 
   cluster.setResolution(chosen_resolution);
   if (seed_set_) {
     cluster.setRandomSeed(seed_);
@@ -330,13 +357,18 @@ double KMC_CourseGrainSystem::getInternalTimeLimit_(vector<int> siteIds ){
   return maxtime;
 }
 
-// Its not worth creating a cluster unless the time being at least cut in half
+// Its not worth creating a cluster unless the time is at least cut in half
+// And it is not allowed if the sample time is smaller than than the simulated
+// time of the cluster. The cluster has to be updated at a minimum once between
+// each measurment (time_resolution). If this is not done the noise will not
+// correctly show up in the data.  
 bool KMC_CourseGrainSystem::sitesSatisfyEquilibriumCondition_(
     vector<int> siteIds, double maxtime) {
 
   LOG("Checking if sites satisfy equilibrium condition", 1);
   auto minTimeConstant = getMinimumTimeConstantFromSitesToNeighbors_(siteIds);
-  return minTimeConstant > (maxtime*minimum_course_graining_resolution_);
+  double time_to_traverse_cluster = maxtime*minimum_course_graining_resolution_;
+  return minTimeConstant > time_to_traverse_cluster && time_to_traverse_cluster< time_resolution_;
 }
 
 double KMC_CourseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
