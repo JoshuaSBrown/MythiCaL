@@ -15,7 +15,7 @@ foreach(PROG
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(performance_${PROG} ${${PROG}_SOURCES})
   target_link_libraries(performance_${PROG} kmc_course_grain ugly)
-  add_test(performance_${PROG} performance_${PROG} 0.08 10 10 10 3 1000 0.001)
+  add_test(performance_${PROG} performance_${PROG} 0.08 10 10 3 1000 0.001)
   set_tests_properties(performance_${PROG} PROPERTIES LABELS "kmccoursegrain")
 endforeach(PROG)
 

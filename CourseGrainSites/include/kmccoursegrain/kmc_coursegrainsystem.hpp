@@ -48,10 +48,11 @@ class KMC_CourseGrainSystem {
    **/
   KMC_CourseGrainSystem()
       : seed_set_(false),
-        max_cluster_resolution_(20),
+        time_resolution_set_(false),
+        //max_cluster_resolution_(20),
         minimum_course_graining_resolution_(2),
-        iteration_threshold_(10000),
-        iteration_threshold_min_(10000){};
+        iteration_threshold_(1000),
+        iteration_threshold_min_(1000){};
 
   /**
    * \brief This will correctly initialize the system
@@ -181,10 +182,20 @@ class KMC_CourseGrainSystem {
    * wanting to capture the noise this needs to be higher. However, it is lower 
    * the more effiecient the course graining should be.
    **/
-  int getMaxCourseGrainResolution() { return max_cluster_resolution_; }
-  void setMaxCourseGrainResolution(int max_cluster_resolution) {
-    max_cluster_resolution_ = max_cluster_resolution;
-  }
+  //int getMaxCourseGrainResolution() { return max_cluster_resolution_; }
+  //void setMaxCourseGrainResolution(int max_cluster_resolution) {
+  //  max_cluster_resolution_ = max_cluster_resolution;
+  //}
+
+  /**
+   * \brief Determines how fine grained the time is allowed to be
+   *
+   * When running simulations where you are only sampling the simulation every
+   * few time increments, a fine grained resolution may not be needed. Reducing
+   * the resolution allows the cluster algorithm to perform better.
+   **/
+  double getTimeResolution();
+  void setTimeResolution(double time_resolution);
 
  private:
   /// Depicts whether a random seed has been set, to yield reproducable data
@@ -193,10 +204,12 @@ class KMC_CourseGrainSystem {
   /// The random seed
   unsigned long seed_;
 
+  bool time_resolution_set_;
   /// The resolution of the clusters. Essentially how many hops will a particle
   /// move within the cluster before it is likely to leave, the point of this
   /// is to at least to a small degree conserve the noise.
-  int max_cluster_resolution_;
+  //int max_cluster_resolution_;
+  double time_resolution_;
 
   /// This should be set to a value of 2, it is used to determine if course 
   /// graining should occur. If the time to hop off the potential sites in

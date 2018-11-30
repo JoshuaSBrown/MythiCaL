@@ -131,6 +131,7 @@ int main(void){
     }
 
     KMC_CourseGrainSystem CGsystem;
+    CGsystem.setTimeResolution(10.0);
     CGsystem.initializeSystem(ratesToNeighbors);
   }
 
@@ -248,12 +249,16 @@ int main(void){
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
+    double time_limit = 10000;
     cout << "Running without cluster" << endl;
     // Without cluster
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
-      CGsystem.setMinCourseGrainIterationThreshold(1000000);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
+      int threshold = 100000000;
+      CGsystem.setMinCourseGrainIterationThreshold(threshold);
       CGsystem.initializeSystem(ratesToNeighbors);
 
       class Electron : public KMC_Particle {};
@@ -270,7 +275,6 @@ int main(void){
       vector<double> time_spent_on_sites(12,0.0);
       vector<int> hops_made_to_sites(12,0);
 
-      double time_limit = 10000;
       double time = 0.0;
       int hop_count = 0;
       KMC_Particle& electron1 = electrons.at(0);
@@ -308,6 +312,8 @@ int main(void){
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
       CGsystem.setMinCourseGrainIterationThreshold(1000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
@@ -325,7 +331,6 @@ int main(void){
       vector<double> time_spent_on_sites(12,0.0);
       vector<int> hops_made_to_sites(12,0);
 
-      double time_limit = 10000;
       double time = 0.0;
       int hop_count = 0;
       KMC_Particle& electron1 = electrons.at(0);
@@ -480,8 +485,9 @@ int main(void){
     }
 
     cout << endl;
+    double time_limit = 10000;
     cout << "Without Course graining" << endl;
-    
+   
     // Number of electrons used for both the following crude and course grained
     // simulation runs
     int NumberElectrons = 4000;
@@ -490,10 +496,12 @@ int main(void){
     vector<double> probabilityOnNeighCrude; 
     // Without cluster formation
     vector<double> portionOfTimeOnSiteNoCluster(5,0.0);
-    vector<int> hops_to_sites_no_cluster(number_of_sites,0);  
+    vector<double> hops_to_sites_no_cluster(number_of_sites,0);  
     {
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(1);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
       CGsystem.setMinCourseGrainIterationThreshold(1000000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
@@ -529,8 +537,8 @@ int main(void){
       cout << "Total number of visits to each site" << endl;
       for(int site_id = 1; site_id <= number_of_sites; ++site_id){
         int visits = CGsystem.getVisitFrequencyOfSite(site_id);
-        hops_to_sites_no_cluster.at(site_id-1) = visits; 
-        cout << "id: " << site_id << " visits " << visits << endl;
+        hops_to_sites_no_cluster.at(site_id-1) = static_cast<double>(visits); 
+        cout << "id: " << site_id << " visits " << static_cast<double>(visits) << endl;
       }
     
       auto clusters = CGsystem.getClusters();
@@ -641,7 +649,7 @@ int main(void){
     {
 
       // Store the number of hops to each site 1-14
-      vector<int> hops_to_sites(number_of_sites,0);  
+      vector<double> hops_to_sites(number_of_sites,0);  
       vector<double> timeOnSites(number_of_sites,0.0);
       // Store the escape time from the cluster for each electron
       vector<double> escapeTimes;
@@ -649,6 +657,8 @@ int main(void){
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setMinCourseGrainIterationThreshold(10);
       CGsystem.setRandomSeed(1);
+      double time_resolution = time_limit/10.0;
+      CGsystem.setTimeResolution(time_resolution);
       CGsystem.initializeSystem(ratesToNeighbors);
       int cycles = 3;
       for(int cycle = 0; cycle < cycles ;++cycle ){
@@ -683,9 +693,38 @@ int main(void){
       cout << "Total number of visits to each site" << endl;
       for(int site_id = 1; site_id <= number_of_sites; ++site_id){
         int visits = CGsystem.getVisitFrequencyOfSite(site_id);
-        hops_to_sites.at(site_id-1) = visits; 
-        cout << "id: " << site_id << " visits " << visits << endl;
+        hops_to_sites.at(site_id-1) = static_cast<double>(visits)/static_cast<double>(cycles); 
+        cout << "id: " << site_id << " visits " << static_cast<double>(visits)/static_cast<double>(cycles) << endl;
       }
+
+      assert(hops_to_sites.at(0)<hops_to_sites_no_cluster.at(0)*1.2);
+      assert(hops_to_sites.at(0)>hops_to_sites_no_cluster.at(0)*0.8);
+      assert(hops_to_sites.at(1)<hops_to_sites_no_cluster.at(1)*1.2);
+      assert(hops_to_sites.at(1)>hops_to_sites_no_cluster.at(1)*0.8);
+      assert(hops_to_sites.at(2)<hops_to_sites_no_cluster.at(2)*1.2);
+      assert(hops_to_sites.at(2)>hops_to_sites_no_cluster.at(2)*0.8);
+      assert(hops_to_sites.at(3)<hops_to_sites_no_cluster.at(3)*1.2);
+      assert(hops_to_sites.at(3)>hops_to_sites_no_cluster.at(3)*0.8);
+      assert(hops_to_sites.at(4)<hops_to_sites_no_cluster.at(4)*1.2);
+      assert(hops_to_sites.at(4)>hops_to_sites_no_cluster.at(4)*0.8);
+      assert(hops_to_sites.at(5)<hops_to_sites_no_cluster.at(5)*1.2);
+      assert(hops_to_sites.at(5)>hops_to_sites_no_cluster.at(5)*0.8);
+      assert(hops_to_sites.at(6)<hops_to_sites_no_cluster.at(6)*1.2);
+      assert(hops_to_sites.at(6)>hops_to_sites_no_cluster.at(6)*0.8);
+      assert(hops_to_sites.at(7)<hops_to_sites_no_cluster.at(7)*1.2);
+      assert(hops_to_sites.at(7)>hops_to_sites_no_cluster.at(7)*0.8);
+      assert(hops_to_sites.at(8)<hops_to_sites_no_cluster.at(8)*1.2);
+      assert(hops_to_sites.at(8)>hops_to_sites_no_cluster.at(8)*0.8);
+      assert(hops_to_sites.at(9)<hops_to_sites_no_cluster.at(9)*1.2);
+      assert(hops_to_sites.at(9)>hops_to_sites_no_cluster.at(9)*0.8);
+      assert(hops_to_sites.at(10)<hops_to_sites_no_cluster.at(10)*1.2);
+      assert(hops_to_sites.at(10)>hops_to_sites_no_cluster.at(10)*0.8);
+      assert(hops_to_sites.at(11)<hops_to_sites_no_cluster.at(11)*1.2);
+      assert(hops_to_sites.at(11)>hops_to_sites_no_cluster.at(11)*0.8);
+      assert(hops_to_sites.at(12)<hops_to_sites_no_cluster.at(12)*1.2);
+      assert(hops_to_sites.at(12)>hops_to_sites_no_cluster.at(12)*0.8);
+      assert(hops_to_sites.at(13)<hops_to_sites_no_cluster.at(13)*1.2);
+      assert(hops_to_sites.at(13)>hops_to_sites_no_cluster.at(13)*0.8);
 
       auto clusters = CGsystem.getClusters();
       cout << "Clusters size " << clusters.size() << endl;

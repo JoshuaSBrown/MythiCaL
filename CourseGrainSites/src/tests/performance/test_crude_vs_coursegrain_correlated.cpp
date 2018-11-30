@@ -50,7 +50,7 @@ bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> &
 
 int main(int argc, char* argv[]){
 
-  if(argc!=8){
+  if(argc!=7){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
     cerr << endl;
@@ -61,8 +61,6 @@ int main(int argc, char* argv[]){
     cerr << "             of sites. " << endl;
     cerr << "seed       - integer value defines the random number " << endl;
     cerr << "             generator seed." << endl;
-    cerr << "resolution - integer value defines how course the couse " << endl;
-    cerr << "             the approxiation will be." << endl;
     cerr << "particles  - integer value defines number of particles." << endl;
     cerr << "threshold  - integer value defines minimum threshold of " << endl;
     cerr << "             how often the simulation will try to course " << endl;
@@ -80,10 +78,9 @@ int main(int argc, char* argv[]){
   double sigma = stod(string(argv[1]));
   int distance = stoi(string(argv[2]));
   int seed = stoi(string(argv[3]));
-  int resolution = stoi(string(argv[4])); 
-  int particles = stoi(string(argv[5]));
-  int threshold = stoi(string(argv[6]));
-  double cutoff_time = stod(string(argv[7]));
+  int particles = stoi(string(argv[4]));
+  int threshold = stoi(string(argv[5]));
+  double cutoff_time = stod(string(argv[6]));
 
   cout << endl;
   cout << "Parameters passed in:" << endl;
@@ -91,7 +88,6 @@ int main(int argc, char* argv[]){
   cout << "sigma:      " << sigma << endl;
   cout << "distance:   " << distance << endl;
   cout << "seed:       " << seed << endl;
-  cout << "resolution: " << resolution << endl;
   cout << "particles:  " << particles << endl;
   cout << "threshold:  " << threshold << endl;
   cout << "time:       " << cutoff_time << endl;
@@ -670,7 +666,7 @@ int main(int argc, char* argv[]){
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
       CGsystem.setMinCourseGrainIterationThreshold(threshold);
-      CGsystem.setMaxCourseGrainResolution(resolution);
+      CGsystem.setTimeResolution(cutoff_time/100.0);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeParticles(electrons);
 
