@@ -5,7 +5,7 @@
 #include <chrono>
 
 #include "../../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
-#include "../../../include/kmccoursegrain/kmc_particle.hpp"
+#include "../../../include/kmccoursegrain/kmc_walker.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -142,7 +142,7 @@ int main(void){
     CGsystem.setMinCourseGrainIterationThreshold(10000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
-    class Electron : public KMC_Particle {};
+    class Electron : public KMC_Walker {};
     
     // Store the number of hops to each site 1-14
     vector<int> hopsToSites(14,0);  
@@ -158,11 +158,11 @@ int main(void){
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      vector<KMC_Particle> electrons;
+      vector<KMC_Walker> electrons;
       electrons.push_back(electron);
-      CGsystem.initializeParticles(electrons);
+      CGsystem.initializeWalkers(electrons);
       
-      KMC_Particle & electron1 = electrons.at(0);
+      KMC_Walker & electron1 = electrons.at(0);
       double totalTimeOnCluster = 0.0;
       while(electron1.getIdOfSiteCurrentlyOccupying()<6){
 
@@ -172,7 +172,7 @@ int main(void){
         totalTimeOnCluster+=electron1.getDwellTime(); 
       }
 
-      CGsystem.removeParticleFromSystem(electron1);
+      CGsystem.removeWalkerFromSystem(electron1);
       escapeTimes.push_back(totalTimeOnCluster);
     }
     clusterEnd = high_resolution_clock::now();
@@ -299,7 +299,7 @@ int main(void){
     CGsystem.setMinCourseGrainIterationThreshold(1000000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
-    class Electron : public KMC_Particle {};
+    class Electron : public KMC_Walker {};
     
     // Store the number of hops to each site 1-14
     vector<int> hopsToSites(14,0);  
@@ -316,11 +316,11 @@ int main(void){
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      vector<KMC_Particle> electrons;
+      vector<KMC_Walker> electrons;
       electrons.push_back(electron);
-      CGsystem.initializeParticles(electrons);
+      CGsystem.initializeWalkers(electrons);
       double totalTimeOnCluster = 0.0;
-      KMC_Particle & electron1 = electrons.at(0);
+      KMC_Walker & electron1 = electrons.at(0);
       while(electron1.getIdOfSiteCurrentlyOccupying()<6){
         CGsystem.hop(electron1);
         hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
@@ -328,7 +328,7 @@ int main(void){
         totalTimeOnCluster+=electron1.getDwellTime(); 
       }
 
-      CGsystem.removeParticleFromSystem(electron1);
+      CGsystem.removeWalkerFromSystem(electron1);
       escapeTimes.push_back(totalTimeOnCluster);
     }
     siteEnd = high_resolution_clock::now();

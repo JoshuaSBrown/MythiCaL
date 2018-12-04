@@ -12,7 +12,7 @@
 #include <algorithm>
 
 #include "../../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
-#include "../../../include/kmccoursegrain/kmc_particle.hpp"
+#include "../../../include/kmccoursegrain/kmc_walker.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
   int distance = stoi(string(argv[2]));
   int seed     = stoi(string(argv[3]));
   int resolution = stoi(string(argv[4])); 
-  int particles = 1;
+  int walkers = 1;
   int threshold = stoi(string(argv[6]));
 
   double cutoff_time = stod(string(argv[7]));
@@ -134,27 +134,27 @@ int main(int argc, char* argv[]){
     }
   }
 
-  // Place particles randomly on the first plane of the system for ToF simulation
+  // Place walkers randomly on the first plane of the system for ToF simulation
   set<int> siteOccupied;
-  unordered_map<int,vector<int>> particle_positions;
+  unordered_map<int,vector<int>> walker_positions;
   {
     mt19937 random_number_generator;
     random_number_generator.seed(seed+1);
     uniform_int_distribution<int> distribution(0,distance-1);
-    int particle_index = 0;
-    while(particle_index<particles){
+    int walker_index = 0;
+    while(walker_index<walkers){
       int x = 0;
       assert(x<distance);
       assert(x>=0);
       int siteId = converter.to1D(x,y,z);
       if(siteOccupied.count(siteId)==0){
         vector<int> position = { x, y, z};
-        particle_positions[particle_index] = position;
-        ++particle_index;
+        walker_positions[walker_index] = position;
+        ++walker_index;
         siteOccupied.insert(siteId);
       }
     }
-  } // Place particles randomly in the system  
+  } // Place walkers randomly in the system  
 
   // Run course grained Monte Carlo
   cout << "Running course grained Monte Carlo" << endl;
@@ -169,13 +169,13 @@ int main(int argc, char* argv[]){
       }
     }
 
-    class Electron : public KMC_Particle {};
-    // Create the electrons using the KMC_Particle class
-    vector<KMC_Particle> electrons;        
+    class Electron : public KMC_Walker {};
+    // Create the electrons using the KMC_Walker class
+    vector<KMC_Walker> electrons;        
     {
-      for(int particle_index = 0; particle_index<particles; ++particle_index){
+      for(int walker_index = 0; walker_index<walkers; ++walker_index){
         Electron electron;
-        int siteId = converter.to1D(particle_positions[particle_index]);
+        int siteId = converter.to1D(walker_positions[walker_index]);
         electron.occupySite(siteId);
         electrons.push_back(electron);
       }
@@ -188,34 +188,34 @@ int main(int argc, char* argv[]){
       CGsystem.setMinCourseGrainIterationThreshold(threshold);
       CGsystem.setMaxCourseGrainResolution(resolution);
       CGsystem.initializeSystem(rates_to_neighbors);
-      CGsystem.initializeParticles(electrons);
+      CGsystem.initializeWalkers(electrons);
 
       double current_time_sample_increment = cutoff_time/static_cast<double>(sample_rate);
       double sample_time = current_time_sample_increment;
 
       vector<double> transient_current(sample_rate,0.0);
-      // Calculate Particle dwell times and sort 
-      list<pair<int,double>> particle_global_times;
+      // Calculate Walker dwell times and sort 
+      list<pair<int,double>> walker_global_times;
       {
 
         mt19937 random_number_generator;
         random_number_generator.seed(3);
         uniform_real_distribution<double> distribution(0.0,1.0);
 
-        for(int particle_index=0; particle_index<particles;++particle_index){
-          particle_global_times.push_back(pair<int,double>(particle_index,electrons.at(particle_index).getDwellTime()));
+        for(int walker_index=0; walker_index<walkers;++walker_index){
+          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).getDwellTime()));
         }
-        particle_global_times.sort(compareSecondItemOfPair);
-      }// Calculate particle dwell times and sort
-      assert(particle_global_times.begin()->second<cutoff_time);
+        walker_global_times.sort(compareSecondItemOfPair);
+      }// Calculate walker dwell times and sort
+      assert(walker_global_times.begin()->second<cutoff_time);
 
    
       int current_index = 0; 
-      while(particle_global_times.size()>0 && particle_global_times.begin()->second<cutoff_time){
+      while(walker_global_times.size()>0 && walker_global_times.begin()->second<cutoff_time){
         double deltaX = 0.0;
-        while(particle_global_times.size()>0 && particle_global_times.begin()->second<sample_time){
-          auto particle_index = particle_global_times.begin()->first;
-          KMC_Particle& electron = electrons.at(particle_index); 
+        while(walker_global_times.size()>0 && walker_global_times.begin()->second<sample_time){
+          auto walker_index = walker_global_times.begin()->first;
+          KMC_Walker& electron = electrons.at(walker_index); 
           int siteId = electron.getIdOfSiteCurrentlyOccupying();
           int old_x_pos = siteId;
           CGsystem.hop(electron);
@@ -223,13 +223,13 @@ int main(int argc, char* argv[]){
           int new_x_pos = siteId;
           deltaX+=static_cast<double>(new_x_pos-old_x_pos);
           // Update the dwell time
-          particle_global_times.begin()->second += electron.getDwellTime();
-          // reorder the particles based on which one will move next
+          walker_global_times.begin()->second += electron.getDwellTime();
+          // reorder the walkers based on which one will move next
           if(new_x_pos==(distance-1)){
-            CGsystem.removeParticleFromSystem(electron);
-            particle_global_times.pop_front();
+            CGsystem.removeWalkerFromSystem(electron);
+            walker_global_times.pop_front();
           }
-          particle_global_times.sort(compareSecondItemOfPair);
+          walker_global_times.sort(compareSecondItemOfPair);
         }
 
         transient_current.at(current_index) = deltaX/current_time_sample_increment;

@@ -7,7 +7,7 @@
 
 #include "../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
 #include "../../include/kmccoursegrain/kmc_constants.hpp"
-#include "../../include/kmccoursegrain/kmc_particle.hpp"
+#include "../../include/kmccoursegrain/kmc_walker.hpp"
 
 #include "topologyfeatures/kmc_topology_feature.hpp"
 #include "topologyfeatures/kmc_cluster.hpp"
@@ -100,30 +100,30 @@ int KMC_CourseGrainSystem::getVisitFrequencyOfSite(int siteId){
   return visits;
 }
 
-void KMC_CourseGrainSystem::initializeParticles(vector<KMC_Particle>& particles) {
+void KMC_CourseGrainSystem::initializeWalkers(vector<KMC_Walker>& walkers) {
 
-  LOG("Initializeing particles", 1);
+  LOG("Initializeing walkers", 1);
   
   if (topology_features_.size() == 0) {
     throw runtime_error(
         "You must first initialize the system before you "
-        "can initialize the particles");
+        "can initialize the walkers");
   }
 
-  for ( size_t index = 0; index<particles.size(); ++index){
-//  for (KMC_Particle & particle : particles) {
-    auto siteId = particles.at(index).getIdOfSiteCurrentlyOccupying();
+  for ( size_t index = 0; index<walkers.size(); ++index){
+//  for (KMC_Walker & walker : walkers) {
+    auto siteId = walkers.at(index).getIdOfSiteCurrentlyOccupying();
     if (siteId == constants::unassignedId) {
       throw runtime_error(
-          "You must first place the particle on a known site"
-          " before the particle can be initialized.");
+          "You must first place the walker on a known site"
+          " before the walker can be initialized.");
     }
     topology_features_[siteId]->occupy();
 
     int newId = topology_features_[siteId]->pickNewSiteId();
     auto hopTime = topology_features_[siteId]->getDwellTime();
-    particles.at(index).setDwellTime(hopTime);
-    particles.at(index).setPotentialSite(newId);
+    walkers.at(index).setDwellTime(hopTime);
+    walkers.at(index).setPotentialSite(newId);
   }
 }
 
@@ -143,9 +143,9 @@ void KMC_CourseGrainSystem::setRandomSeed(const unsigned long seed) {
   seed_set_ = true;
 }
 
-void KMC_CourseGrainSystem::removeParticleFromSystem(KMC_Particle& particle) {
-  LOG("Particle is being removed from system", 1);
-  auto siteId = particle.getIdOfSiteCurrentlyOccupying();
+void KMC_CourseGrainSystem::removeWalkerFromSystem(KMC_Walker& walker) {
+  LOG("Walker is being removed from system", 1);
+  auto siteId = walker.getIdOfSiteCurrentlyOccupying();
   sites_.vacate(siteId);
 }
 
@@ -153,10 +153,10 @@ int KMC_CourseGrainSystem::getClusterIdOfSite(int siteId) {
   return sites_.getClusterIdOfSite(siteId);
 }
 
-void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
-  LOG("Particle is hopping in system", 1);
-  auto siteId = particle.getIdOfSiteCurrentlyOccupying();
-  int siteToHopToId = particle.getPotentialSite();
+void KMC_CourseGrainSystem::hop(KMC_Walker & walker) {
+  LOG("Walker is hopping in system", 1);
+  auto siteId = walker.getIdOfSiteCurrentlyOccupying();
+  int siteToHopToId = walker.getPotentialSite();
 
   KMC_TopologyFeature * feature = topology_features_[siteId];
   KMC_TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
@@ -172,9 +172,9 @@ void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
     newId   = feature_to_hop_to->pickNewSiteId();
     hopTime = feature_to_hop_to->getDwellTime();
  
-    particle.occupySite(siteToHopToId);
-    particle.setDwellTime(hopTime);
-    particle.setPotentialSite(newId);
+    walker.occupySite(siteToHopToId);
+    walker.setDwellTime(hopTime);
+    walker.setPotentialSite(newId);
   }else{
     feature->vacate(siteId);
     feature->occupy(siteId);
@@ -182,8 +182,8 @@ void KMC_CourseGrainSystem::hop(KMC_Particle & particle) {
     newId   = feature->pickNewSiteId();
     hopTime = feature->getDwellTime();
     
-    particle.setDwellTime(hopTime);
-    particle.setPotentialSite(newId);
+    walker.setDwellTime(hopTime);
+    walker.setPotentialSite(newId);
   }
 
   ++iteration_;
