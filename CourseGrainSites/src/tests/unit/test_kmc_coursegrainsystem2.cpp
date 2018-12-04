@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "../../../include/kmccoursegrain/kmc_coursegrainsystem.hpp"
-#include "../../../include/kmccoursegrain/kmc_particle.hpp"
+#include "../../../include/kmccoursegrain/kmc_walker.hpp"
 
 using namespace std;
 using namespace kmccoursegrain;
@@ -165,23 +165,23 @@ int main(void){
       CGsystem.setMinCourseGrainIterationThreshold(100000000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
-      class Electron : public KMC_Particle {};
+      class Electron : public KMC_Walker {};
 
       Electron electron;
       // Place the electron on site 1
       electron.occupySite(1);
 
-      vector<KMC_Particle> electrons;
+      vector<KMC_Walker> electrons;
       electrons.push_back(electron);
 
-      CGsystem.initializeParticles(electrons);
+      CGsystem.initializeWalkers(electrons);
 
       vector<double> time_spent_on_sites(number_of_sites,0.0);
       vector<int> hops_made_to_sites(number_of_sites,0);
 
       double time = 0.0;
       int hop_count = 0;
-      KMC_Particle& electron1 = electrons.at(0);
+      KMC_Walker& electron1 = electrons.at(0);
       while(time<time_limit){
         CGsystem.hop(electron1);
         time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
@@ -221,23 +221,23 @@ int main(void){
       CGsystem.setMinCourseGrainIterationThreshold(500);
       CGsystem.initializeSystem(ratesToNeighbors);
 
-      class Electron : public KMC_Particle {};
+      class Electron : public KMC_Walker {};
 
       Electron electron;
       // Place the electron on site 1
       electron.occupySite(1);
 
-      vector<KMC_Particle> electrons;
+      vector<KMC_Walker> electrons;
       electrons.push_back(electron);
 
-      CGsystem.initializeParticles(electrons);
+      CGsystem.initializeWalkers(electrons);
 
       vector<double> time_spent_on_sites(number_of_sites,0.0);
       vector<int> hops_made_to_sites(number_of_sites,0);
 
       double time = 0.0;
       int hop_count = 0;
-      KMC_Particle& electron1 = electrons.at(0);
+      KMC_Walker& electron1 = electrons.at(0);
       while(time<time_limit){
         CGsystem.hop(electron1);
         time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
