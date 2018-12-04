@@ -22,14 +22,14 @@ class Graph;
 
 namespace kmccoursegrain {
 
-class KMC_Particle;
+class KMC_Walker;
 
 /**
  * \brief Course Grain System allows abstraction of renormalization of sites
  *
  * This class simply uses pointers to the relevant hop rates. It will simulate a
- * particle hopping through the system of sites. If a large number of compute
- * cycles are expended moving a particle between two low energy sites they will
+ * walker hopping through the system of sites. If a large number of compute
+ * cycles are expended moving a walker between two low energy sites they will
  * be course grained, or renormalized so that the probabilities and time spent
  * on each site will be the same but the number of compute cycles will be
  * significantly reduced.
@@ -42,7 +42,7 @@ class KMC_CourseGrainSystem {
    *
    * The constructor by default seeds the random number generator based on the
    * current time. Furthermore, course graining of two sites is by default set
-   * to a threshold of 20. Meaning a particle must remember moving back and
+   * to a threshold of 20. Meaning a walker must remember moving back and
    * forth between two sites at least 20 times before the sites are course
    * grained.
    **/
@@ -60,9 +60,9 @@ class KMC_CourseGrainSystem {
    * Essentially pointers to all the rates are stored in this class. Pointers
    * are used in case any of the rates are changed, there will be no need to
    * pass them back into the couse grain object. An updated function could
-   * simply be called. This function must be called before the particles can
-   * be initialized `initializeParticles` and before a hopping event is called
-   * on a particle `hop`.
+   * simply be called. This function must be called before the walkers can
+   * be initialized `initializeWalkerss` and before a hopping event is called
+   * on a walker `hop`.
    *
    * \param[in] ratesOfAllSites this is a map of maps the first int is site i
    * the value of which is a second map of sites j which are all neighbors of
@@ -107,17 +107,17 @@ class KMC_CourseGrainSystem {
   void initializeSystem(std::unordered_map<int, std::unordered_map<int, double*>> ratesOfAllSites);
 
   /**
-   * \brief Initialize particle dwell times and future hop site id
+   * \brief Initialize walker dwell times and future hop site id
    *
    * This function can only be called after initializing the sites. Each
-   * particle mst have also been placed on a site in the system. As in if
-   * there are sites 1 2 and 3. Then the particles must exist on at least one
+   * walker mst have also been placed on a site in the system. As in if
+   * there are sites 1 2 and 3. Then the walkers must exist on at least one
    * of these sites before they are passed in. The function will then update
    * their dwell times as well as providing a potential future hopping site.
    *
-   * \param[in] particles a vector of pointers to the particles
+   * \param[in] walkers a vector of pointers to the walkers
    **/
-  void initializeParticles(std::vector<KMC_Particle>& particles);
+  void initializeWalkers(std::vector<KMC_Walker>& walkers);
 
   /**
    * \brief Define the seed for the random number generator
@@ -130,22 +130,22 @@ class KMC_CourseGrainSystem {
   void setRandomSeed(const unsigned long seed);
 
   /**
-   * \brief Make the particle hop to a site in the system
+   * \brief Make the walker hop to a site in the system
    *
-   * Once a particle has been initialized, i.e. it has a dwell time it is
+   * Once a walker has been initialized, i.e. it has a dwell time it is
    * located on a site in the system and it has a stored potential site it
    * will be hopping to. This function will be called on it. It will move the
-   * particle if necessary and will course grain sites/renormalize sites if
+   * walker if necessary and will course grain sites/renormalize sites if
    * necessary.
    *
-   * \param[in] particle
+   * \param[in] walker
    **/
-  void hop(KMC_Particle& particle);
+  void hop(KMC_Walker& walker);
 
   /**
-   * \brief Remove the particle from the system
+   * \brief Remove the walker from the system
    **/
-  void removeParticleFromSystem(KMC_Particle& particle);
+  void removeWalkerFromSystem(KMC_Walker& walker);
 
   /**
    * \brief Determine if the site is part of a cluster
@@ -205,7 +205,7 @@ class KMC_CourseGrainSystem {
   unsigned long seed_;
 
   bool time_resolution_set_;
-  /// The resolution of the clusters. Essentially how many hops will a particle
+  /// The resolution of the clusters. Essentially how many hops will a walker
   /// move within the cluster before it is likely to leave, the point of this
   /// is to at least to a small degree conserve the noise.
   //int max_cluster_resolution_;
@@ -234,7 +234,7 @@ class KMC_CourseGrainSystem {
   /// Stores smart pointers to all the clusters
   KMC_Cluster_Container clusters_;
 
-  void courseGrainSiteIfNeeded_(KMC_Particle& particle);
+  void courseGrainSiteIfNeeded_(KMC_Walker& walker);
 
   /**
    * \brief Determines if it is appropriate to coursegrain the sites
