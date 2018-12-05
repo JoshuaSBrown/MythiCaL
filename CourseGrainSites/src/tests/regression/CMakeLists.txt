@@ -8,5 +8,5 @@ endforeach(PROG)
 
 configure_file(test_regression_script.sh test_regression_script.sh COPYONLY)
 
-add_test(test_regression bash bash test_regression_script.sh)
+add_test(test_regression bash test_regression_script.sh)
 set_tests_properties(test_regression PROPERTIES LABELS "kmccoursegrain")
