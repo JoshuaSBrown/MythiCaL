@@ -58,7 +58,7 @@ int main(void){
     site3.setRatesToNeighbors(neigh_rates_site3);
 
     unordered_map<int, double *> neigh_rates_site4;
-    neigh_rates_site1[3] = &rate4_3;
+    neigh_rates_site4[3] = &rate4_3;
     site4.setRatesToNeighbors(neigh_rates_site4);
 
     KMC_Site_Container site_container;

@@ -41,15 +41,6 @@ class Converter {
       position.at(0) = index % distance_;
       return position;
     }
-
-    int x(int index){
-      vector<int> position(3,0);
-      position.at(2) = index / (distance_*distance_);
-      index-=(position.at(2) *distance_*distance_);
-      position.at(1) = index/distance_;
-      position.at(0) = index % distance_;
-      return position.at(0);
-    }
   private:
     int distance_;
 };
@@ -60,7 +51,7 @@ bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> &
 
 int main(int argc, char* argv[]){
 
-  if(argc!=9){
+  if(argc!=8){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
     cerr << endl;
@@ -68,7 +59,7 @@ int main(int argc, char* argv[]){
     cerr << "             must be a double. " << endl;
     cerr << "distance   - integer defines the width, length and height" << endl;
     cerr << "             of the simulation box in terms of the number" << endl;
-    cerr << "             of sites. [nm] " << endl;
+    cerr << "             of sites. " << endl;
     cerr << "seed       - integer value defines the random number seed" << endl;
     cerr << "walkers    - integer value defines number of walkers." << endl;
     cerr << "threshold  - integer value defines minimum threshold of " << endl;
@@ -76,14 +67,12 @@ int main(int argc, char* argv[]){
     cerr << "             grain." << endl;
     cerr << "time       - a double defining how long the simulation " << endl;
     cerr << "             will run for." << endl;
-    cerr << "sample     - how often the current is sampled with respect"<< endl; 
-    cerr << "rate         to the cutoff time." <<endl;
-    cerr << "field      - the electric field across the system. [V/cm]" << endl;
+    cerr << "sample     - how often the current is sampled with respect"<< endl;
+    cerr << "rate         to the cutoff time." << endl;
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
-    cerr << "./performance_test_crude_vs_coursegraining sigma distance ";
-    cerr << "seed walkers threshold time sample_rate field" << endl;
+    cerr << "./performance_test_coursegraining_cluster_vs_nocluster sigma distance seed walkers threshold time sample_rate" << endl;
     cerr << endl;
     return -1;
   }
@@ -94,12 +83,7 @@ int main(int argc, char* argv[]){
   int walkers = stoi(string(argv[4]));
   int threshold = stoi(string(argv[5]));
   double cutoff_time = stod(string(argv[6]));
-  int sample_rate = stoi(string(argv[7]));
-  double field = stod(string(argv[8]));
-
-  if(cutoff_time<=0.0){
-    throw invalid_argument("Cutoff time must be greater than 0.0");
-  }
+  int rate = stoi(string(argv[7]));
 
   cout << endl;
   cout << "Parameters passed in:" << endl;
@@ -110,12 +94,8 @@ int main(int argc, char* argv[]){
   cout << "walkers:     " << walkers << endl;
   cout << "threshold:   " << threshold << endl;
   cout << "time:        " << cutoff_time << endl;
-  cout << "sample rate: " << sample_rate << endl;
-  cout << "field:       " << field << endl;
+  cout << "sample rate: " << rate << endl;
   cout << endl;
-
-  double nm_to_m = 1E-9; // m/nm
-  double field_nm = field*10E-7; // eV/nm
 
   /// Create Energies and place them in a vector
   cout << "Filling sites with energies from a guassian distribution " << endl;
@@ -125,6 +105,7 @@ int main(int argc, char* argv[]){
   cout << endl;
 
   // Record setup time
+  high_resolution_clock::time_point setup_time_start = high_resolution_clock::now();
   vector<double> energies;
   {
     mt19937 random_number_generator;
@@ -183,10 +164,6 @@ int main(int argc, char* argv[]){
             for( int y2 = ylow; y2<=yhigh; ++y2){
               for( int z2 = zlow; z2<=zhigh; ++z2){
 
-                double xdiff = static_cast<double>(x2-x);
-                // The negative is to ensure that there is a reduction in energy
-                // in the downfield direction
-                double field_energy = -1.0*xdiff*field_nm;
                 assert(x2>=0);
                 assert(x2<distance);
                 assert(y2>=0);
@@ -196,7 +173,7 @@ int main(int argc, char* argv[]){
                 int neighId = converter.to1D(x2,y2,z2);
                 if(siteId!=neighId){
                   neighbors[siteId].push_back(neighId);
-                  double deltaE = energies.at(neighId)-energies.at(siteId)-field_energy;
+                  double deltaE = energies.at(neighId)-energies.at(siteId);
                   double exponent = -pow(reorganization_energy-deltaE,2.0)/(4.0*reorganization_energy*kBT);
                   rates[siteId][neighId] = coef*exp(exponent);
                 }
@@ -209,7 +186,7 @@ int main(int argc, char* argv[]){
     }
   }
 
-  // Place walkers randomly on the first plane of the system for ToF simulation
+  // Place walkers randomly in the system
   set<int> siteOccupied;
   unordered_map<int,vector<int>> walker_positions;
   {
@@ -218,7 +195,7 @@ int main(int argc, char* argv[]){
     uniform_int_distribution<int> distribution(0,distance-1);
     int walker_index = 0;
     while(walker_index<walkers){
-      int x = 0;
+      int x = distribution(random_number_generator);
       int y = distribution(random_number_generator);
       int z = distribution(random_number_generator);
       assert(x<distance);
@@ -236,9 +213,11 @@ int main(int argc, char* argv[]){
       }
     }
   } // Place walkers randomly in the system  
+  high_resolution_clock::time_point setup_time_end = high_resolution_clock::now();
 
-  // Run course grained Monte Carlo
-  cout << "Running course grained Monte Carlo" << endl;
+  cout << "Running noclustering course grained Monte Carlo" << endl;
+  // Course Grained Monte Carlo with no clustering
+  high_resolution_clock::time_point nocluster_time_start = high_resolution_clock::now();
   {
     // greating map with pointer to rates
     unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
@@ -264,17 +243,16 @@ int main(int argc, char* argv[]){
     
     // Run the course grain simulation
     {
-      double current_time_sample_increment = cutoff_time/static_cast<double>(sample_rate);
+  
+      double current_time_sample_increment = cutoff_time/static_cast<double>(rate);
       double sample_time = current_time_sample_increment;
 
       KMC_CourseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
+      CGsystem.setMinCourseGrainIterationThreshold(100000000);
       CGsystem.setTimeResolution(sample_time);
-      CGsystem.setMinCourseGrainIterationThreshold(threshold);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeWalkers(electrons);
-
-      vector<double> transient_current(sample_rate,0.0);
       // Calculate Walker dwell times and sort 
       list<pair<int,double>> walker_global_times;
       {
@@ -289,46 +267,102 @@ int main(int argc, char* argv[]){
         walker_global_times.sort(compareSecondItemOfPair);
       }// Calculate walker dwell times and sort
       assert(walker_global_times.begin()->second<cutoff_time);
-
-   
-      int current_index = 0; 
-      while(walker_global_times.size()>0 && walker_global_times.begin()->second<cutoff_time){
-        double deltaX = 0.0;
-        while(walker_global_times.size()>0 && walker_global_times.begin()->second<sample_time){
-          auto walker_index = walker_global_times.begin()->first;
-          KMC_Walker& electron = electrons.at(walker_index); 
-          int siteId = electron.getIdOfSiteCurrentlyOccupying();
-          int old_x_pos = converter.x(siteId);
-          CGsystem.hop(electron);
-          siteId = electron.getIdOfSiteCurrentlyOccupying();
-          int new_x_pos = converter.x(siteId);
-          deltaX+=static_cast<double>(new_x_pos-old_x_pos);
-          // Update the dwell time
-          walker_global_times.begin()->second += electron.getDwellTime();
-          // reorder the walkers based on which one will move next
-          if(new_x_pos==(distance-1)){
-            CGsystem.removeWalkerFromSystem(electron);
-            walker_global_times.pop_front();
-          }
-          walker_global_times.sort(compareSecondItemOfPair);
-        }
-        transient_current.at(current_index) = deltaX*nm_to_m/current_time_sample_increment;
-        ++current_index;
-        sample_time+=current_time_sample_increment;
+      while(walker_global_times.begin()->second<cutoff_time){
+        auto walker_index = walker_global_times.begin()->first;
+        KMC_Walker& electron = electrons.at(walker_index); 
+        CGsystem.hop(electron);
+        // Update the dwell time
+        walker_global_times.begin()->second += electron.getDwellTime();
+        // reorder the walkers based on which one will move next
+        walker_global_times.sort(compareSecondItemOfPair);
       }
 
-      cout << endl;
-      cout << "Transient Current" << endl;
-      sample_time = 0.0;
-      for( auto current : transient_current){
-        sample_time+=current_time_sample_increment;
-        cout << sample_time << " " << current << endl;
-      }  
+      auto clusters = CGsystem.getClusters();
+      if(clusters.size()!=0){
+        throw runtime_error("Error a cluster was found in the nocluster part of"
+            " the test");
+      } 
 
     }// End of the Course grain simulation 
     
 
-  } // End of course grain Monte Carlo
+  } // End of nocluster course grain Monte Carlo
+  
+  high_resolution_clock::time_point nocluster_time_end = high_resolution_clock::now();
 
+  // Run course grained Monte Carlo
+  cout << "Running course grained Monte Carlo" << endl;
+  high_resolution_clock::time_point course_time_start = high_resolution_clock::now();
+  {
+    // greating map with pointer to rates
+    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
+    {
+      for(auto site_rates : rates){
+        for( auto neigh_rate : site_rates.second){
+          rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
+        }
+      }
+    }
+
+    class Electron : public KMC_Walker {};
+    // Create the electrons using the KMC_Walker class
+    vector<KMC_Walker> electrons;        
+    {
+      for(int walker_index = 0; walker_index<walkers; ++walker_index){
+        Electron electron;
+        int siteId = converter.to1D(walker_positions[walker_index]);
+        electron.occupySite(siteId);
+        electrons.push_back(electron);
+      }
+    }
+    
+    // Run the course grain simulation
+    {
+
+      double current_time_sample_increment = cutoff_time/static_cast<double>(rate);
+      double sample_time = current_time_sample_increment;
+
+      KMC_CourseGrainSystem CGsystem;
+      CGsystem.setRandomSeed(seed);
+      CGsystem.setMinCourseGrainIterationThreshold(threshold);
+      CGsystem.setTimeResolution(sample_time);
+      CGsystem.initializeSystem(rates_to_neighbors);
+      CGsystem.initializeWalkers(electrons);
+      // Calculate Walker dwell times and sort 
+      list<pair<int,double>> walker_global_times;
+      {
+
+        mt19937 random_number_generator;
+        random_number_generator.seed(3);
+        uniform_real_distribution<double> distribution(0.0,1.0);
+
+        for(int walker_index=0; walker_index<walkers;++walker_index){
+          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).getDwellTime()));
+        }
+        walker_global_times.sort(compareSecondItemOfPair);
+      }// Calculate walker dwell times and sort
+      assert(walker_global_times.begin()->second<cutoff_time);
+      while(walker_global_times.begin()->second<cutoff_time){
+        auto walker_index = walker_global_times.begin()->first;
+        KMC_Walker& electron = electrons.at(walker_index); 
+        CGsystem.hop(electron);
+        // Update the dwell time
+        walker_global_times.begin()->second += electron.getDwellTime();
+        // reorder the walkers based on which one will move next
+        walker_global_times.sort(compareSecondItemOfPair);
+      }
+
+      auto clusters = CGsystem.getClusters();
+      cout << "Total number of clusters found " << clusters.size() << endl;
+    }// End of the Course grain simulation 
+    
+  } // End of course grain Monte Carlo
+  high_resolution_clock::time_point course_time_end = high_resolution_clock::now();
+
+  auto duraction_nocluster = duration_cast<seconds>(setup_time_end-setup_time_start+nocluster_time_end-nocluster_time_start).count();
+  auto duraction_course = duration_cast<seconds>(setup_time_end-setup_time_start+course_time_end-course_time_start).count();
+
+  cout << "Course nocluster Monte Carlo Run Time: " << duraction_nocluster << " s " << endl;
+  cout << "Course Monte Carlo Run Time: " << duraction_course << " s " << endl;
   return 0;
 }
