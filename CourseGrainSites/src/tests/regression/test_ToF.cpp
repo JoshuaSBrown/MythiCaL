@@ -302,7 +302,6 @@ int main(int argc, char* argv[]){
           CGsystem.hop(electron);
           siteId = electron.getIdOfSiteCurrentlyOccupying();
           int new_x_pos = converter.x(siteId);
-          cout << new_x_pos << " " << old_x_pos << endl;
           deltaX+=static_cast<double>(new_x_pos-old_x_pos);
           // Update the dwell time
           walker_global_times.begin()->second += electron.getDwellTime();
