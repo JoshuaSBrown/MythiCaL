@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
     cerr << "             of the simulation box in terms of the number" << endl;
     cerr << "             of sites. [nm] " << endl;
     cerr << "seed       - integer value defines the random number seed" << endl;
-    cerr << "walkers  - integer value defines number of walkers." << endl;
+    cerr << "walkers    - integer value defines number of walkers." << endl;
     cerr << "threshold  - integer value defines minimum threshold of " << endl;
     cerr << "             how often the simulation will try to course " << endl;
     cerr << "             grain." << endl;
@@ -107,13 +107,14 @@ int main(int argc, char* argv[]){
   cout << "sigma:       " << sigma << endl;
   cout << "distance:    " << distance << endl;
   cout << "seed:        " << seed << endl;
-  cout << "walkers:   " << walkers << endl;
+  cout << "walkers:     " << walkers << endl;
   cout << "threshold:   " << threshold << endl;
   cout << "time:        " << cutoff_time << endl;
   cout << "sample rate: " << sample_rate << endl;
   cout << "field:       " << field << endl;
   cout << endl;
 
+  double nm_to_m = 1E-9; // m/nm
   double field_nm = field*10E-7; // eV/nm
 
   /// Create Energies and place them in a vector
@@ -183,7 +184,9 @@ int main(int argc, char* argv[]){
               for( int z2 = zlow; z2<=zhigh; ++z2){
 
                 double xdiff = static_cast<double>(x2-x);
-                double field_energy = xdiff*field_nm;
+                // The negative is to ensure that there is a reduction in energy
+                // in the downfield direction
+                double field_energy = -1.0*xdiff*field_nm;
                 assert(x2>=0);
                 assert(x2<distance);
                 assert(y2>=0);
@@ -299,6 +302,7 @@ int main(int argc, char* argv[]){
           CGsystem.hop(electron);
           siteId = electron.getIdOfSiteCurrentlyOccupying();
           int new_x_pos = converter.x(siteId);
+          cout << new_x_pos << " " << old_x_pos << endl;
           deltaX+=static_cast<double>(new_x_pos-old_x_pos);
           // Update the dwell time
           walker_global_times.begin()->second += electron.getDwellTime();
@@ -309,8 +313,7 @@ int main(int argc, char* argv[]){
           }
           walker_global_times.sort(compareSecondItemOfPair);
         }
-
-        transient_current.at(current_index) = deltaX/current_time_sample_increment;
+        transient_current.at(current_index) = deltaX*nm_to_m/current_time_sample_increment;
         ++current_index;
         sample_time+=current_time_sample_increment;
       }

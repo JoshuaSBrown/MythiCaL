@@ -1,5 +1,6 @@
 
-foreach(PROG test_ToF)
+foreach(PROG test_ToF
+    test_1Dsystem)
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(regression_${PROG} ${${PROG}_SOURCES})
   target_link_libraries(regression_${PROG} kmc_course_grain ugly)
