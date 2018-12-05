@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sigma=0.07
 size=30
 seed=1
