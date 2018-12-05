@@ -12,10 +12,10 @@ sample_rate=100
 ./regression_test_ToF $sigma $size $seed $particles $threshold $time $sample_rate $field
 
 # Test when clusters are used
-./regression_test_1Dsystem 8000 1 10 0.002 1000 10 > out.txt
+./regression_test_1Dsystem 8000 1 10 0.001 1000 10 | tee out.txt
 
 # Test when clusters are essentially turned off
-./regression_test_1Dsystem 8000 1 10000000 0.002 1000 10 > out2.txt
+./regression_test_1Dsystem 8000 1 10000000 0.001 1000 10 | tee out2.txt
 
 cluster_deviation=$(cat out.txt | grep "Standard deviation" | awk '{print $3}')
 cluster_mean=$(cat out.txt | grep "Mean" | awk '{print $2}')
