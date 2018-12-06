@@ -165,7 +165,9 @@ class KMC_CoarseGrainSystem {
    * \brief Determines how often to check for coarse graining
    *
    * This function determines the number of iterations that will pass before 
-   * the algorithm will check for coarse graining 
+   * the algorithm will check for coarse graining. If one desires to turn the
+   * cluster algorithm off the threshold can be set with a value of:
+   * constants::inf_iterations. 
    *
    * \param[in] thershold
    **/

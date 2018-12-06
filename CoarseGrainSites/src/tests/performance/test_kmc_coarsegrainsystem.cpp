@@ -4,6 +4,7 @@
 #include <memory>
 #include <chrono>
 
+#include "../../../include/kmccoarsegrain/kmc_constants.hpp"
 #include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
 #include "../../../include/kmccoarsegrain/kmc_walker.hpp"
 
@@ -296,7 +297,7 @@ int main(void){
     KMC_CoarseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
     CGsystem.setTimeResolution(100.0);
-    CGsystem.setMinCoarseGrainIterationThreshold(1000000);
+    CGsystem.setMinCoarseGrainIterationThreshold(constants::inf_iterations);
     CGsystem.initializeSystem(ratesToNeighbors);
     
     class Electron : public KMC_Walker {};
