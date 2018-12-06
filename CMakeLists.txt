@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 enable_language(CXX)
 
-project(kmc_course_grain)
+project(kmc_coarse_grain)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -43,20 +43,20 @@ foreach(FUNC sqrt)
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include/kmcoursegrain/*.hpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/kmcoarsegrain/*.hpp)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/include )
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include )
 
-install(FILES ${HEADERS} DESTINATION CourseGrainSites/include/kmccoursegrain)
+install(FILES ${HEADERS} DESTINATION CoarseGrainSites/include/kmccoarsegrain)
 
 message(${CMAKE_CURRENT_SOURCE_DIR})
 
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CourseGrainSites/src/libkmccoursegrain/topologyfeatures/*.cpp)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*.cpp)
 
-add_library(kmc_course_grain ${SOURCES} )
+add_library(kmc_coarse_grain ${SOURCES} )
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
 
-set_target_properties(kmc_course_grain PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(kmc_coarse_grain PROPERTIES LINKER_LANGUAGE CXX)
 
 ###############################
 # Check if unit testing is on #
@@ -67,8 +67,8 @@ option(ENABLE_TESTING "Build and enable unit testing" OFF)
 if(ENABLE_TESTING)
   enable_testing()
   message("Unit testing enabled")
-  add_subdirectory(CourseGrainSites/src/tests/unit)
-  add_subdirectory(CourseGrainSites/src/tests/regression)
+  add_subdirectory(CoarseGrainSites/src/tests/unit)
+  add_subdirectory(CoarseGrainSites/src/tests/regression)
 endif(ENABLE_TESTING)
 
 ###########################################
@@ -78,7 +78,7 @@ endif(ENABLE_TESTING)
 if(CXXTEST_ADD_PERFORMANCE)
   enable_testing()
   message("Performance testing enabled")
-  add_subdirectory(CourseGrainSites/src/tests/performance)
+  add_subdirectory(CoarseGrainSites/src/tests/performance)
 endif(CXXTEST_ADD_PERFORMANCE)
 
 #####################################
@@ -89,7 +89,7 @@ foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
   if(${FLAG_OPT} MATCHES "-coverage")
     find_program(GCOV_EXE gcov)
     if(GCOV_EXE)
-      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_course_grain.dir/CourseGrainSites/src/libkmccoursegrain/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_course_grain.dir/CourseGrainSites/src/libkmccoursegrain/topologyfeatures/*gcno)
+      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_coarse_grain.dir/CoarseGrainSites/src/libkmccoarsegrain/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_coarse_grain.dir/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*gcno)
       foreach(PROG ${COVERAGE_FILES})
         get_filename_component(NAME_FILE ${PROG} NAME)
         add_test(coverage_${NAME_FILE} gcov ${PROG})
