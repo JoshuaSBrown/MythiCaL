@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 
+#include "../../../include/kmccoarsegrain/kmc_constants.hpp"
 #include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
 #include "../../../include/kmccoarsegrain/kmc_walker.hpp"
 
@@ -162,7 +163,7 @@ int main(void){
       CGsystem.setRandomSeed(1);
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);
-      CGsystem.setMinCoarseGrainIterationThreshold(100000000);
+      CGsystem.setMinCoarseGrainIterationThreshold(constants::inf_iterations);
       CGsystem.initializeSystem(ratesToNeighbors);
 
       class Electron : public KMC_Walker {};

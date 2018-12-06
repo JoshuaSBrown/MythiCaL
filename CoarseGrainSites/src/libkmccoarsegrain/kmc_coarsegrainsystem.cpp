@@ -188,10 +188,12 @@ void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
 
   ++iteration_;
   if(iteration_ > iteration_threshold_){
-    if(coarseGrain_(siteToHopToId)){
-      iteration_threshold_ = iteration_threshold_min_;
-    }else{
-      iteration_threshold_*=2;
+    if(iteration_threshold_min_!=constants::inf_iterations){
+      if(coarseGrain_(siteToHopToId)){
+        iteration_threshold_ = iteration_threshold_min_;
+      }else{
+        iteration_threshold_*=2;
+      }
     }
     iteration_ = 0;
   }

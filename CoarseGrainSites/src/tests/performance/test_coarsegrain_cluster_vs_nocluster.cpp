@@ -11,6 +11,7 @@
 #include <cassert>
 #include <algorithm>
 
+#include "../../../include/kmccoarsegrain/kmc_constants.hpp"
 #include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
 #include "../../../include/kmccoarsegrain/kmc_walker.hpp"
 
@@ -249,7 +250,7 @@ int main(int argc, char* argv[]){
 
       KMC_CoarseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
-      CGsystem.setMinCoarseGrainIterationThreshold(100000000);
+      CGsystem.setMinCoarseGrainIterationThreshold(constants::inf_iterations);
       CGsystem.setTimeResolution(sample_time);
       CGsystem.initializeSystem(rates_to_neighbors);
       CGsystem.initializeWalkers(electrons);
