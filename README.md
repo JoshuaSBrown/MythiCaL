@@ -10,6 +10,7 @@ Though kinetic Monte Carlo simulations are a very powerful tool they can at time
 The library is designed to work with rates and could for instance be used with:
  * Monte Carlo Charge Transport Simulations
  * Tracking the spread of disease
+ * Modeling the circadian cycle
  
 ## Dependencies
 
