@@ -30,7 +30,7 @@ The library makes use of c++14 features so requires gcc 6 or a compiler with sim
 
 ## Developers
 
-[Developers Guide](doc/DEVELOPERS_GUIDE.md)
+[Developers Guide](CoarseGrainSites/doc/DEVELOPERS_GUIDE.md)
 
 ## Author List
 
