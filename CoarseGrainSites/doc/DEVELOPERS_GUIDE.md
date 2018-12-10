@@ -56,5 +56,5 @@ code
 ## Variables
  
  * Unlike function names, the variable names should all be lower case and if 
-   they are composed of more than one word they should be seperated by
-   underscored.
+   they are composed of more than one word they should be separated by an
+   underscore.
