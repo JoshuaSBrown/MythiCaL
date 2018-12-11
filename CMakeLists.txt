@@ -43,13 +43,13 @@ foreach(FUNC sqrt)
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/kmcoarsegrain/*.hpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/kmccoarsegrain/*.hpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include )
 
-install(FILES ${HEADERS} DESTINATION CoarseGrainSites/include/kmccoarsegrain)
+install(FILES ${HEADERS} DESTINATION include/kmccoarsegrain)
 
-message(${CMAKE_CURRENT_SOURCE_DIR})
+message( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*.cpp)
 
