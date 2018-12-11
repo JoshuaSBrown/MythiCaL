@@ -7,12 +7,6 @@
 #include <memory>
 #include <vector>
 
-#include "../../src/libkmccoarsegrain/kmc_site_container.hpp"
-#include "../../src/libkmccoarsegrain/kmc_cluster_container.hpp"
-#include "../../src/libkmccoarsegrain/topologyfeatures/kmc_site.hpp"
-#include "../../src/libkmccoarsegrain/topologyfeatures/kmc_cluster.hpp"
-#include "../../src/libkmccoarsegrain/topologyfeatures/kmc_topology_feature.hpp"
-
 #include "kmc_constants.hpp"
 
 namespace ugly {
@@ -21,6 +15,10 @@ class Graph;
 }
 
 namespace kmccoarsegrain {
+
+class KMC_Site_Container;
+class KMC_Cluster_Container;
+class KMC_TopologyFeature;
 
 class KMC_Walker;
 
@@ -46,14 +44,8 @@ class KMC_CoarseGrainSystem {
    * forth between two sites at least 20 times before the sites are coarse
    * grained.
    **/
-  KMC_CoarseGrainSystem()
-      : seed_set_(false),
-        time_resolution_set_(false),
-        //max_cluster_resolution_(20),
-        minimum_coarse_graining_resolution_(2),
-        iteration_threshold_(1000),
-        iteration_threshold_min_(1000){};
-
+  KMC_CoarseGrainSystem();
+  ~KMC_CoarseGrainSystem();
   /**
    * \brief This will correctly initialize the system
    *
@@ -218,10 +210,10 @@ class KMC_CoarseGrainSystem {
 
   std::unordered_map<int, KMC_TopologyFeature *> topology_features_;
   /// Stores smart pointers to all the sites
-  KMC_Site_Container sites_;
+  std::unique_ptr<KMC_Site_Container> sites_;
 
   /// Stores smart pointers to all the clusters
-  KMC_Cluster_Container clusters_;
+  std::unique_ptr<KMC_Cluster_Container> clusters_;
 
   void coarseGrainSiteIfNeeded_(KMC_Walker& walker);
 
