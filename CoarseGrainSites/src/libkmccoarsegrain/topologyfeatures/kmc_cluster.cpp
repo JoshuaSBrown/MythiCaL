@@ -294,38 +294,41 @@ void KMC_Cluster::initializeProbabilityOnSites_() {
 void KMC_Cluster::iterate_() {
 
   unordered_map<int, double> temp_probabilityOnSite;
-
+  // Initialize temporary probabilities
+  for(auto site : sitesInCluster_){
+    temp_probabilityOnSite[site.first] = probabilityOnSite_[site.first];
+  }
+  
   double total = 0.0;
   for (auto site : sitesInCluster_) {
     for (auto neighsite : site.second.getNeighborSiteIds()) {
       if (siteIsInCluster(neighsite)) {
-        if (temp_probabilityOnSite.count(site.first)) {
-          temp_probabilityOnSite[site.first] +=
-              sitesInCluster_[neighsite].getProbabilityOfHoppingToNeighboringSite(site.first) *
-              probabilityOnSite_[neighsite];
-                  
-        } else {
-          temp_probabilityOnSite[site.first] =
-              sitesInCluster_[neighsite].getProbabilityOfHoppingToNeighboringSite(site.first) *
-              probabilityOnSite_[neighsite];
-        }
-        total += temp_probabilityOnSite[site.first];
+        temp_probabilityOnSite[site.first] +=
+          sitesInCluster_[neighsite].getProbabilityOfHoppingToNeighboringSite(site.first) *
+          probabilityOnSite_[neighsite];
       }
+      temp_probabilityOnSite[site.first] -=
+        sitesInCluster_[site.first].getProbabilityOfHoppingToNeighboringSite(neighsite) *
+        probabilityOnSite_[site.first];
     }
+    total += temp_probabilityOnSite[site.first];
   }
 
+  // Combine the former probability with the presently calculated probability
   double total2 = 0.0;
+  double inverse_total = 1.0/total;
   for (auto site : sitesInCluster_) {
     probabilityOnSite_[site.first] =
-        (temp_probabilityOnSite[site.first] / total +
-         probabilityOnSite_[site.first]) /
-        2.0;
+        (temp_probabilityOnSite[site.first]*inverse_total +
+         probabilityOnSite_[site.first]) * 0.5;;
 
     total2 += probabilityOnSite_[site.first];
   }
 
+  // Normalize the probability
+  double inverse_total2 = 1.0/total2;
   for (auto site : sitesInCluster_) {
-    probabilityOnSite_[site.first] = probabilityOnSite_[site.first] / total2;
+    probabilityOnSite_[site.first] = probabilityOnSite_[site.first]*inverse_total2;
   }
 }
 
