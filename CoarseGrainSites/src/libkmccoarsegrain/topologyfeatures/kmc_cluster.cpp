@@ -294,38 +294,41 @@ void KMC_Cluster::initializeProbabilityOnSites_() {
 void KMC_Cluster::iterate_() {
 
   unordered_map<int, double> temp_probabilityOnSite;
-
+  // Initialize temporary probabilities
+  for(auto site : sitesInCluster_){
+    temp_probabilityOnSite[site.first] = probabilityOnSite_[site.first];
+  }
+  
   double total = 0.0;
   for (auto site : sitesInCluster_) {
     for (auto neighsite : site.second.getNeighborSiteIds()) {
       if (siteIsInCluster(neighsite)) {
-        if (temp_probabilityOnSite.count(site.first)) {
-          temp_probabilityOnSite[site.first] +=
-              sitesInCluster_[neighsite].getProbabilityOfHoppingToNeighboringSite(site.first) *
-              probabilityOnSite_[neighsite];
-                  
-        } else {
-          temp_probabilityOnSite[site.first] =
-              sitesInCluster_[neighsite].getProbabilityOfHoppingToNeighboringSite(site.first) *
-              probabilityOnSite_[neighsite];
-        }
-        total += temp_probabilityOnSite[site.first];
+        temp_probabilityOnSite[site.first] +=
+          sitesInCluster_[neighsite].getProbabilityOfHoppingToNeighboringSite(site.first) *
+          probabilityOnSite_[neighsite];
       }
+      temp_probabilityOnSite[site.first] -=
+        sitesInCluster_[site.first].getProbabilityOfHoppingToNeighboringSite(neighsite) *
+        probabilityOnSite_[site.first];
     }
+    total += temp_probabilityOnSite[site.first];
   }
 
+  // Combine the former probability with the presently calculated probability
   double total2 = 0.0;
+  double inverse_total = 1.0/total;
   for (auto site : sitesInCluster_) {
     probabilityOnSite_[site.first] =
-        (temp_probabilityOnSite[site.first] / total +
-         probabilityOnSite_[site.first]) /
-        2.0;
+        (temp_probabilityOnSite[site.first]*inverse_total +
+         probabilityOnSite_[site.first]) * 0.5;;
 
     total2 += probabilityOnSite_[site.first];
   }
 
+  // Normalize the probability
+  double inverse_total2 = 1.0/total2;
   for (auto site : sitesInCluster_) {
-    probabilityOnSite_[site.first] = probabilityOnSite_[site.first] / total2;
+    probabilityOnSite_[site.first] = probabilityOnSite_[site.first]*inverse_total2;
   }
 }
 
@@ -509,51 +512,36 @@ void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
 // requires master equation convergence as it uses probabilityOnSite_
 void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
 
-  auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
+  probabilityHopToNeighbor_.clear();
+  unordered_map<int, double> temp_probabilityHopToNeighbor;
 
-  double sumRatesOffCluster = 0.0;
-  for (auto rateToNeigh : ratesToNeighbors) {
-    for (auto rate : rateToNeigh.second) {
-      sumRatesOffCluster += rate.second;
-    }
-  }
-  auto sumDwell = 0.0;
   for (auto site : sitesInCluster_) {
-    sumDwell += site.second.getTimeConstant();
-  }
-
-  unordered_map<int, double> probabilityHopToNeighbor;
-  for (auto rateToNeigh : ratesToNeighbors) {
-    int siteHoppingFrom = rateToNeigh.first;
-    for (auto rate : rateToNeigh.second) {
-      int siteHoppingTo = rate.first;
-
-      if (probabilityHopToNeighbor.count(siteHoppingTo)) {
-        probabilityHopToNeighbor[siteHoppingTo] +=
-            probabilityOnSite_[siteHoppingFrom] *
-            sitesInCluster_[siteHoppingFrom].getTimeConstant() / sumDwell *
-            sitesInCluster_[siteHoppingFrom].getRateToNeighbor(siteHoppingTo) /
-            sumRatesOffCluster;
-
-      } else {
-
-        probabilityHopToNeighbor[siteHoppingTo] =
-            probabilityOnSite_[siteHoppingFrom] *
-            sitesInCluster_[siteHoppingFrom].getTimeConstant() / sumDwell *
-            sitesInCluster_[siteHoppingFrom].getRateToNeighbor(siteHoppingTo) /
-            sumRatesOffCluster;
+    for (auto neighsite : site.second.getNeighborSiteIds()) {
+      if (!siteIsInCluster(neighsite)) {
+        if(temp_probabilityHopToNeighbor.count(neighsite)){
+          temp_probabilityHopToNeighbor[neighsite] +=
+            sitesInCluster_[site.first].getProbabilityOfHoppingToNeighboringSite(neighsite) *
+            probabilityOnSite_[site.first];
+        }else{
+          temp_probabilityHopToNeighbor[neighsite] =
+            sitesInCluster_[site.first].getProbabilityOfHoppingToNeighboringSite(neighsite) *
+            probabilityOnSite_[site.first];
+        }
       }
     }
   }
 
   double total = 0.0;
-  for (auto neighborProb : probabilityHopToNeighbor) {
-    total += neighborProb.second;
+  for(auto prob : temp_probabilityHopToNeighbor){
+    total += prob.second;
   }
-  for (auto neighborProb : probabilityHopToNeighbor) {
-    probabilityHopToNeighbor[neighborProb.first] = neighborProb.second / total;
+
+  // Normalize the probability
+  double inverse_total = 1.0/total;
+  unordered_map<int, double> probabilityHopToNeighbor;
+  for (auto prob : temp_probabilityHopToNeighbor) {
+    probabilityHopToNeighbor[prob.first] = prob.second*inverse_total;
   }
-  probabilityHopToNeighbor_.clear();
 
   copy(probabilityHopToNeighbor.begin(),
       probabilityHopToNeighbor.end(),
