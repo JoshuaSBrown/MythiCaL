@@ -30,7 +30,7 @@ class KMC_Cluster_Container {
     void occupy(int clusterId);
 
     std::vector<int> getClusterIds(); 
-    double getDwellTime(int clusterId);
+    double getDwellTime(int walker_id, int clusterId);
     double getTimeConstant(int clusterId);
 
     double getFastestRateOffCluster(int clusterId);

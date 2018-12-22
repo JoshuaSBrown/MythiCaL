@@ -172,8 +172,8 @@ int main(void){
       // Place the electron on site 1
       electron.occupySite(1);
 
-      vector<KMC_Walker> electrons;
-      electrons.push_back(electron);
+      vector<std::pair<int,KMC_Walker>> electrons;
+      electrons.push_back(std::pair<int,KMC_Walker>(1,electron));
 
       CGsystem.initializeWalkers(electrons);
 
@@ -182,9 +182,10 @@ int main(void){
 
       double time = 0.0;
       int hop_count = 0;
-      KMC_Walker& electron1 = electrons.at(0);
+      auto & electron1 = electrons.at(0).second;
+      int id = electrons.at(0).first;
       while(time<time_limit){
-        CGsystem.hop(electron1);
+        CGsystem.hop(id,electron1);
         time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
           electron1.getDwellTime();
         hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
@@ -228,8 +229,8 @@ int main(void){
       // Place the electron on site 1
       electron.occupySite(1);
 
-      vector<KMC_Walker> electrons;
-      electrons.push_back(electron);
+      vector<pair<int,KMC_Walker>> electrons;
+      electrons.push_back(pair<int,KMC_Walker>(1,electron));
 
       CGsystem.initializeWalkers(electrons);
 
@@ -238,9 +239,10 @@ int main(void){
 
       double time = 0.0;
       int hop_count = 0;
-      KMC_Walker& electron1 = electrons.at(0);
+      KMC_Walker& electron1 = electrons.at(0).second;
+      int id = electrons.at(0).first;
       while(time<time_limit){
-        CGsystem.hop(electron1);
+        CGsystem.hop(id,electron1);
         time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
           electron.getDwellTime();
         hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;

@@ -33,6 +33,10 @@ namespace kmccoarsegrain {
     return feature->occupied_>0;
   }
 
+  void removeWalker_(KMC_TopologyFeature*, int&){
+    return;
+  }
+
   KMC_TopologyFeature::KMC_TopologyFeature(){
     auto seed = chrono::system_clock::now().time_since_epoch().count();
     random_engine_ = mt19937(seed);
@@ -44,23 +48,28 @@ namespace kmccoarsegrain {
     occupy_ptr_ = &occupyTopology_;
     occupy_siteId_ptr_ = &occupyTopology_;
 
-    vacate_ptr_ = vacateTopology_;
-    vacate_siteId_ptr_ = vacateTopology_;
+    vacate_ptr_ = &vacateTopology_;
+    vacate_siteId_ptr_ = &vacateTopology_;
 
-    isOccupied_ptr_ = isOccupiedTopology_;
-    isOccupied_siteId_ptr_ = isOccupiedTopology_;
+    isOccupied_ptr_ = &isOccupiedTopology_;
+    isOccupied_siteId_ptr_ = &isOccupiedTopology_;
+
+    remove_ptr_ = &removeWalker_;
   }
 
   void KMC_TopologyFeature::setRandomSeed(const unsigned long seed){
     random_engine_ = mt19937(seed);
   }
 
-  double KMC_TopologyFeature::getDwellTime(){
+  double KMC_TopologyFeature::getDwellTime(int){
+//  double KMC_TopologyFeature::getDwellTime(){
     double number = random_distribution_(random_engine_);
+    //cout << "Getting dwell time using escape_time_constant_ " << escape_time_constant_ << endl;
     return (-1.0)*log(number) * escape_time_constant_;
   }
 
-  int KMC_TopologyFeature::pickNewSiteId(){
+  int KMC_TopologyFeature::pickNewSiteId(int){
+  //int KMC_TopologyFeature::pickNewSiteId(){
     throw std::runtime_error("Cannot pick new site virtual method must be "
         "overloaded.");
   }

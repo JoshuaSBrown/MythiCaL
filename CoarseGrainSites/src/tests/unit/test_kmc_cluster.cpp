@@ -188,7 +188,7 @@ int main(void){
     assert(static_cast<int>(10*site3.getProbabilityOfHoppingToNeighboringSite(2))==10);
 
     KMC_Cluster cluster;
-    cluster.setConvergenceIterations(6);
+    cluster.setConvergenceIterations(10);
 
     cluster.addSite(site);
     cluster.addSite(site2);
@@ -206,6 +206,7 @@ int main(void){
       if(value==25) ++count_value_25;
       if(value==50) ++count_value_50;
     }
+    cout << "count value 25 " << count_value_25 << endl;
     assert(count_value_25==2);
     assert(count_value_50==1);
 
@@ -248,7 +249,7 @@ int main(void){
 
   }
 
-  cout << "Testing: pickNewSiteId" << endl;
+  cout << "Testing: getProbabilityOfHoppingToNeighborOfCluster 2" << endl;
   {
     KMC_Site site;
     site.setId(1);
@@ -329,19 +330,33 @@ int main(void){
     int site4chosen = 0;
     int site5chosen = 0;
 
+    int site1_id = 1;
+    int site2_id = 2;
+    int site3_id = 3;
+
+    int walker_id = 1;
+    cluster.getDwellTime(walker_id);
     for(int count=0; count < total; ++count){
-      int chosen_site = cluster.pickNewSiteId();
+      int chosen_site = cluster.pickNewSiteId(walker_id);
       switch(chosen_site)
       {
         case 1: ++site1chosen;
+                cluster.occupy(site1_id);
+                cluster.getDwellTime(walker_id);
                 break;
         case 2: ++site2chosen;
+                cluster.occupy(site2_id);
+                cluster.getDwellTime(walker_id);
                 break;
         case 3: ++site3chosen;
+                cluster.occupy(site3_id);
+                cluster.getDwellTime(walker_id);
                 break;
         case 4: ++site4chosen;
+                cluster.getDwellTime(walker_id);
                 break;
         case 5: ++site5chosen;
+                cluster.getDwellTime(walker_id);
                 break;
       }
     }
@@ -352,12 +367,33 @@ int main(void){
     float percent4 = static_cast<float>(site4chosen)/static_cast<float>(total);
     float percent5 = static_cast<float>(site5chosen)/static_cast<float>(total);
 
-    cout << percent1 << endl;
-    assert(percent1<0.15 && percent1>0.14);
-    assert(percent2<0.21 && percent2>0.19);
-    assert(percent3<0.15 && percent3>0.14);
-    assert(percent4<0.251 && percent4>0.24);
-    assert(percent5<0.251 && percent5>0.24);
+    // Able to reproduce the proportion of time spent on each site
+    assert(percent1<0.185 && percent1>0.16);
+    assert(percent2<0.255 && percent2>0.13);
+    assert(percent3<0.185 && percent3>0.165);
+    assert(percent4<0.21 && percent4>0.19);
+    assert(percent5<0.205 && percent5>0.18);
+
+    vector<double> visit_freq(5,0.0);
+    visit_freq.at(0) = static_cast<double>(cluster.getVisitFrequency(1));
+    visit_freq.at(1) = static_cast<double>(cluster.getVisitFrequency(2));
+    visit_freq.at(2) = static_cast<double>(cluster.getVisitFrequency(3));
+
+    double sum=0.0;
+    for(auto visits : visit_freq){
+      sum+=visits;
+    }
+    vector<double> visit_prob;
+    for(auto visits : visit_freq){
+      visit_prob.push_back(visits/sum);
+    }
+
+    assert(visit_prob.at(0) < 0.31);
+    assert(visit_prob.at(0) > 0.28);
+    assert(visit_prob.at(1) < 0.42);
+    assert(visit_prob.at(1) > 0.40);
+    assert(visit_prob.at(2) < 0.31);
+    assert(visit_prob.at(2) > 0.28);
   }
 
 	return 0;

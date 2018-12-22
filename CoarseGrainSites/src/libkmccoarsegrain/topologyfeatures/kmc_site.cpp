@@ -90,7 +90,8 @@ vector<int> KMC_Site::getNeighborSiteIds() const {
   return neighborIds;
 }
 
-int KMC_Site::pickNewSiteId() {
+int KMC_Site::pickNewSiteId(int) {
+//int KMC_Site::pickNewSiteId() {
   double number = random_distribution_(random_engine_);
   double threshold = 0.0;
   for (auto pval : probabilityHopToNeighbor_) {

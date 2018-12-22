@@ -267,8 +267,8 @@ int main(void){
       // Place the electron on site 1
       electron.occupySite(1);
 
-      vector<KMC_Walker> electrons;
-      electrons.push_back(electron);
+      vector<pair<int,KMC_Walker>> electrons;
+      electrons.push_back(pair<int,KMC_Walker>(1,electron));
 
       CGsystem.initializeWalkers(electrons);
 
@@ -277,9 +277,10 @@ int main(void){
 
       double time = 0.0;
       int hop_count = 0;
-      KMC_Walker& electron1 = electrons.at(0);
+      KMC_Walker& electron1 = electrons.at(0).second;
+      int id = electrons.at(0).first;
       while(time<time_limit){
-        CGsystem.hop(electron1);
+        CGsystem.hop(id,electron1);
         time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
           electron1.getDwellTime();
         hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
@@ -323,8 +324,8 @@ int main(void){
       // Place the electron on site 1
       electron.occupySite(1);
 
-      vector<KMC_Walker> electrons;
-      electrons.push_back(electron);
+      vector<pair<int,KMC_Walker>> electrons;
+      electrons.push_back(pair<int,KMC_Walker>(0,electron));
 
       CGsystem.initializeWalkers(electrons);
 
@@ -333,11 +334,12 @@ int main(void){
 
       double time = 0.0;
       int hop_count = 0;
-      KMC_Walker& electron1 = electrons.at(0);
+      KMC_Walker& electron1 = electrons.at(0).second;
+      int id = electrons.at(0).first;
       while(time<time_limit){
-        CGsystem.hop(electron1);
+        CGsystem.hop(id,electron1);
         time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
-          electron.getDwellTime();
+          electron1.getDwellTime();
         hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
         time += electron1.getDwellTime();
         ++hop_count;
@@ -490,7 +492,7 @@ int main(void){
    
     // Number of electrons used for both the following crude and coarse grained
     // simulation runs
-    int NumberElectrons = 4000;
+    int NumberElectrons = 8000;
     int number_of_sites = 14;
     // Will be compared with Coarse grained version
     vector<double> probabilityOnNeighCrude; 
@@ -515,22 +517,23 @@ int main(void){
 
       for(int i=0; i<NumberElectrons;++i){
         Electron electron;
+        int id = 1;
         // Alternate placing electrons on sites 1-5
         int initialSite =  (i%5)+1;
         electron.occupySite(initialSite);
-        vector<KMC_Walker> electrons;
-        electrons.push_back(electron);
+        vector<pair<int,KMC_Walker>> electrons;
+        electrons.push_back(pair<int,KMC_Walker>(id,electron));
         CGsystem.initializeWalkers(electrons);
         double totalTimeOnCluster = 0.0;
-        KMC_Walker & electron1 = electrons.at(0);
+        KMC_Walker & electron1 = electrons.at(0).second;
 
         while(electron1.getIdOfSiteCurrentlyOccupying()<6){
-          CGsystem.hop(electron1);
+          CGsystem.hop(id,electron1);
           timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
           totalTimeOnCluster+=electron1.getDwellTime(); 
         }
 
-        CGsystem.removeWalkerFromSystem(electron1);
+        CGsystem.removeWalkerFromSystem(id,electron1);
         escapeTimes.push_back(totalTimeOnCluster);
       }
 
@@ -649,7 +652,6 @@ int main(void){
     {
 
       // Store the number of hops to each site 1-14
-      vector<double> hops_to_sites(number_of_sites,0);  
       vector<double> timeOnSites(number_of_sites,0.0);
       // Store the escape time from the cluster for each electron
       vector<double> escapeTimes;
@@ -660,37 +662,39 @@ int main(void){
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);
       CGsystem.initializeSystem(ratesToNeighbors);
-      int cycles = 3;
+      int cycles = 1;
       for(int cycle = 0; cycle < cycles ;++cycle ){
         class Electron : public KMC_Walker {};
 
 
         for(int i=0; i<NumberElectrons;++i){
           Electron electron;
+          int id = 1;
           // Alternate placing electrons on sites 1-5
           int initialSite =  (i%5)+1;
           electron.occupySite(initialSite);
-          vector<KMC_Walker> electrons;
-          electrons.push_back(electron);
+          vector<pair<int,KMC_Walker>> electrons;
+          electrons.push_back(pair<int,KMC_Walker>(id,electron));
           CGsystem.initializeWalkers(electrons);
           double totalTimeOnCluster = 0.0;
           // First hop is ignored 
-          KMC_Walker & electron1 = electrons.at(0);
-          CGsystem.hop(electron1);
+          KMC_Walker & electron1 = electrons.at(0).second;
+          CGsystem.hop(id,electron1);
 
           while(electron1.getIdOfSiteCurrentlyOccupying()<6){
             timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
             totalTimeOnCluster+=electron1.getDwellTime(); 
-            CGsystem.hop(electron1);
+            CGsystem.hop(id,electron1);
           }
 
-          CGsystem.removeWalkerFromSystem(electron1);
+          CGsystem.removeWalkerFromSystem(id,electron1);
           escapeTimes.push_back(totalTimeOnCluster);
         }
 
       }
 
       cout << "Total number of visits to each site" << endl;
+      vector<double> hops_to_sites(number_of_sites,0);  
       for(int site_id = 1; site_id <= number_of_sites; ++site_id){
         int visits = CGsystem.getVisitFrequencyOfSite(site_id);
         hops_to_sites.at(site_id-1) = static_cast<double>(visits)/static_cast<double>(cycles); 

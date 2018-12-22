@@ -118,7 +118,8 @@ class KMC_Site : public KMC_TopologyFeature {
    *
    * \return site id of a neigboring site
    **/
-  int pickNewSiteId();
+  int pickNewSiteId(int);
+  //int pickNewSiteId();
 
   /**
    * \brief Return the id of the cluster the site is attached too

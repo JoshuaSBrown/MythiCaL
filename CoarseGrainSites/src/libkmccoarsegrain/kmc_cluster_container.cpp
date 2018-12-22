@@ -77,12 +77,12 @@ namespace kmccoarsegrain {
     return clusterids;
   }
 
-  double KMC_Cluster_Container::getDwellTime(int clusterId){
+  double KMC_Cluster_Container::getDwellTime(int walker_id, int clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot get cluster dwell time as it is not stored"
           " in the container.");
     }
-    return clusters_[clusterId].getDwellTime();
+    return clusters_[clusterId].getDwellTime(walker_id);
   }
 
   double KMC_Cluster_Container::getTimeConstant(int clusterId){

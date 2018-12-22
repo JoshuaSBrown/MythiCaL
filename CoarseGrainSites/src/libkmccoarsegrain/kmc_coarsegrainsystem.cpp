@@ -115,7 +115,8 @@ int KMC_CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){
   return visits;
 }
 
-void KMC_CoarseGrainSystem::initializeWalkers(vector<KMC_Walker>& walkers) {
+//void KMC_CoarseGrainSystem::initializeWalkers(vector<KMC_Walker>& walkers) {
+void KMC_CoarseGrainSystem::initializeWalkers(vector<pair<int,KMC_Walker>>& walkers) {
 
   LOG("Initializeing walkers", 1);
   
@@ -127,7 +128,7 @@ void KMC_CoarseGrainSystem::initializeWalkers(vector<KMC_Walker>& walkers) {
 
   for ( size_t index = 0; index<walkers.size(); ++index){
 //  for (KMC_Walker & walker : walkers) {
-    auto siteId = walkers.at(index).getIdOfSiteCurrentlyOccupying();
+    auto siteId = walkers.at(index).second.getIdOfSiteCurrentlyOccupying();
     if (siteId == constants::unassignedId) {
       throw runtime_error(
           "You must first place the walker on a known site"
@@ -135,10 +136,14 @@ void KMC_CoarseGrainSystem::initializeWalkers(vector<KMC_Walker>& walkers) {
     }
     topology_features_[siteId]->occupy();
 
-    int newId = topology_features_[siteId]->pickNewSiteId();
-    auto hopTime = topology_features_[siteId]->getDwellTime();
-    walkers.at(index).setDwellTime(hopTime);
-    walkers.at(index).setPotentialSite(newId);
+    //int newId = topology_features_[siteId]->pickNewSiteId();
+    //auto hopTime = topology_features_[siteId]->getDwellTime();
+    auto hopTime = topology_features_[siteId]->getDwellTime(walkers.at(index).first);
+    int newId = topology_features_[siteId]->pickNewSiteId(walkers.at(index).first);
+    //walkers.at(index).setDwellTime(hopTime);
+    //walkers.at(index).setPotentialSite(newId);
+    walkers.at(index).second.setDwellTime(hopTime);
+    walkers.at(index).second.setPotentialSite(newId);
   }
 }
 
@@ -158,17 +163,19 @@ void KMC_CoarseGrainSystem::setRandomSeed(const unsigned long seed) {
   seed_set_ = true;
 }
 
-void KMC_CoarseGrainSystem::removeWalkerFromSystem(KMC_Walker& walker) {
+void KMC_CoarseGrainSystem::removeWalkerFromSystem(int walker_id, KMC_Walker& walker) {
   LOG("Walker is being removed from system", 1);
   auto siteId = walker.getIdOfSiteCurrentlyOccupying();
-  sites_->vacate(siteId);
+  //sites_->vacate(siteId);
+  topology_features_[siteId]->removeWalker(walker_id,siteId);
 }
 
 int KMC_CoarseGrainSystem::getClusterIdOfSite(int siteId) {
   return sites_->getClusterIdOfSite(siteId);
 }
 
-void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
+void KMC_CoarseGrainSystem::hop(int walker_id, KMC_Walker & walker) {
+//void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
   LOG("Walker is hopping in system", 1);
   auto siteId = walker.getIdOfSiteCurrentlyOccupying();
   int siteToHopToId = walker.getPotentialSite();
@@ -184,8 +191,8 @@ void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
     feature->vacate(siteId);
     feature_to_hop_to->occupy(siteToHopToId);
 
-    newId   = feature_to_hop_to->pickNewSiteId();
-    hopTime = feature_to_hop_to->getDwellTime();
+    hopTime = feature_to_hop_to->getDwellTime(walker_id);
+    newId   = feature_to_hop_to->pickNewSiteId(walker_id);
  
     walker.occupySite(siteToHopToId);
     walker.setDwellTime(hopTime);
@@ -194,8 +201,8 @@ void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
     feature->vacate(siteId);
     feature->occupy(siteId);
 
-    newId   = feature->pickNewSiteId();
-    hopTime = feature->getDwellTime();
+    hopTime = feature->getDwellTime(walker_id);
+    newId   = feature->pickNewSiteId(walker_id);
     
     walker.setDwellTime(hopTime);
     walker.setPotentialSite(newId);

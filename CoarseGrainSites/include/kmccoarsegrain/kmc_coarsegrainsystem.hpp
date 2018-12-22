@@ -109,7 +109,7 @@ class KMC_CoarseGrainSystem {
    *
    * \param[in] walkers a vector of pointers to the walkers
    **/
-  void initializeWalkers(std::vector<KMC_Walker>& walkers);
+  void initializeWalkers(std::vector<std::pair<int,KMC_Walker>>& walkers);
 
   /**
    * \brief Define the seed for the random number generator
@@ -132,12 +132,13 @@ class KMC_CoarseGrainSystem {
    *
    * \param[in] walker
    **/
-  void hop(KMC_Walker& walker);
+  void hop(int walker_id, KMC_Walker& walker);
+  //void hop(KMC_Walker& walker);
 
   /**
    * \brief Remove the walker from the system
    **/
-  void removeWalkerFromSystem(KMC_Walker& walker);
+  void removeWalkerFromSystem(int walker_id,KMC_Walker& walker);
 
   /**
    * \brief Determine if the site is part of a cluster
