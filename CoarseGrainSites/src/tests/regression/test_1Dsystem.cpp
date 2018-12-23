@@ -162,10 +162,11 @@ int main(int argc, char* argv[]){
 
       for(int rep=0; rep<repetitions;++rep){
         // Create the electrons using the KMC_Walker class
-        vector<KMC_Walker> electrons;        
+        vector<pair<int,KMC_Walker>> electrons;        
         Electron electron;
-        electrons.push_back(electron);
-        electrons.at(0).occupySite(0);
+        int id = 0;
+        electrons.push_back(pair<int,KMC_Walker>(id,electron));
+        electrons.at(0).second.occupySite(0);
         CGsystem.initializeWalkers(electrons);
 
         vector<double> transient_current(sample_rate,0.0);
@@ -177,7 +178,7 @@ int main(int argc, char* argv[]){
           random_number_generator.seed(3);
           uniform_real_distribution<double> distribution(0.0,1.0);
 
-          walker_global_times.push_back(pair<int,double>(0,electrons.at(0).getDwellTime()));
+          walker_global_times.push_back(pair<int,double>(id,electrons.at(0).second.getDwellTime()));
           walker_global_times.sort(compareSecondItemOfPair);
         }// Calculate walker dwell times and sort
         assert(walker_global_times.begin()->second<cutoff_time);
@@ -188,10 +189,10 @@ int main(int argc, char* argv[]){
           while(walker_global_times.size()>0 && walker_global_times.begin()->second<sample_time){
 
             auto walker_index = walker_global_times.begin()->first;
-            KMC_Walker& electron = electrons.at(walker_index); 
+            KMC_Walker& electron = electrons.at(walker_index).second; 
             int siteId = electron.getIdOfSiteCurrentlyOccupying();
             int old_x_pos = siteId;
-            CGsystem.hop(electron);
+            CGsystem.hop(walker_index,electron);
             siteId = electron.getIdOfSiteCurrentlyOccupying();
             int new_x_pos = siteId;
             deltaX+=static_cast<double>(new_x_pos-old_x_pos);
@@ -199,8 +200,8 @@ int main(int argc, char* argv[]){
             walker_global_times.begin()->second += electron.getDwellTime();
             // reorder the walkers based on which one will move next
             if(new_x_pos==(distance-1)){
-              cout << "a. Repetition " << rep << " final position " << electrons.at(0).getIdOfSiteCurrentlyOccupying() << endl;
-              CGsystem.removeWalkerFromSystem(electron);
+              cout << "a. Repetition " << rep << " final position " << electrons.at(0).second.getIdOfSiteCurrentlyOccupying() << endl;
+              CGsystem.removeWalkerFromSystem(walker_index,electron);
               walker_global_times.pop_front();
             }
           }
@@ -212,8 +213,8 @@ int main(int argc, char* argv[]){
         }
 
         if(walker_global_times.size()!=0){
-          cout << "b. Repetition " << rep << " final position " << electrons.at(0).getIdOfSiteCurrentlyOccupying() << endl;
-          CGsystem.removeWalkerFromSystem(electrons.at(0));
+          cout << "b. Repetition " << rep << " final position " << electrons.at(0).second.getIdOfSiteCurrentlyOccupying() << endl;
+          CGsystem.removeWalkerFromSystem(electrons.at(0).first,electrons.at(0).second);
           walker_global_times.pop_front();
         }
         

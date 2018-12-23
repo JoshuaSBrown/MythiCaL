@@ -71,6 +71,8 @@ class KMC_TopologyFeature : public virtual Identity {
   bool (*isOccupied_ptr_)(KMC_TopologyFeature *);
   bool (*isOccupied_siteId_ptr_)(KMC_TopologyFeature *,int&);
 
+  void (*remove_ptr_)(KMC_TopologyFeature *,int &);
+
   friend void occupyTopology_(KMC_TopologyFeature*);
   friend void occupyTopology_(KMC_TopologyFeature*,int&);
 
@@ -79,6 +81,8 @@ class KMC_TopologyFeature : public virtual Identity {
 
   friend bool isOccupiedTopology_(KMC_TopologyFeature*);
   friend bool isOccupiedTopology_(KMC_TopologyFeature*,int&);
+
+  friend void removeWalker_(KMC_TopologyFeature*,int&);
 
  public:
   KMC_TopologyFeature();
@@ -109,6 +113,18 @@ class KMC_TopologyFeature : public virtual Identity {
    **/
   void vacate() { vacate_ptr_(this); }
   void vacate(int& siteId) { vacate_siteId_ptr_(this,siteId); }
+
+  /**
+   * \brief Remove a random walker from the site 
+   *
+   * This is not the same as vacate. If a walker is removed from the system this
+   * function should be called, as it ensures that any internal variables 
+   * tracking the walker are appropriately reset.
+   **/
+  void removeWalker(int walker_id, int site_id) { 
+    vacate(site_id);
+    remove_ptr_(this,walker_id);
+  }
 
   /**
    * \brief The action of occupying a site
@@ -150,7 +166,8 @@ class KMC_TopologyFeature : public virtual Identity {
    * \return A time indicating how long a particle was on the site before it
    * hopped
    **/
-  virtual double getDwellTime();
+  virtual double getDwellTime(int walker_id);
+  //virtual double getDwellTime();
 
   /**
    * \brief Returns the id of a neighboring site
@@ -163,7 +180,8 @@ class KMC_TopologyFeature : public virtual Identity {
    *
    * \return site id of a neigboring site
    **/
-  virtual int pickNewSiteId();
+  virtual int pickNewSiteId(int walker_id);
+  //virtual int pickNewSiteId();
 
   virtual void setVisitFrequency(int frequency) 
   { total_visit_freq_ = frequency;}

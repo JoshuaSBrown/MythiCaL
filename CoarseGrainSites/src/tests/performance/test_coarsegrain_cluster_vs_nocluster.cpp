@@ -232,13 +232,13 @@ int main(int argc, char* argv[]){
 
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class
-    vector<KMC_Walker> electrons;        
+    vector<pair<int,KMC_Walker>> electrons;        
     {
       for(int walker_index = 0; walker_index<walkers; ++walker_index){
         Electron electron;
         int siteId = converter.to1D(walker_positions[walker_index]);
         electron.occupySite(siteId);
-        electrons.push_back(electron);
+        electrons.push_back(pair<int,KMC_Walker>(walker_index,electron));
       }
     }
     
@@ -263,15 +263,16 @@ int main(int argc, char* argv[]){
         uniform_real_distribution<double> distribution(0.0,1.0);
 
         for(int walker_index=0; walker_index<walkers;++walker_index){
-          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).getDwellTime()));
+          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).second.getDwellTime()));
         }
         walker_global_times.sort(compareSecondItemOfPair);
       }// Calculate walker dwell times and sort
       assert(walker_global_times.begin()->second<cutoff_time);
       while(walker_global_times.begin()->second<cutoff_time){
         auto walker_index = walker_global_times.begin()->first;
-        KMC_Walker& electron = electrons.at(walker_index); 
-        CGsystem.hop(electron);
+        KMC_Walker& electron = electrons.at(walker_index).second; 
+        int electron_id = electrons.at(walker_index).first; 
+        CGsystem.hop(electron_id,electron);
         // Update the dwell time
         walker_global_times.begin()->second += electron.getDwellTime();
         // reorder the walkers based on which one will move next
@@ -307,13 +308,13 @@ int main(int argc, char* argv[]){
 
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class
-    vector<KMC_Walker> electrons;        
+    vector<pair<int, KMC_Walker>> electrons;        
     {
       for(int walker_index = 0; walker_index<walkers; ++walker_index){
         Electron electron;
         int siteId = converter.to1D(walker_positions[walker_index]);
         electron.occupySite(siteId);
-        electrons.push_back(electron);
+        electrons.push_back(pair<int,KMC_Walker>(walker_index,electron));
       }
     }
     
@@ -338,15 +339,16 @@ int main(int argc, char* argv[]){
         uniform_real_distribution<double> distribution(0.0,1.0);
 
         for(int walker_index=0; walker_index<walkers;++walker_index){
-          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).getDwellTime()));
+          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).second.getDwellTime()));
         }
         walker_global_times.sort(compareSecondItemOfPair);
       }// Calculate walker dwell times and sort
       assert(walker_global_times.begin()->second<cutoff_time);
       while(walker_global_times.begin()->second<cutoff_time){
         auto walker_index = walker_global_times.begin()->first;
-        KMC_Walker& electron = electrons.at(walker_index); 
-        CGsystem.hop(electron);
+        KMC_Walker& electron = electrons.at(walker_index).second; 
+        int electron_id = electrons.at(walker_index).first; 
+        CGsystem.hop(electron_id,electron);
         // Update the dwell time
         walker_global_times.begin()->second += electron.getDwellTime();
         // reorder the walkers based on which one will move next

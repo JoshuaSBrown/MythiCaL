@@ -159,21 +159,21 @@ int main(void){
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      vector<KMC_Walker> electrons;
-      electrons.push_back(electron);
+      vector<pair<int,KMC_Walker>> electrons;
+      electrons.push_back(pair<int,KMC_Walker>(0,electron));
       CGsystem.initializeWalkers(electrons);
       
-      KMC_Walker & electron1 = electrons.at(0);
+      KMC_Walker & electron1 = electrons.at(0).second;
       double totalTimeOnCluster = 0.0;
       while(electron1.getIdOfSiteCurrentlyOccupying()<6){
 
-        CGsystem.hop(electron1);
+        CGsystem.hop(0,electron1);
         hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
         timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
         totalTimeOnCluster+=electron1.getDwellTime(); 
       }
 
-      CGsystem.removeWalkerFromSystem(electron1);
+      CGsystem.removeWalkerFromSystem(0,electron1);
       escapeTimes.push_back(totalTimeOnCluster);
     }
     clusterEnd = high_resolution_clock::now();
@@ -317,19 +317,19 @@ int main(void){
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      vector<KMC_Walker> electrons;
-      electrons.push_back(electron);
+      vector<pair<int,KMC_Walker>> electrons;
+      electrons.push_back(pair<int,KMC_Walker>(0,electron));
       CGsystem.initializeWalkers(electrons);
       double totalTimeOnCluster = 0.0;
-      KMC_Walker & electron1 = electrons.at(0);
+      KMC_Walker & electron1 = electrons.at(0).second;
       while(electron1.getIdOfSiteCurrentlyOccupying()<6){
-        CGsystem.hop(electron1);
+        CGsystem.hop(0,electron1);
         hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
         timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
         totalTimeOnCluster+=electron1.getDwellTime(); 
       }
 
-      CGsystem.removeWalkerFromSystem(electron1);
+      CGsystem.removeWalkerFromSystem(0,electron1);
       escapeTimes.push_back(totalTimeOnCluster);
     }
     siteEnd = high_resolution_clock::now();

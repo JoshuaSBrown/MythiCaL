@@ -148,7 +148,7 @@ namespace kmccoarsegrain {
       throw invalid_argument("Cannot get site dwell time as site is not in the "
           "container.");
     }
-    return sites_[siteId].getDwellTime();
+    return sites_[siteId].getDwellTime(constants::unassignedId);
   }
 
   double KMC_Site_Container::getTimeConstant(int siteId){

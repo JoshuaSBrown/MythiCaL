@@ -191,7 +191,8 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * \return site id generated to reproduce the probability of a particle
    * moving to it
    **/
-  int pickNewSiteId();
+  int pickNewSiteId(int walker_id);
+  //int pickNewSiteId();
 
   /**
    * \brief Set the convergence method
@@ -247,7 +248,8 @@ class KMC_Cluster : public KMC_TopologyFeature {
   /**
    * \brief Returns the dwell time, each call will return a different value
    **/
-  double getDwellTime();
+  double getDwellTime(int walker_id);
+  //double getDwellTime();
 
   double getFastestRateOffCluster();
 
@@ -277,6 +279,20 @@ class KMC_Cluster : public KMC_TopologyFeature {
   /// Type of convergence used to solve the master equation
   Method convergence_method_;
 
+  /// Time increment of the cluster
+  double time_increment_;
+
+  double internal_time_constant_;
+  /**
+   * \brief Stores the particle and its total dwell time on the cluster
+   *
+   * This is an internal map, the dwell time returned by getDwellTime will 
+   * return the actual dwell time if the resolution were 1. Whenever the charge
+   * has been on the cluster longer than the dwell time stored by the cluster
+   * it will then be able to hop to a site external to the cluster. 
+   **/
+  std::unordered_map<int,double> remaining_walker_dwell_times_;
+
   /**
    * \brief Stores the probability of hopping to each of the neighbors
    *
@@ -297,15 +313,20 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * \brief Stores the number of times a site in the cluster is visited
    *
    **/
-  std::unordered_map<int,int> site_visits_;
+  std::unordered_map<int,double> site_visits_;
 
   /**
    * \brief Stores the rates from each site in the cluster to the neighbors
    *
    * The first int is the site id of an internal site, the double is a sum of
-   * all the rates going to that neighbors.
+   * all the rates going from the internal site to sites neighboring the cluster.
    **/
-  std::unordered_map<int, double> escapeRateFromSiteToNeighbor_;
+  std::unordered_map<int, double> sumOfEscapeRateFromSiteToNeighbor_;
+  /**
+   * Same as above but the double is the sum of the rates going to other sites
+   * within the cluster. 
+   **/
+  std::unordered_map<int, double> sumOfEscapeRateFromSiteToInternalSite_;
 
   /**
    * \brief Stores the pointers to sites that are in the cluster
@@ -313,6 +334,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
   std::unordered_map<int, KMC_Site> sitesInCluster_;
 
   std::unordered_map<int,double> probabilityHopOffInternalSite_;
+  std::unordered_map<int,double> probabilityHopBetweenInternalSite_;
 
   /**
    * \brief The probability of a particle being on each of the sites
@@ -329,6 +351,10 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * Local Cluster Functions
    ************************************************************************/
 
+  void incrementVisits_();
+
+  std::unordered_map<int,int> getVisitFrequencies_();
+
   /// Will solve the Master Equation
   void solveMasterEquation_();
 
@@ -341,7 +367,8 @@ class KMC_Cluster : public KMC_TopologyFeature {
    *
    * \return the site id of one of the neighbors
    **/
-  int pickClusterNeighbor_();
+  int pickClusterNeighbor_(int walker_id);
+  //int pickClusterNeighbor_();
 
   /**
    * \brief Picks a site within the cluster
@@ -372,7 +399,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * longer it will take for the particle to escape.
    **/
   void calculateEscapeTimeConstant_();
-
+  void calculateInternalTimeConstant_();
   /**
    * \brief Determines if a particle will stay within a cluster or not
    *
@@ -382,9 +409,8 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * \return True if the particle should stay within the cluster, False if
    * it should not
    **/
-  bool hopWithinCluster_();
-
-  void calcualteEscapeRatesFromSitesToTheirNeighbors_();
+  bool hopWithinCluster_(int walker_id);
+  //bool hopWithinCluster_();
 
   // First int is the Id of a site within the cluster
   // pair - first int is the id of the site neighboring the cluster
@@ -400,8 +426,10 @@ class KMC_Cluster : public KMC_TopologyFeature {
   void calculateProbabilityHopToNeighbors_();
   void calculateProbabilityHopToInternalSite_();
   void calculateProbabilityHopOffInternalSite_();
+  void calculateProbabilityHopBetweenInternalSite_();
   void calculateInternalDwellTimes_();
-  void calculateEscapeRatesFromSitesToTheirNeighbors_();
+  void calculateSumOfEscapeRatesFromSitesToTheirNeighbors_();
+  void calculateSumOfEscapeRatesFromSitesToInternalSites_();
 
   void initializeProbabilityOnSites_();
 
@@ -430,6 +458,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
   friend void occupyCluster_(KMC_TopologyFeature*,int&);
   friend void vacateCluster_(KMC_TopologyFeature*,int&);
   friend bool isOccupiedCluster_(KMC_TopologyFeature*,int&);
+  friend void removeWalkerCluster_(KMC_TopologyFeature *, int&);
 };
 
 
