@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.4)
 
 enable_language(CXX)
 
-project(kmc_coarse_grain)
+project(kmccoarsegrain)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(BUILD_SHARED_LIBS "Build shared libs" ON)
+option(ENABLE_TESTING "Build and enable unit testing" OFF)
 ########################################################
 # Compiler Flags                                       #
 ########################################################
@@ -16,11 +18,6 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
-########################################################
-# Add and build other dependent libraries first        #
-########################################################
-
-add_subdirectory(UGLY)
 ########################################################
 # Basic system tests (standard libraries, headers etc) #
 ########################################################
@@ -43,27 +40,32 @@ foreach(FUNC sqrt)
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/kmccoarsegrain/*.hpp)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include )
 
+###################################################################
+# Grab headers and set the directory where they will be installed #
+###################################################################
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/kmccoarsegrain/*.hpp)
 install(FILES ${HEADERS} DESTINATION include/kmccoarsegrain)
 
 message( ${CMAKE_CURRENT_SOURCE_DIR} )
 
+########################################################################
+# Grab source files and set the directory where they will be installed #
+########################################################################
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*.cpp)
-
-add_library(kmc_coarse_grain ${SOURCES} )
-install(TARGETS kmc_coarse_grain DESTINATION lib/${PROJECT_NAME})
-
-set_target_properties(kmc_coarse_grain PROPERTIES LINKER_LANGUAGE CXX)
+file(GLOB SOURCES_UGLY1 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/*.cpp)
+file(GLOB SOURCES_UGLY2 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.cpp)
+file(GLOB SOURCES_UGLY3 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.hpp)
+file(GLOB SOURCES_UGLY4 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisitor/*.cpp)
+file(GLOB SOURCES_UGLY5 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisitor/*.hpp)
+add_library(kmccoarsegrain ${SOURCES} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY3} ${SOURCES_UGLY4} ${SOURCES_UGLY5})
+set_target_properties(kmccoarsegrain PROPERTIES LINKER_LANGUAGE CXX)
+install(TARGETS kmccoarsegrain DESTINATION lib/${PROJECT_NAME})
 
 ###############################
 # Check if unit testing is on #
 ###############################
-option(BUILD_SHARED_LIBS "Build shared libs" ON)
-
-option(ENABLE_TESTING "Build and enable unit testing" OFF)
 if(ENABLE_TESTING)
   enable_testing()
   message("Unit testing enabled")
@@ -89,7 +91,7 @@ foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
   if(${FLAG_OPT} MATCHES "-coverage")
     find_program(GCOV_EXE gcov)
     if(GCOV_EXE)
-      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_coarse_grain.dir/CoarseGrainSites/src/libkmccoarsegrain/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/kmc_coarse_grain.dir/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*gcno)
+      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/kmccoarsegrain.dir/CoarseGrainSites/src/libkmccoarsegrain/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/kmccoarsegrain.dir/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*gcno)
       foreach(PROG ${COVERAGE_FILES})
         get_filename_component(NAME_FILE ${PROG} NAME)
         add_test(coverage_${NAME_FILE} gcov ${PROG})
