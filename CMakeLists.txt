@@ -54,7 +54,7 @@ message( ${CMAKE_CURRENT_SOURCE_DIR} )
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*.cpp)
 
 add_library(kmc_coarse_grain ${SOURCES} )
-install(TARGETS ${PROJECT_NAME} DESTINATION lib/${PROJECT_NAME})
+install(TARGETS kmc_coarse_grain DESTINATION lib/${PROJECT_NAME})
 
 set_target_properties(kmc_coarse_grain PROPERTIES LINKER_LANGUAGE CXX)
 
