@@ -3,7 +3,7 @@ foreach(PROG test_ToF
     test_1Dsystem)
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(regression_${PROG} ${${PROG}_SOURCES})
-  target_link_libraries(regression_${PROG} kmc_coarse_grain ugly)
+  target_link_libraries(regression_${PROG} kmccoarsegrain ugly)
 endforeach(PROG)
 
 configure_file(test_regression_script.sh test_regression_script.sh COPYONLY)
