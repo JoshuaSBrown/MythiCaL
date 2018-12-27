@@ -39,13 +39,13 @@ KMC_Site::KMC_Site()
 
 KMC_Site::~KMC_Site() {}
 
-void KMC_Site::setRatesToNeighbors(unordered_map<int, double*> neighRates) {
+void KMC_Site::setRatesToNeighbors(unordered_map<int, double>& neighRates) {
   assert(neighRates.size()!=0 && "Sites must have at least one rate to a "
     "neighbor. Cannot set rates to neighbors with empty map.");
   for (auto neighAndRate : neighRates) {
-    assert(*neighAndRate.second!=0 && "One of the rates is 0.0. You cannot "
+    assert(neighAndRate.second!=0 && "One of the rates is 0.0. You cannot "
         "set a rate to a value of 0.0 as it is meaningless.");
-    neighRates_[neighAndRate.first] = neighAndRate.second;
+    neighRates_[neighAndRate.first] = &(neighRates[neighAndRate.first]);
   }
   calculateDwellTimeConstant_();
   calculateProbabilityHopToNeighbors_();

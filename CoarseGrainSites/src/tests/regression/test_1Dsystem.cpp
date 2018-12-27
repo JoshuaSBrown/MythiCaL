@@ -134,14 +134,14 @@ int main(int argc, char* argv[]){
   cout << "Running coarse grained Monte Carlo" << endl;
   {
     // greating map with pointer to rates
-    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
+/*    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
     {
       for(auto site_rates : rates){
         for( auto neigh_rate : site_rates.second){
           rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
         }
       }
-    }
+    }*/
     // Run the coarse grain simulation
     {
       double current_time_sample_increment = cutoff_time/static_cast<double>(sample_rate);
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]){
       CGsystem.setRandomSeed(seed);
       CGsystem.setMinCoarseGrainIterationThreshold(threshold);
       CGsystem.setTimeResolution(sample_time);
-      CGsystem.initializeSystem(rates_to_neighbors);
+      CGsystem.initializeSystem(rates);
 
       class Electron : public KMC_Walker {};
       // Only a single electron is created but the simulation is repeated 

@@ -135,20 +135,20 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    unordered_map< int,unordered_map< int,double *>> ratesToNeighbors;
+    unordered_map< int,unordered_map< int,double>> ratesToNeighbors;
 
     int global_index = 0;
     int number_of_sites = 16;
     for( int index=0;index<number_of_sites;++index){
 
-      unordered_map< int,double*> ratesFromSiteToNeighbors;
+      unordered_map< int,double> ratesFromSiteToNeighbors;
 
       for( int rate_index = 0; 
           rate_index<numberOfNeighbors.at(index);
           ++rate_index){
 
         ratesFromSiteToNeighbors[rates.at(global_index).first] = \
-           &(rates.at(global_index).second);
+           (rates.at(global_index).second);
 
         ++global_index;        
       }

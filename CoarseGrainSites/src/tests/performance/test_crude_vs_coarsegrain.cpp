@@ -377,7 +377,7 @@ int main(int argc, char* argv[]){
   cout << "Running coarse grained Monte Carlo" << endl;
   high_resolution_clock::time_point coarse_time_start = high_resolution_clock::now();
   {
-    // greating map with pointer to rates
+    /*// greating map with pointer to rates
     unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
     {
       for(auto site_rates : rates){
@@ -385,7 +385,7 @@ int main(int argc, char* argv[]){
           rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
         }
       }
-    }
+    }*/
 
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class
@@ -405,7 +405,7 @@ int main(int argc, char* argv[]){
       CGsystem.setRandomSeed(seed);
       CGsystem.setMinCoarseGrainIterationThreshold(threshold);
       CGsystem.setTimeResolution(cutoff_time/100.0);
-      CGsystem.initializeSystem(rates_to_neighbors);
+      CGsystem.initializeSystem(rates);
       CGsystem.initializeWalkers(electrons);
       // Calculate Walker dwell times and sort 
       list<pair<int,double>> walker_global_times;
