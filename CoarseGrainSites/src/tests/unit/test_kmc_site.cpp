@@ -39,15 +39,15 @@ int main(void){
 
   cout << "Testing: setRatesToNeighbors" << endl;
   {
-    unordered_map< int, double *> neighRates;
+    unordered_map< int, double> neighRates;
     double rate1 = 400;
     double rate2 = 200;
     double rate3 = 10;
     double rate4 = 1;
-    neighRates[1]=&rate1;
-    neighRates[2]=&rate2;
-    neighRates[3]=&rate3;
-    neighRates[4]=&rate4;
+    neighRates[1]=rate1;
+    neighRates[2]=rate2;
+    neighRates[3]=rate3;
+    neighRates[4]=rate4;
     
     KMC_Site site;
     site.setRatesToNeighbors(neighRates);
@@ -55,15 +55,15 @@ int main(void){
 
   cout << "Testing: getRateToNeighbor" << endl;
   {
-    unordered_map< int, double *> neighRates;
+    unordered_map< int, double> neighRates;
     double rate1 = 400;
     double rate2 = 200;
     double rate3 = 10;
     double rate4 = 1;
-    neighRates[1]=&rate1;
-    neighRates[2]=&rate2;
-    neighRates[3]=&rate3;
-    neighRates[4]=&rate4;
+    neighRates[1]=rate1;
+    neighRates[2]=rate2;
+    neighRates[3]=rate3;
+    neighRates[4]=rate4;
     
     KMC_Site site;
     site.setRatesToNeighbors(neighRates);
@@ -174,15 +174,15 @@ int main(void){
 
   cout << "Testing: probability to hop to neighbor" << endl;
   {
-    unordered_map< int, double * > neighRates;
+    unordered_map< int, double > neighRates;
     double rate1 = 1;
     double rate2 = 1;
     double rate3 = 1;
     double rate4 = 1;
-    neighRates[1]=&rate1;
-    neighRates[2]=&rate2;
-    neighRates[3]=&rate3;
-    neighRates[4]=&rate4;
+    neighRates[1]=rate1;
+    neighRates[2]=rate2;
+    neighRates[3]=rate3;
+    neighRates[4]=rate4;
     
     KMC_Site site;
     site.setRatesToNeighbors(neighRates);
@@ -203,15 +203,15 @@ int main(void){
 
   cout << "Testing: getNeighborSiteIds" << endl;
   {
-    unordered_map< int, double * > neighRates;
+    unordered_map< int, double > neighRates;
     double rate1 = 1;
     double rate2 = 1;
     double rate3 = 1;
     double rate4 = 1;
-    neighRates[1]=&rate1;
-    neighRates[2]=&rate2;
-    neighRates[3]=&rate3;
-    neighRates[4]=&rate4;
+    neighRates[1]=rate1;
+    neighRates[2]=rate2;
+    neighRates[3]=rate3;
+    neighRates[4]=rate4;
     
     KMC_Site site;
     site.setRatesToNeighbors(neighRates);
@@ -238,15 +238,15 @@ int main(void){
 
   cout << "Testing: site output" << endl;
   {
-    unordered_map< int, double * > neighRates;
+    unordered_map< int, double > neighRates;
     double rate1 = 1;
     double rate2 = 1;
     double rate3 = 1;
     double rate4 = 1;
-    neighRates[1]=&rate1;
-    neighRates[2]=&rate2;
-    neighRates[3]=&rate3;
-    neighRates[4]=&rate4;
+    neighRates[1]=rate1;
+    neighRates[2]=rate2;
+    neighRates[3]=rate3;
+    neighRates[4]=rate4;
     
     KMC_Site site;
     site.setId(0);

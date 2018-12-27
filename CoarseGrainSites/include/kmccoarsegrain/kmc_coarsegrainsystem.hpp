@@ -96,7 +96,7 @@ class KMC_CoarseGrainSystem {
    *
    * Where each of the rateFrom variables is a double
    **/
-  void initializeSystem(std::unordered_map<int, std::unordered_map<int, double*>> ratesOfAllSites);
+  void initializeSystem(std::unordered_map<int, std::unordered_map<int, double>> &ratesOfAllSites);
 
   /**
    * \brief Initialize walker dwell times and future hop site id

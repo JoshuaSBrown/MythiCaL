@@ -27,17 +27,17 @@ int main(void){
     double rate3 = 2.0;
     double rate4 = 1.0;
 
-    unordered_map<int, double *> neigh_rates_site1;
-    neigh_rates_site1[2] = &rate1;
+    unordered_map<int, double> neigh_rates_site1;
+    neigh_rates_site1[2] = rate1;
     site1.setRatesToNeighbors(neigh_rates_site1);
 
-    unordered_map<int, double *> neigh_rates_site2;
-    neigh_rates_site2[1] = &rate2;
-    neigh_rates_site2[3] = &rate3;
+    unordered_map<int, double> neigh_rates_site2;
+    neigh_rates_site2[1] = rate2;
+    neigh_rates_site2[3] = rate3;
     site2.setRatesToNeighbors(neigh_rates_site2);
      
-    unordered_map<int, double *> neigh_rates_site3;
-    neigh_rates_site3[2] = &rate4;
+    unordered_map<int, double> neigh_rates_site3;
+    neigh_rates_site3[2] = rate4;
     site3.setRatesToNeighbors(neigh_rates_site3);
 
     KMC_Site_Container site_container;

@@ -35,7 +35,7 @@ class KMC_Site : public KMC_TopologyFeature {
    * \param[in] neighRates Stores the site id of the neighbor with a pointer
    * to the rate going to the neighboring site.
    **/
-  void setRatesToNeighbors(std::unordered_map<int, double*> neighRates);
+  void setRatesToNeighbors(std::unordered_map<int, double>& neighRates);
 
   /**
    * \brief Add a rate to a neighboring site

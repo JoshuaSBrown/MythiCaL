@@ -77,7 +77,7 @@ void KMC_CoarseGrainSystem::setTimeResolution(double time_resolution){
   time_resolution_ = time_resolution;
 }
 
-void KMC_CoarseGrainSystem::initializeSystem(unordered_map<int, unordered_map<int, double*>> ratesOfAllSites) {
+void KMC_CoarseGrainSystem::initializeSystem(unordered_map<int, unordered_map<int, double>>& ratesOfAllSites) {
 
   LOG("Initializeing system", 1);
 

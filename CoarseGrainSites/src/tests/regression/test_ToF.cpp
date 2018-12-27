@@ -240,7 +240,7 @@ int main(int argc, char* argv[]){
   // Run coarse grained Monte Carlo
   cout << "Running coarse grained Monte Carlo" << endl;
   {
-    // greating map with pointer to rates
+    /*// greating map with pointer to rates
     unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
     {
       for(auto site_rates : rates){
@@ -248,7 +248,7 @@ int main(int argc, char* argv[]){
           rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
         }
       }
-    }
+    }*/
 
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class
@@ -271,7 +271,7 @@ int main(int argc, char* argv[]){
       CGsystem.setRandomSeed(seed);
       CGsystem.setTimeResolution(sample_time);
       CGsystem.setMinCoarseGrainIterationThreshold(threshold);
-      CGsystem.initializeSystem(rates_to_neighbors);
+      CGsystem.initializeSystem(rates);
       CGsystem.initializeWalkers(electrons);
 
       vector<double> transient_current(sample_rate,0.0);
