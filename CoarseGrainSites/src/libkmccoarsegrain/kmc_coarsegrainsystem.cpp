@@ -163,6 +163,10 @@ void KMC_CoarseGrainSystem::setRandomSeed(const unsigned long seed) {
   seed_set_ = true;
 }
 
+void KMC_CoarseGrainSystem::removeWalkerFromSystem(pair<int,KMC_Walker>& walker) {
+  removeWalkerFromSystem(walker.first,walker.second);
+}
+
 void KMC_CoarseGrainSystem::removeWalkerFromSystem(int walker_id, KMC_Walker& walker) {
   LOG("Walker is being removed from system", 1);
   auto siteId = walker.getIdOfSiteCurrentlyOccupying();
@@ -172,6 +176,10 @@ void KMC_CoarseGrainSystem::removeWalkerFromSystem(int walker_id, KMC_Walker& wa
 
 int KMC_CoarseGrainSystem::getClusterIdOfSite(int siteId) {
   return sites_->getClusterIdOfSite(siteId);
+}
+
+void KMC_CoarseGrainSystem::hop(pair<int,KMC_Walker>& walker) {
+  hop(walker.first,walker.second);
 }
 
 void KMC_CoarseGrainSystem::hop(int walker_id, KMC_Walker & walker) {
