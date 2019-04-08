@@ -220,16 +220,6 @@ int main(int argc, char* argv[]){
   // Coarse Grained Monte Carlo with no clustering
   high_resolution_clock::time_point nocluster_time_start = high_resolution_clock::now();
   {
-    // greating map with pointer to rates
-   /* unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
-    {
-      for(auto site_rates : rates){
-        for( auto neigh_rate : site_rates.second){
-          rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
-        }
-      }
-    }*/
-
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class
     vector<pair<int,KMC_Walker>> electrons;        
@@ -296,16 +286,6 @@ int main(int argc, char* argv[]){
   cout << "Running coarse grained Monte Carlo" << endl;
   high_resolution_clock::time_point coarse_time_start = high_resolution_clock::now();
   {
-    /*// greating map with pointer to rates
-    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
-    {
-      for(auto site_rates : rates){
-        for( auto neigh_rate : site_rates.second){
-          rates_to_neighbors[site_rates.first][neigh_rate.first] =&(rates[site_rates.first][neigh_rate.first]);
-        }
-      }
-    }*/
-
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class
     vector<pair<int, KMC_Walker>> electrons;        
