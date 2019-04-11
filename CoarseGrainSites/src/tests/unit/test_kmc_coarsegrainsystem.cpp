@@ -360,12 +360,10 @@ int main(void){
       double sum_times = 0.0;
       for(auto time_site : time_spent_on_sites) sum_times+=time_site;
 
-      int siteId=1;
       double sum_time_ratio = 0.0;
       vector<double> time_ratios;
       for(auto time_site : time_spent_on_sites){
         time_ratios.push_back(time_site/sum_times);
-        ++siteId;
         sum_time_ratio +=time_site/sum_times;
       }
 

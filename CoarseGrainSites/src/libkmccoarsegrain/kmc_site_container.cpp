@@ -18,7 +18,7 @@ namespace kmccoarsegrain {
     }
   }
 
-  KMC_Site& KMC_Site_Container::getKMC_Site(int siteId){
+  KMC_Site& KMC_Site_Container::getKMC_Site(const int & siteId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Site is not stored in the container.");
     }

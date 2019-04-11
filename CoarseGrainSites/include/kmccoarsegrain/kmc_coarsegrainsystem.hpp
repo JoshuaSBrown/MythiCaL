@@ -263,10 +263,9 @@ class KMC_CoarseGrainSystem {
   int getFavoredClusterId_(std::vector<int> siteIds);
 
   bool coarseGrain_(int siteId);
-  std::unordered_map<int,int> getClustersOfSites(std::vector<int> siteIds);
+  std::unordered_map<int,int> getClustersOfSites(const std::vector<int> & siteIds);
   int createCluster_(std::vector<int> siteIds,double internal_time_limit);
   void mergeSitesAndClusters_(std::unordered_map<int,int> sites_and_clusters, int clusterId);
-  double getMinimumTimeConstantFromSitesToNeighbors_(std::vector<int> siteIds);
   double getTimeConstantFromSitesToNeighbors_(const std::vector<int> & siteIds) const;
   std::unordered_map<int,double> filterSites_();
   std::vector<std::vector<int>> breakIntoIslands_(std::unordered_map<int,double> relevant_sites);

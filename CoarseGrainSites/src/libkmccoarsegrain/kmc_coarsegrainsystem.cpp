@@ -43,7 +43,7 @@ namespace kmccoarsegrain {
 
   unordered_map<int, shared_ptr<GraphNode<string>>> createNode_(int siteIds);
 
-  size_t countUniqueClusters(unordered_map<int,int> sites_and_clusters);
+  size_t countUniqueClusters(const unordered_map<int,int> & sites_and_clusters);
   int getFavoredClusterId(unordered_map<int,int> sites_and_clusters);
 
   /****************************************************************************
@@ -52,8 +52,10 @@ namespace kmccoarsegrain {
 
   KMC_CoarseGrainSystem::KMC_CoarseGrainSystem() :
     seed_set_(false),
+    seed_(0),
     time_resolution_set_(false),
     minimum_coarse_graining_resolution_(2),
+    iteration_(0),
     iteration_threshold_(1000),
     iteration_threshold_min_(1000){
       sites_ = unique_ptr<KMC_Site_Container>( new KMC_Site_Container );
@@ -128,7 +130,6 @@ namespace kmccoarsegrain {
     int visits = sites_->getKMC_Site(siteId).getVisitFrequency();
     if(sites_->partOfCluster(siteId)){
       int cluster_id = sites_->getClusterIdOfSite(siteId);
-      cout << "Getting visit frequency of sites in cluster " << cluster_id << endl;
       visits += clusters_->getKMC_Cluster(cluster_id).getVisitFrequency(siteId);
     }
     return visits;
@@ -157,7 +158,6 @@ namespace kmccoarsegrain {
       auto hopTime = topology_features_[siteId]->getDwellTime(walkers.at(index).first);
       int newId = topology_features_[siteId]->pickNewSiteId(walkers.at(index).first);
       walkers.at(index).second.setDwellTime(hopTime);
-      //cout << "Set potential site to " << newId << endl;
       walkers.at(index).second.setPotentialSite(newId);
     }
   }
@@ -202,10 +202,8 @@ namespace kmccoarsegrain {
     LOG("Walker is hopping in system", 1);
     auto siteId = walker.getIdOfSiteCurrentlyOccupying();
     int siteToHopToId = walker.getPotentialSite();
-    //cout << "Grabbed potential site " << siteToHopToId << endl;
     KMC_TopologyFeature * feature = topology_features_[siteId];
     KMC_TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
-    //cout << "Grabbing function pointers " << endl;
     int newId;
     double hopTime;
 
@@ -213,7 +211,6 @@ namespace kmccoarsegrain {
       LOG("Hopping to " + to_string(siteToHopToId) + " site", 1);
       feature->vacate(siteId);
       feature_to_hop_to->occupy(siteToHopToId);
-      //cout << "Occupying new site " << siteToHopToId << endl;
       hopTime = feature_to_hop_to->getDwellTime(walker_id);
       newId   = feature_to_hop_to->pickNewSiteId(walker_id);
 
@@ -234,7 +231,6 @@ namespace kmccoarsegrain {
     ++iteration_;
     if(iteration_ > iteration_threshold_){
       if(iteration_threshold_min_!=constants::inf_iterations){
-        //cout << "Testing for coarse graining" << endl;
         if(coarseGrain_(siteToHopToId)){
           iteration_threshold_ = iteration_threshold_min_;
         }else{
@@ -256,23 +252,16 @@ namespace kmccoarsegrain {
     //double external_time_limit = getExternalTimeLimit_(basin_site_ids);
     double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
 
-    //cout << "internal to external ratio " << internal_time_limit/external_time_limit << endl;
-    //cout << "internal to time resolution " << internal_time_limit*time_resolution_ << endl;
-    //cout << "internal time limit " << internal_time_limit << " basin site id count " << basin_site_ids.size() << endl;
-    //cout << "external time limit " << external_time_limit << endl;
     if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
-      cout << "Sites satisfy equilbrium condition" << endl;
       auto sites_and_clusters = getClustersOfSites(basin_site_ids);
       auto number_clusters = countUniqueClusters(sites_and_clusters);
 
       if(number_clusters==1 &&
           sites_and_clusters.begin()->second==constants::unassignedId)
       {
-        cout << "Creating cluster " << endl;
         createCluster_(basin_site_ids,internal_time_limit);
         return true;
       }else if(number_clusters!=1){
-        cout << "Merging cluster " << endl;
         // Joint clusters and sites to an existing cluster
         int favored_clusterId = getFavoredClusterId(sites_and_clusters);
         mergeSitesAndClusters_(sites_and_clusters,favored_clusterId);
@@ -282,7 +271,7 @@ namespace kmccoarsegrain {
     return false;
   }
 
-  size_t countUniqueClusters(unordered_map<int,int> sites_and_clusters){
+  size_t countUniqueClusters(const unordered_map<int,int> & sites_and_clusters){
     set<int> clusters;
     for(auto site_and_cluster : sites_and_clusters){
       clusters.insert(site_and_cluster.second);
@@ -304,7 +293,7 @@ namespace kmccoarsegrain {
   }
 
   // The first int is the site id the second int is the cluster id 
-  unordered_map<int,int> KMC_CoarseGrainSystem::getClustersOfSites(vector<int> siteIds){
+  unordered_map<int,int> KMC_CoarseGrainSystem::getClustersOfSites(const vector<int> & siteIds){
     unordered_map<int,int> sites_and_clusters;
     for(auto siteId : siteIds){
       if(sites_->partOfCluster(siteId)){
@@ -332,9 +321,6 @@ namespace kmccoarsegrain {
     double cluster_time_const = cluster.getTimeConstant();
     // Cut the resolution in half from what it would otherwise be otherwise not worth doing
     int res = static_cast<int>(floor(cluster_time_const/(2*internal_time_limit)));
-    //  int max_cluster_resolution = static_cast<int>(floor(time_resolution_/(2*internal_time_limit)));
-    cout << "cluster time const " << cluster_time_const << endl;
-    cout << "time resolution " << time_resolution_ << endl;
     int allowed_resolution = static_cast<int>(ceil(cluster_time_const/time_resolution_));
     int chosen_resolution = res;
 
@@ -343,9 +329,6 @@ namespace kmccoarsegrain {
 
     if(chosen_resolution<2) chosen_resolution=2;
    
-    cout << "allowed res " << allowed_resolution << endl; 
-    cout << "Chosen resolution " << chosen_resolution << endl;
-    //  if(max_cluster_resolution_<res) chosen_resolution = max_cluster_resolution; 
     cluster.setResolution(chosen_resolution);
     if (seed_set_) {
       cluster.setRandomSeed(seed_);
@@ -355,7 +338,6 @@ namespace kmccoarsegrain {
 
     for(auto siteId : siteIds){
       sites_->setClusterId(siteId,cluster.getId());  
-      cout << "Creating cluster " << cluster.getId() << endl;
       topology_features_[siteId] = &(clusters_->getKMC_Cluster(cluster.getId()));
     }
 
@@ -367,20 +349,16 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::mergeSitesAndClusters_( unordered_map<int,int> sites_and_clusters,int favoredClusterId) {
 
     LOG("Merging sites to cluster", 1);
-    cout << "Favored cluster id " << favoredClusterId << endl;
     vector<KMC_Site> isolated_sites;
     unordered_set<int> cluster_ids;
 
-    cout << "Sites Ids     Cluster Ids" << endl;
     for (auto site_and_cluster : sites_and_clusters) { 
-      cout << site_and_cluster.first << "               " << site_and_cluster.second << endl;
       if(site_and_cluster.second != favoredClusterId){ 
         if (site_and_cluster.second == constants::unassignedId) {
           isolated_sites.push_back(sites_->getKMC_Site(site_and_cluster.first));
         } else {
           cluster_ids.insert(site_and_cluster.second);
         }
-        cout << " in merge getting favored cluster " << favoredClusterId << endl;
         topology_features_[site_and_cluster.first] = &(clusters_->getKMC_Cluster(favoredClusterId));
         sites_->setClusterId(site_and_cluster.first,favoredClusterId);
       }
@@ -388,7 +366,6 @@ namespace kmccoarsegrain {
     clusters_->getKMC_Cluster(favoredClusterId).addSites(isolated_sites);
     clusters_->getKMC_Cluster(favoredClusterId).updateProbabilitiesAndTimeConstant();
     for(auto clusterId : cluster_ids ){
-      cout << "Removing clusters with id " << clusterId << endl;
       clusters_->getKMC_Cluster(favoredClusterId).migrateSitesFrom(clusters_->getKMC_Cluster(clusterId));
       clusters_->erase(clusterId);
     }
@@ -405,11 +382,9 @@ namespace kmccoarsegrain {
     double max_rate_off = 0; 
     for(const int & site_id : siteIds){
       KMC_Site & site = sites_->getKMC_Site(site_id);
-      //cout << "site id " << site_id << endl;
       const unordered_map<int,double *> neigh_and_rates = site.getNeighborsAndRatesConst();
       for( const pair<int,double *> & neigh_and_rate : neigh_and_rates){
         if(internal_sites.count(neigh_and_rate.first)==0){
-          //cout << "not an internal site " << neigh_and_rate.first << endl;
           if(*(neigh_and_rate.second) > max_rate_off){
             max_rate_off = *(neigh_and_rate.second);
           }
@@ -460,35 +435,7 @@ bool KMC_CoarseGrainSystem::sitesSatisfyEquilibriumCondition_(
   LOG("Checking if sites satisfy equilibrium condition", 1);
   double timeConstant = getTimeConstantFromSitesToNeighbors_(siteIds);
   double time_to_traverse_cluster = maxtime*minimum_coarse_graining_resolution_;
-//  cout << "timeConstant " << timeConstant << endl;
-//  cout << "Time to traverse cluster " << time_to_traverse_cluster << endl;
-//  double ratio = timeConstant/time_to_traverse_cluster;
   return timeConstant > time_to_traverse_cluster*performance_ratio && time_to_traverse_cluster< time_resolution_;// && ratio>25;
-}
-
-double KMC_CoarseGrainSystem::getMinimumTimeConstantFromSitesToNeighbors_(
-    vector<int> siteIds) {
-
-  LOG("Get the minimum time constant", 1);
-  set<int> internalSiteIds(siteIds.begin(), siteIds.end());
-
-  double minimumTimeConstant = -1.0;
-  bool initialized = false;
-  for (auto siteId : siteIds) {
-    auto neighborSiteIds = sites_->getSiteIdsOfNeighbors(siteId);
-    for (auto neighId : neighborSiteIds) {
-      if (!internalSiteIds.count(neighId)) {
-        auto timeConstant = 1.0 / sites_->getRateToNeighborOfSite(siteId,neighId);
-        if (!initialized) {
-          initialized = true;
-          minimumTimeConstant = timeConstant;
-        } else if (timeConstant < minimumTimeConstant) {
-          minimumTimeConstant = timeConstant;
-        }
-      }
-    }
-  }
-  return minimumTimeConstant;
 }
 
 double KMC_CoarseGrainSystem::getTimeConstantFromSitesToNeighbors_(
@@ -503,7 +450,6 @@ double KMC_CoarseGrainSystem::getTimeConstantFromSitesToNeighbors_(
     for (const int & neighId : neighborSiteIds) {
       if (!internalSiteIds.count(neighId)) {
         sumRates+= sites_->getRateToNeighborOfSite(siteId,neighId);
-        //cout << "sum Rate value " << sumRates << endl;
       }
     }
   }

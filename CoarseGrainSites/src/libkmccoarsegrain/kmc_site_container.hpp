@@ -19,7 +19,7 @@ class KMC_Site_Container {
 
     void addKMC_Site(KMC_Site& site);
     void addKMC_Sites(std::vector<KMC_Site>& sites);
-    KMC_Site& getKMC_Site(int siteId);
+    KMC_Site& getKMC_Site(const int & siteId);
 
     std::unordered_map<int,KMC_Site> getKMC_Sites(std::vector<int> siteIds);
     std::unordered_map<int,KMC_Site> getKMC_Sites();

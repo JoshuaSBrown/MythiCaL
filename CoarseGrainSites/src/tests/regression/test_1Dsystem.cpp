@@ -184,9 +184,9 @@ int main(int argc, char* argv[]){
         assert(walker_global_times.begin()->second<cutoff_time);
 
         int current_index = 0; 
-        while(walker_global_times.size()>0 && walker_global_times.begin()->second<cutoff_time){
+        while(!walker_global_times.empty() && walker_global_times.begin()->second<cutoff_time){
           double deltaX = 0.0;
-          while(walker_global_times.size()>0 && walker_global_times.begin()->second<sample_time){
+          while(!walker_global_times.empty() && walker_global_times.begin()->second<sample_time){
 
             auto walker_index = walker_global_times.begin()->first;
             KMC_Walker& electron = electrons.at(walker_index).second; 

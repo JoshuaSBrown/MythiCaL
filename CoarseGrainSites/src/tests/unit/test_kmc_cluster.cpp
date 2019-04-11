@@ -149,8 +149,10 @@ int main(void){
     cluster.addSite(site2);
     cluster.updateProbabilitiesAndTimeConstant();
 
-    assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(1)))==50);
-    assert(static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(2)))==50);
+    double value = static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(1)));
+    assert(value==50);
+    value = static_cast<int>(round(100*cluster.getProbabilityOfOccupyingInternalSite(2)));
+    assert(value==50);
 
   }
 

@@ -185,8 +185,10 @@ int main(void){
     site_container.addKMC_Site(site);
     site_container.addKMC_Site(site2);
 
-    assert(site_container.partOfCluster(1));
-    assert(site_container.partOfCluster(2)==false);
+    bool value = site_container.partOfCluster(1);
+    assert(value);
+    value =site_container.partOfCluster(2);
+    assert(value==false);
 
     bool throw_error = false;
     try{

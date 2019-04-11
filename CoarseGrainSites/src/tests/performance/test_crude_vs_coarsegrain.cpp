@@ -23,7 +23,7 @@ using namespace kmccoarsegrain;
  **/
 class Converter {
   public: 
-    Converter(int distance) { distance_=distance;};
+    Converter(int distance) { distance_=distance;} explicit
     int to1D(int x,int y, int z){
       assert(x<distance_);
       assert(y<distance_);

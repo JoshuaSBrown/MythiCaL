@@ -71,10 +71,13 @@ int main(void){
 
     KMC_Rate_Container rate_container;
     rate_container.addRates(rate_map);
-
-    assert(rate_container.outgoingRateCount(2)==0);
-    assert(rate_container.outgoingRateCount(1)==1);
-    assert(rate_container.outgoingRateCount(3)==1);
+  
+    int value = rate_container.outgoingRateCount(2);
+    assert(value==0);
+    value = rate_container.outgoingRateCount(1);
+    assert(value==1);
+    value = rate_container.outgoingRateCount(3);
+    assert(value==1);
   }
 
   cout << "Testing: getRate" << endl;
