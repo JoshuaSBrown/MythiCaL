@@ -1,4 +1,7 @@
 # Kinetic Monte Carlo Coarse Graining Library 
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/142f5448ab0243acabe198e6632b8e84)](https://app.codacy.com/app/JoshuaSBrown/CoarseGrainSites?utm_source=github.com&utm_medium=referral&utm_content=JoshuaSBrown/CoarseGrainSites&utm_campaign=Badge_Grade_Dashboard)
+
 Library is designed to coarse grain kinetic Monte Carlo Simulations. Primary motivation for this library is to reduce the number of unnecessary compute cycles. 
 
 ## The Problem
