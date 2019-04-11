@@ -239,6 +239,15 @@ class KMC_CoarseGrainSystem {
   double getInternalTimeLimit_(std::vector<int> siteIds);
 
   /**
+   * @brief Gets the fastest rate off the basin sites
+   *
+   * @param siteIds
+   *
+   * @return 
+   */
+  double getExternalTimeLimit_(std::vector<int> siteIds);
+
+  /**
    * \brief Determines that the cluster id should be if sites are to be merged
    *
    * If there are several sites that could make a cluster we determine if they

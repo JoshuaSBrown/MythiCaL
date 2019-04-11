@@ -24,14 +24,13 @@ static int clusterIdCounter = 0;
  * Public Facing Functions
  ****************************************************************************/
 void occupyCluster_(KMC_TopologyFeature* feature, int& siteId){
-  auto cluster = static_cast<KMC_Cluster *>(feature);
+  KMC_Cluster * cluster = static_cast<KMC_Cluster *>(feature);
   
   KMC_Site & site = cluster->sitesInCluster_[siteId];
   assert(cluster->site_visits_.count(siteId));
   
-//  cluster->site_visits_[siteId]++;
- 
-  cluster->incrementVisits_();
+  ++cluster->total_visit_freq_; 
+  //cluster->incrementVisits_();
 
   site.setToOccupiedStatus(); 
 }
@@ -53,13 +52,13 @@ void removeWalkerCluster_(KMC_TopologyFeature * feature, int & walker_id){
   cluster->remaining_walker_dwell_times_.erase(walker_id);
 }
 
-void KMC_Cluster::incrementVisits_(){
+/*void KMC_Cluster::incrementVisits_(){
   for(auto site_visit : site_visits_){
     //cout << "time_increment_/ internal_time_constant_ " <<time_increment_/internal_time_constant_ << endl;
     //cout << probabilityOnSite_[site_visit.first] << endl;
     site_visits_[site_visit.first] += time_increment_/internal_time_constant_ *probabilityOnSite_[site_visit.first];
   }
-}
+}*/
 
 KMC_Cluster::KMC_Cluster() : KMC_TopologyFeature() {
   setId(clusterIdCounter);
@@ -67,6 +66,7 @@ KMC_Cluster::KMC_Cluster() : KMC_TopologyFeature() {
   iterations_ = 3;
   resolution_ = 20;
   total_visit_freq_ = 0;
+  prev_total_visit_freq_ = 0;
   convergenceTolerance_ = 0.01;
   convergence_method_ = converge_by_iterations_per_site;
 
@@ -169,6 +169,7 @@ void KMC_Cluster::migrateSitesFrom(KMC_Cluster& cluster) {
   cluster.site_visits_.clear();
   cluster.internal_dwell_time_.clear();
   cluster.probabilityHopToNeighbor_.clear();
+  cluster.cumulitive_probabilityHopToNeighbor_.clear();
   cluster.escape_time_constant_ = constants::unassigned_value;
   cluster.internal_time_constant_ = constants::unassigned_value;
 
@@ -260,9 +261,19 @@ int KMC_Cluster::getVisitFrequency(int siteId){
       "that you have called the update function and that there exist at least "
       "one rate off the cluster.");
 
+  if(total_visit_freq_!=prev_total_visit_freq_){
+    int difference = total_visit_freq_ - prev_total_visit_freq_; 
+    for(auto site_visit : site_visits_){
+      double visits = static_cast<double>(difference)*probabilityOnSite_[site_visit.first]*sitesInCluster_.at(site_visit.first).getTimeConstant();
+      visits = visits/internal_dwell_time_.at(site_visit.first);
+      visits = escape_time_constant_*visits;
+      visits = visits/static_cast<double>(resolution_);
+      site_visits_[site_visit.first] += round(visits);
+    }
+    prev_total_visit_freq_ = total_visit_freq_;
+  }
+
   double visit_count = (site_visits_[siteId]); 
-  //cout << "visit count site " << siteId << " " <<site_visits_[siteId]<< " time increment " << time_increment_ << " internal_time_constant_ " <<internal_time_constant_ << endl;
-  //return static_cast<int>(round(visit_count*time_increment_/internal_time_constant_)); 
   return static_cast<int>(round(visit_count)); 
 }
 
@@ -452,10 +463,10 @@ int KMC_Cluster::pickClusterNeighbor_(int walker_id) {
   remaining_walker_dwell_times_.erase(walker_id);
 
   double number = random_distribution_(random_engine_);
-  double threshold = 0.0;
-  for (auto pval : probabilityHopToNeighbor_) {
-    threshold += pval.second;
-    if (number < threshold) return pval.first;
+//  double threshold = 0.0;
+  for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
+ //   threshold += pval.second;
+    if (number < pval.second) return pval.first;
   }
   assert("Cummulitive probability distribution is flawed or random "
       "number is greater than 1");
@@ -465,14 +476,15 @@ int KMC_Cluster::pickClusterNeighbor_(int walker_id) {
 int KMC_Cluster::pickInternalSite_() {
 
   double number = random_distribution_(random_engine_);
-  double threshold = 0.0;
-  for (auto pval : probabilityHopToInternalSite_) {
-    threshold += pval.second;
-    if (number < threshold) {
+  //double threshold = 0.0;
+  for (const pair<int,double> & pval : cumulitive_probabilityHopToInternalSite_) {
+   // threshold += pval.second;
+    //if (number < threshold) {
+    if (number < pval.second) {
       return pval.first;
     }
   }
-  assert("cummulitive probability distribution of sites in the cluster "
+  assert("cumulitive probability distribution of sites in the cluster "
     "is flawed or random number is greater than 1");
   return -1;
 }
@@ -588,6 +600,9 @@ void KMC_Cluster::calculateEscapeTimeConstant_() {
     }
   }
   time_increment_ = KMC_TopologyFeature::escape_time_constant_/resolution_;
+  cout << "Resolution " << resolution_ << endl;
+  cout << "Calculated time_increment " << time_increment_ << endl;
+  cout << "escape time constant " <<KMC_TopologyFeature::escape_time_constant_ << endl;
 }
 void KMC_Cluster::calculateInternalTimeConstant_() {
   internal_time_constant_ = 0.0;
@@ -630,6 +645,12 @@ void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
         return x.second>y.second;
       });
 
+  total = 0.0;
+  for(pair<int,double> site_and_prob : probabilityHopToInternalSite_){
+    site_and_prob.second+=total;
+    total = site_and_prob.second;
+    cumulitive_probabilityHopToInternalSite_.push_back(site_and_prob);
+  }
 }
 
 // requires master equation convergence as it uses probabilityOnSite_
@@ -675,6 +696,13 @@ void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
       [](const pair<int,double>& x,const pair<int,double>&y)->bool{
         return x.second>y.second;
       });
+
+  total = 0.0;
+  for(pair<int,double>  site_and_prob : probabilityHopToNeighbor_){
+    site_and_prob.second+=total;
+    total = site_and_prob.second;
+    cumulitive_probabilityHopToNeighbor_.push_back(site_and_prob);
+  }
 }
 
 void KMC_Cluster::calculateInternalDwellTimes_(){

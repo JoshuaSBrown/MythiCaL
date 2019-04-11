@@ -23,18 +23,18 @@ class KMC_Site_Container {
 
     std::unordered_map<int,KMC_Site> getKMC_Sites(std::vector<int> siteIds);
     std::unordered_map<int,KMC_Site> getKMC_Sites();
-    size_t size();
+    size_t size() const {return sites_.size();}
 
     void setClusterId(int siteId, int clusterId);
     int getClusterIdOfSite(int siteId);
     bool partOfCluster(int siteId);
     int getSmallestClusterId(std::vector<int> siteIds);
 
-    bool exist(int siteId);
+    bool exist(const int & siteId) const;
 
-    bool isOccupied(int siteId);
-    void vacate(int siteId);
-    void occupy(int siteId);
+    bool isOccupied(const int & siteId);
+    void vacate(const int & siteId);
+    void occupy(const int & siteId);
 
     std::vector<int> getSiteIds(); 
     double getDwellTime(int siteId);

@@ -23,6 +23,7 @@ foreach(PROG
 endforeach(PROG)
 
 foreach(PROG  
+    test_coarsegrain_cluster_vs_nocluster_toy
     test_coarsegrain_cluster_vs_nocluster)
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(performance_${PROG} ${${PROG}_SOURCES})

@@ -19,7 +19,8 @@ int KMC_Walker::getIdOfSiteCurrentlyOccupying() const {
   if (current_site_ == constants::unassignedId) {
     throw runtime_error(
         "Cannot get current site as it has not yet been "
-        "assigned. You many need to first initialize the walker");
+        "assigned. You many need to first initialize the walker. "
+        "You can do this by calling the occupySite method.");
   }
   return current_site_;
 }

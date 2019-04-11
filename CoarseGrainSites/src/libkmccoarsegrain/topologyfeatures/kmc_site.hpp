@@ -118,8 +118,8 @@ class KMC_Site : public KMC_TopologyFeature {
    *
    * \return site id of a neigboring site
    **/
-  int pickNewSiteId(int);
-  //int pickNewSiteId();
+  int pickNewSiteId(int) override;
+  int pickNewSiteId() override;
 
   /**
    * \brief Return the id of the cluster the site is attached too
@@ -149,6 +149,7 @@ class KMC_Site : public KMC_TopologyFeature {
   double getProbabilityOfHoppingToNeighboringSite(const int neighSiteId);
 
   std::unordered_map<int,double *> getNeighborsAndRates();
+  const std::unordered_map<int,double *>& getNeighborsAndRatesConst() const;
 
   /**
    * \brief Gets the ids and the probabilities of hopping to neighbors

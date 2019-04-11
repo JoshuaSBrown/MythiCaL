@@ -180,8 +180,8 @@ class KMC_TopologyFeature : public virtual Identity {
    *
    * \return site id of a neigboring site
    **/
-  virtual int pickNewSiteId(int walker_id);
-  //virtual int pickNewSiteId();
+  virtual int pickNewSiteId(int walker_id) = 0;
+  virtual int pickNewSiteId() { return -1;}
 
   virtual void setVisitFrequency(int frequency) 
   { total_visit_freq_ = frequency;}

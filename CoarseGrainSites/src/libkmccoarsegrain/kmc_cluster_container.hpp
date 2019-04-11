@@ -21,13 +21,13 @@ class KMC_Cluster_Container {
     void addKMC_Clusters(std::vector<KMC_Cluster>& clusters);
     KMC_Cluster& getKMC_Cluster(int clusterId);
 
-    size_t size();
+    size_t size() const { return clusters_.size();}
 
-    bool exist(int clusterId);
+    bool exist(const int & clusterId) const;
     void erase(int clusterId);
-    bool isOccupied(int clusterId);
-    void vacate(int clusterId);
-    void occupy(int clusterId);
+    bool isOccupied(const int & clusterId);
+    void vacate(const int & clusterId);
+    void occupy(const int & clusterId);
 
     std::vector<int> getClusterIds(); 
     double getDwellTime(int walker_id, int clusterId);
