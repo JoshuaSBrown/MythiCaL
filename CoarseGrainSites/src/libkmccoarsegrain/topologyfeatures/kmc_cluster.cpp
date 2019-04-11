@@ -30,7 +30,6 @@ void occupyCluster_(KMC_TopologyFeature* feature, int& siteId){
   assert(cluster->site_visits_.count(siteId));
   
   ++cluster->total_visit_freq_; 
-  //cluster->incrementVisits_();
 
   site.setToOccupiedStatus(); 
 }
@@ -51,14 +50,6 @@ void removeWalkerCluster_(KMC_TopologyFeature * feature, int & walker_id){
   auto cluster = static_cast<KMC_Cluster *>(feature);
   cluster->remaining_walker_dwell_times_.erase(walker_id);
 }
-
-/*void KMC_Cluster::incrementVisits_(){
-  for(auto site_visit : site_visits_){
-    //cout << "time_increment_/ internal_time_constant_ " <<time_increment_/internal_time_constant_ << endl;
-    //cout << probabilityOnSite_[site_visit.first] << endl;
-    site_visits_[site_visit.first] += time_increment_/internal_time_constant_ *probabilityOnSite_[site_visit.first];
-  }
-}*/
 
 KMC_Cluster::KMC_Cluster() : KMC_TopologyFeature() {
   setId(clusterIdCounter);
@@ -214,18 +205,14 @@ void KMC_Cluster::setConvergenceIterations(long iterations) {
 }
 
 double KMC_Cluster::getDwellTime(int walker_id) {
-//double KMC_Cluster::getDwellTime() {
   assert(escape_time_constant_!=constants::unassigned_value && "Cannot get "
       "dwell time of the cluster as the escape_time_constant is not defined.");
   if(remaining_walker_dwell_times_.count(walker_id)==0){
-    //cout << "Count number of times cluster visited " << temp_count << endl;
     remaining_walker_dwell_times_[walker_id]=KMC_TopologyFeature::getDwellTime(walker_id);
   }
-  //  return (KMC_TopologyFeature::getDwellTime() / resolution_);
   auto dwell_time = remaining_walker_dwell_times_[walker_id];
   remaining_walker_dwell_times_[walker_id]-=time_increment_;
 
-  //cout << "Minus time increment " <<time_increment_ <<endl;
   if(dwell_time>time_increment_){
     return time_increment_;
   }
@@ -245,12 +232,6 @@ void KMC_Cluster::setVisitFrequency(int frequency, int siteId){
 
   // Need to convert to the right storage format 
   double visits = static_cast<double>(frequency);
-//  visits*=internal_dwell_time_[siteId]/escape_time_constant_;
-//  visits*=static_cast<double>(resolution_-1);
-//  visits*=internal_time_constant_/ time_increment_;
-
-
-//round(visit_count*time_increment_/internal_time_constant_) << endl;
   site_visits_[siteId] = visits;
 }
 
@@ -446,26 +427,17 @@ unordered_map<int, vector<pair<int, double>>>
 }
 
 bool KMC_Cluster::hopWithinCluster_(int walker_id) {
-//bool KMC_Cluster::hopWithinCluster_() {
   assert(remaining_walker_dwell_times_.count(walker_id) && "Walker is not "
       "found within the cluster and does not have a dwell time, error in "
       "hopWithinCluster function call. Make sure you call getDwellTime first.");
-//  double hop = random_distribution_(random_engine_);
-//  double in_or_out_threshold = (static_cast<double>(resolution_) - 1.0) /
-//                            static_cast<double>(resolution_);
-//  return (hop < in_or_out_threshold);
-//  cout << "remaining dwell time " << remaining_walker_dwell_times_[walker_id] << " "<< time_increment_ << endl;
   return remaining_walker_dwell_times_[walker_id]>0;
 }
 
 int KMC_Cluster::pickClusterNeighbor_(int walker_id) {
-//int KMC_Cluster::pickClusterNeighbor_() {
   remaining_walker_dwell_times_.erase(walker_id);
 
   double number = random_distribution_(random_engine_);
-//  double threshold = 0.0;
   for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
- //   threshold += pval.second;
     if (number < pval.second) return pval.first;
   }
   assert("Cummulitive probability distribution is flawed or random "
@@ -476,10 +448,7 @@ int KMC_Cluster::pickClusterNeighbor_(int walker_id) {
 int KMC_Cluster::pickInternalSite_() {
 
   double number = random_distribution_(random_engine_);
-  //double threshold = 0.0;
   for (const pair<int,double> & pval : cumulitive_probabilityHopToInternalSite_) {
-   // threshold += pval.second;
-    //if (number < threshold) {
     if (number < pval.second) {
       return pval.first;
     }
@@ -600,9 +569,6 @@ void KMC_Cluster::calculateEscapeTimeConstant_() {
     }
   }
   time_increment_ = KMC_TopologyFeature::escape_time_constant_/resolution_;
-  cout << "Resolution " << resolution_ << endl;
-  cout << "Calculated time_increment " << time_increment_ << endl;
-  cout << "escape time constant " <<KMC_TopologyFeature::escape_time_constant_ << endl;
 }
 void KMC_Cluster::calculateInternalTimeConstant_() {
   internal_time_constant_ = 0.0;
@@ -622,7 +588,6 @@ void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
   unordered_map<int, double> probabilityHopToInternalSite;
   double total = 0.0;
   for(auto site_prob : probabilityOnSite_){
-//    probabilityHopToInternalSite[site_prob.first] = site_prob.second;
     probabilityHopToInternalSite[site_prob.first] = site_prob.second * sitesInCluster_[site_prob.first].getTimeConstant();
 
     total+=probabilityHopToInternalSite[site_prob.first];
@@ -631,7 +596,6 @@ void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
   // Normalize
   for(auto site_prob_per_time : probabilityHopToInternalSite){
     probabilityHopToInternalSite[site_prob_per_time.first]/=total;
-    //cout << "Probability hop to internal site " << probabilityHopToInternalSite[site_prob_per_time.first] << endl;
   }
 
   probabilityHopToInternalSite_.clear();

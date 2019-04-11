@@ -28,7 +28,7 @@ namespace kmccoarsegrain {
 
     fastest_rate_ = sites.getFastestRateOffSite(siteId);
     if(sites.partOfCluster(siteId)){
-      cout << "In basin explorer, site is considered part of cluster " << siteId << endl;
+      //cout << "In basin explorer, site is considered part of cluster " << siteId << endl;
       auto & cluster = clusters.getKMC_Cluster(sites.getClusterIdOfSite(siteId));
       slowest_rate_ = cluster.getFastestRateOffCluster();
     }else{
