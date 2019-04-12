@@ -325,7 +325,7 @@ int main(void){
     site5.addNeighRate(pair<int, double *>(1,&rate8));
 
     KMC_Cluster cluster;
-    cluster.setConvergenceIterations(6);
+    cluster.setConvergenceIterations(50);
     cluster.setResolution(2);
     cluster.addSite(site);
     cluster.addSite(site2);
@@ -335,19 +335,15 @@ int main(void){
 
     cluster.setRandomSeed(1);
    
-    int total = 20000;
-    int site1chosen = 0;
-    int site2chosen = 0;
-    int site3chosen = 0;
-    int site4chosen = 0;
-    int site5chosen = 0;
-
+    int total = 1000000;
     int site1_id = 1;
     int site2_id = 2;
     int site3_id = 3;
     int site4_id = 4;
     int site5_id = 5;
 
+    double time_on_cluster = 0.0;
+    double time_off_cluster = 0.0;
     // 
     // neigh5 -> site1 -> site2  -> site3 -> neigh4
     //        <-       <-        <-       <-
@@ -357,108 +353,127 @@ int main(void){
       for(int count=0; count < total; ++count){
         switch(chosen_site)
         {
-          case 1: ++site1chosen;
-                  cluster.occupy(site1_id);
-                  cluster.getDwellTime(walker_id);
+          case 1: cluster.occupy(site1_id);
+                  time_on_cluster+=cluster.getDwellTime(walker_id);
                   chosen_site = cluster.pickNewSiteId(walker_id);
                   cluster.vacate(walker_id);
                   break;
-          case 2: ++site2chosen;
-                  cluster.occupy(site2_id);
-                  cluster.getDwellTime(walker_id);
+          case 2: cluster.occupy(site2_id);
+                  time_on_cluster+=cluster.getDwellTime(walker_id);
                   chosen_site = cluster.pickNewSiteId(walker_id);
                   cluster.vacate(walker_id);
                   break;
-          case 3: ++site3chosen;
-                  cluster.occupy(site3_id);
-                  cluster.getDwellTime(walker_id);
+          case 3: cluster.occupy(site3_id);
+                  time_on_cluster+=cluster.getDwellTime(walker_id);
                   chosen_site = cluster.pickNewSiteId(walker_id);
                   cluster.vacate(walker_id);
                   break;
-          case 4: ++site4chosen;
-                  site4.occupy(site4_id);
+          case 4: site4.occupy(site4_id);
                   chosen_site = site4.pickNewSiteId(); 
+                  time_off_cluster+=site4.getDwellTime(walker_id);
                   site4.vacate(site4_id);
                   break;
-          case 5: ++site5chosen;
-                  site5.occupy(site5_id);
+          case 5: site5.occupy(site5_id);
                   chosen_site = site5.pickNewSiteId(); 
+                  time_off_cluster+=site4.getDwellTime(walker_id);
                   site5.vacate(site5_id);
                   break;
         }
       }
     }
 
-    int baseline_site1chosen = 0;
-    int baseline_site2chosen = 0;
-    int baseline_site3chosen = 0;
-    int baseline_site4chosen = 0;
-    int baseline_site5chosen = 0;
+    int site1_visits = cluster.getVisitFrequency(1); 
+    int site2_visits = cluster.getVisitFrequency(2); 
+    int site3_visits = cluster.getVisitFrequency(3); 
+    int site4_visits = site4.getVisitFrequency(); 
+    int site5_visits = site5.getVisitFrequency(); 
+    
+    int total_visits = site1_visits;
+    total_visits+= site2_visits;
+    total_visits+= site3_visits;
+    total_visits+= site4_visits;
+    total_visits+= site5_visits;
+
+    int baseline_site1_visits = 0;
+    int baseline_site2_visits = 0;
+    int baseline_site3_visits = 0;
+    int baseline_site4_visits = 0;
+    int baseline_site5_visits = 0;
+
+    double baseline_time_on_cluster = 0.0;
+    double baseline_time_off_cluster = 0.0;
+    // Note unlike the cluster algorithm for individual sites the iterations
+    // directly correspond to the number of visits. 
     { // Using KMC site pick New site as baseline
-      int chosen_site = 2;
+      int _visits_site = 2;
       for(int count=0; count < total; ++count){
-        switch(chosen_site)
+        switch(_visits_site)
         {
-          case 1: ++baseline_site1chosen;
+          case 1: ++baseline_site1_visits;
                   site.occupy(site1_id);
-                  site.getDwellTime(walker_id);
-                  chosen_site = site.pickNewSiteId(); 
+                  baseline_time_on_cluster+=site.getDwellTime(walker_id);
+                  _visits_site = site.pickNewSiteId(); 
                   site.vacate(site1_id);
                   break;
-          case 2: ++baseline_site2chosen;
+          case 2: ++baseline_site2_visits;
                   site2.occupy(site2_id);
-                  site2.getDwellTime(walker_id);
-                  chosen_site = site2.pickNewSiteId(); 
+                  baseline_time_on_cluster+=site2.getDwellTime(walker_id);
+                  _visits_site = site2.pickNewSiteId(); 
                   site2.vacate(site2_id);
                   break;
-          case 3: ++baseline_site3chosen;
+          case 3: ++baseline_site3_visits;
                   site3.occupy(site3_id);
-                  site3.getDwellTime(walker_id);
-                  chosen_site = site3.pickNewSiteId(); 
+                  baseline_time_on_cluster+=site3.getDwellTime(walker_id);
+                  _visits_site = site3.pickNewSiteId(); 
                   site3.vacate(site3_id);
                   break;
-          case 4: ++baseline_site4chosen;
+          case 4: ++baseline_site4_visits;
                   site4.occupy(site4_id);
-                  site4.getDwellTime(walker_id);
-                  chosen_site = site4.pickNewSiteId(); 
+                  baseline_time_off_cluster+=site4.getDwellTime(walker_id);
+                  _visits_site = site4.pickNewSiteId(); 
                   site4.vacate(site4_id);
                   break;
-          case 5: ++baseline_site5chosen;
+          case 5: ++baseline_site5_visits;
                   site5.occupy(site5_id);
-                  site5.getDwellTime(walker_id);
-                  chosen_site = site5.pickNewSiteId(); 
+                  baseline_time_off_cluster+=site5.getDwellTime(walker_id);
+                  _visits_site = site5.pickNewSiteId(); 
                   site5.vacate(site5_id);
                   break;
         }
       }
     }
 
-    float baseline_percent1 = static_cast<float>(site1chosen)/static_cast<float>(total);
-    float baseline_percent2 = static_cast<float>(site2chosen)/static_cast<float>(total);
-    float baseline_percent3 = static_cast<float>(site3chosen)/static_cast<float>(total);
-    float baseline_percent4 = static_cast<float>(site4chosen)/static_cast<float>(total);
-    float baseline_percent5 = static_cast<float>(site5chosen)/static_cast<float>(total);
+    float baseline_percent1 = static_cast<float>(baseline_site1_visits)/static_cast<float>(total);
+    float baseline_percent2 = static_cast<float>(baseline_site2_visits)/static_cast<float>(total);
+    float baseline_percent3 = static_cast<float>(baseline_site3_visits)/static_cast<float>(total);
+    float baseline_percent4 = static_cast<float>(baseline_site4_visits)/static_cast<float>(total);
+    float baseline_percent5 = static_cast<float>(baseline_site5_visits)/static_cast<float>(total);
 
-    float percent1 = static_cast<float>(site1chosen)/static_cast<float>(total);
-    float percent2 = static_cast<float>(site2chosen)/static_cast<float>(total);
-    float percent3 = static_cast<float>(site3chosen)/static_cast<float>(total);
-    float percent4 = static_cast<float>(site4chosen)/static_cast<float>(total);
-    float percent5 = static_cast<float>(site5chosen)/static_cast<float>(total);
+    float percent1 = static_cast<float>(site1_visits)/static_cast<float>(total_visits);
+    float percent2 = static_cast<float>(site2_visits)/static_cast<float>(total_visits);
+    float percent3 = static_cast<float>(site3_visits)/static_cast<float>(total_visits);
+    float percent4 = static_cast<float>(site4_visits)/static_cast<float>(total_visits);
+    float percent5 = static_cast<float>(site5_visits)/static_cast<float>(total_visits);
 
     cout << "baseline perc: " << baseline_percent1 << " perc: " << percent1 << endl;
     cout << "baseline perc: " << baseline_percent2 << " perc: " << percent2 << endl;
     cout << "baseline perc: " << baseline_percent3 << " perc: " << percent3 << endl;
     cout << "baseline perc: " << baseline_percent4 << " perc: " << percent4 << endl;
     cout << "baseline perc: " << baseline_percent5 << " perc: " << percent5 << endl;
-    
-    
+   
+    double baseline_total_time = baseline_time_on_cluster+baseline_time_off_cluster; 
+    cout << "baseline time on cluster " << baseline_time_on_cluster/baseline_total_time << endl; 
+    cout << "baseline time off cluster " << baseline_time_off_cluster/baseline_total_time << endl; 
+    double total_time = time_on_cluster+time_off_cluster; 
+    cout << "time on cluster " << time_on_cluster/total_time << endl; 
+    cout << "time off cluster " << time_off_cluster/total_time << endl; 
     
     // Able to reproduce the proportion of time spent on each site
     assert(percent1< baseline_percent1*1.2 && percent1>baseline_percent1*0.8 );
     assert(percent2< baseline_percent2*1.2 && percent2>baseline_percent2*0.8 );
     assert(percent3< baseline_percent3*1.2 && percent3>baseline_percent3*0.8 );
-    assert(percent4< baseline_percent4*1.2 && percent4>baseline_percent4*0.8 );
-    assert(percent5< baseline_percent5*1.2 && percent5>baseline_percent5*0.8 ); 
+    assert(percent4< 0.0005 );
+    assert(percent5< 0.0005 ); 
 
     vector<double> visit_freq(5,0.0);
     visit_freq.at(0) = static_cast<double>(cluster.getVisitFrequency(1));

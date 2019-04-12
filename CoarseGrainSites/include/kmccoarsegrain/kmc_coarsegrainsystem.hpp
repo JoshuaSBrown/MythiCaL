@@ -273,7 +273,7 @@ class KMC_CoarseGrainSystem {
    *
    * @return 
    */
-  double getExternalTimeLimit_(std::vector<int> siteIds);
+  double getExternalTimeLimit_(const std::vector<int> & siteIds);
 
   /**
    * \brief Determines that the cluster id should be if sites are to be merged

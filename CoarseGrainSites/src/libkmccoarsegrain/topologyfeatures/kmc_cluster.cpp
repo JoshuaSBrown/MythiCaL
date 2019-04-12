@@ -28,9 +28,7 @@ void occupyCluster_(KMC_TopologyFeature* feature, int& siteId){
   
   KMC_Site & site = cluster->sitesInCluster_[siteId];
   assert(cluster->site_visits_.count(siteId));
-  
   ++cluster->total_visit_freq_; 
-
   site.setToOccupiedStatus(); 
 }
 
@@ -243,7 +241,7 @@ int KMC_Cluster::getVisitFrequency(int siteId){
       "one rate off the cluster.");
 
   if(total_visit_freq_!=prev_total_visit_freq_){
-    int difference = total_visit_freq_ - prev_total_visit_freq_; 
+    double difference = total_visit_freq_ - prev_total_visit_freq_; 
     for(auto site_visit : site_visits_){
       double visits = static_cast<double>(difference)*probabilityOnSite_[site_visit.first]*sitesInCluster_.at(site_visit.first).getTimeConstant();
       visits = visits/internal_dwell_time_.at(site_visit.first);

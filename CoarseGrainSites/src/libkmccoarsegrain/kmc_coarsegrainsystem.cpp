@@ -250,7 +250,6 @@ namespace kmccoarsegrain {
     BasinExplorer basin_explorer;
     auto basin_site_ids = basin_explorer.findBasin(*sites_,*clusters_,siteId);
 
-    //double external_time_limit = getExternalTimeLimit_(basin_site_ids);
     double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
 
     if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
@@ -373,7 +372,7 @@ namespace kmccoarsegrain {
 
   }
 
-  double KMC_CoarseGrainSystem::getExternalTimeLimit_(vector<int> siteIds ){
+  double KMC_CoarseGrainSystem::getExternalTimeLimit_(const vector<int> & siteIds ){
     LOG("Getting the external time limit of a cluster", 1);
     unordered_set<int> internal_sites;
     for(const int & site_id : siteIds){
