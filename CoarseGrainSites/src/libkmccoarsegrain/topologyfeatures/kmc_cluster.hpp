@@ -180,7 +180,6 @@ class KMC_Cluster : public KMC_TopologyFeature {
     assert(resolution>1); 
     resolution_ = resolution; 
     time_increment_ = KMC_TopologyFeature::escape_time_constant_/resolution_;
-    std::cout << "Time increment " << time_increment_ << std::endl;
   }
 
   /**

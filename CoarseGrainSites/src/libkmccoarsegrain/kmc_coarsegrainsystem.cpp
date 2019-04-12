@@ -51,6 +51,7 @@ namespace kmccoarsegrain {
    ****************************************************************************/
 
   KMC_CoarseGrainSystem::KMC_CoarseGrainSystem() :
+    performance_ratio_(1.50),
     seed_set_(false),
     seed_(0),
     time_resolution_set_(false),
@@ -431,11 +432,10 @@ double KMC_CoarseGrainSystem::getInternalTimeLimit_(vector<int> siteIds ){
 bool KMC_CoarseGrainSystem::sitesSatisfyEquilibriumCondition_(
     vector<int> siteIds, double maxtime) {
 
-  double performance_ratio = 1.5;
   LOG("Checking if sites satisfy equilibrium condition", 1);
   double timeConstant = getTimeConstantFromSitesToNeighbors_(siteIds);
   double time_to_traverse_cluster = maxtime*minimum_coarse_graining_resolution_;
-  return timeConstant > time_to_traverse_cluster*performance_ratio && time_to_traverse_cluster< time_resolution_;// && ratio>25;
+  return timeConstant > time_to_traverse_cluster*performance_ratio_ && time_to_traverse_cluster< time_resolution_;// && ratio>25;
 }
 
 double KMC_CoarseGrainSystem::getTimeConstantFromSitesToNeighbors_(

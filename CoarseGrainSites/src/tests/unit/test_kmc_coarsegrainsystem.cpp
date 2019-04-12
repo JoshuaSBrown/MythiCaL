@@ -315,6 +315,7 @@ int main(void){
       CGsystem.setRandomSeed(1);
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);
+      CGsystem.setPerformanceRatio(1.0);
       CGsystem.setMinCoarseGrainIterationThreshold(1000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
@@ -656,6 +657,7 @@ int main(void){
 
       KMC_CoarseGrainSystem CGsystem;
       CGsystem.setMinCoarseGrainIterationThreshold(10);
+      CGsystem.setPerformanceRatio(0.2);
       CGsystem.setRandomSeed(1);
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);
