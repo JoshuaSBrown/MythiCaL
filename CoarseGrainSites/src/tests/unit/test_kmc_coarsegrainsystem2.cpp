@@ -250,7 +250,7 @@ int main(void){
         ++hop_count;
       }    
 
-      auto clusters = CGsystem.getClusters();
+      vector<vector<int>> clusters = CGsystem.getClusters();
       assert(clusters.size()==1);
       assert(clusters.at(0).size()==4);
       bool site6_found = false;

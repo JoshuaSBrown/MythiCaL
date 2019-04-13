@@ -17,7 +17,10 @@ option(ENABLE_TESTING "Build and enable unit testing" OFF)
 IF(CMAKE_COMPILER_IS_GNUCXX)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-
+IF(CMAKE_BUILD_TYPE MATCHES "DEBUG")
+  message("Building in Debug mode")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+ENDIF(CMAKE_BUILD_TYPE MATCHES "DEBUG")
 ########################################################
 # Basic system tests (standard libraries, headers etc) #
 ########################################################
@@ -68,8 +71,12 @@ install(TARGETS kmccoarsegrain DESTINATION lib/${PROJECT_NAME})
 ###############################
 if(ENABLE_TESTING)
   enable_testing()
-  message("Unit testing enabled")
-  add_subdirectory(CoarseGrainSites/src/tests/unit)
+  message("testing enabled")
+  IF(CMAKE_BUILD_TYPE MATCHES "RELEASE")
+    message("Cannot build unit tests with release mode")  
+  ELSE(CMAKE_BUILD_TYPE MATCHES "RELEASE")
+    add_subdirectory(CoarseGrainSites/src/tests/unit)
+  ENDIF(CMAKE_BUILD_TYPE MATCHES "RELEASE")
   add_subdirectory(CoarseGrainSites/src/tests/regression)
 endif(ENABLE_TESTING)
 

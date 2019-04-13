@@ -181,7 +181,35 @@ class KMC_CoarseGrainSystem {
   double getTimeResolution();
   void setTimeResolution(double time_resolution);
 
+  /**
+   * @brief Adjusts how easy it is to create a cluster.
+   *
+   * This parameter should not be changed unless you know what you are doing. 
+   * Essentially, the larger it is, delays when the cluster will satisfy the
+   * coarse graining criteria. 
+   *
+   * When determining if sites will make a good cluster, the rates off the 
+   * potential cluster sites are used to create a time constant. If this time
+   * constant is greater than the time it takes for a particle to move within
+   * the cluster it would normally satify the mathematical arguments for 
+   * coarse graining. However, there is extra overhead associated with using
+   * clusters, the overhead becomes negligable the larger the different between
+   * the time constant and the internal time. 
+   *
+   * The parameter essentially delays when coarse graining will occur so that
+   * the algorithm does not take a performance penalty be coarse graining sites
+   * that do not have a big enough different between the time constant and the
+   * internal time of crossing. 
+   *
+   * @param double
+   */
+  void setPerformanceRatio(double performance_ratio) { 
+    performance_ratio_ = performance_ratio;
+  }
  private:
+  /// Performance ratio
+  double performance_ratio_;
+
   /// Depicts whether a random seed has been set, to yield reproducable data
   bool seed_set_;
 
@@ -239,6 +267,15 @@ class KMC_CoarseGrainSystem {
   double getInternalTimeLimit_(std::vector<int> siteIds);
 
   /**
+   * @brief Gets the fastest rate off the basin sites
+   *
+   * @param siteIds
+   *
+   * @return 
+   */
+  double getExternalTimeLimit_(const std::vector<int> & siteIds);
+
+  /**
    * \brief Determines that the cluster id should be if sites are to be merged
    *
    * If there are several sites that could make a cluster we determine if they
@@ -254,10 +291,10 @@ class KMC_CoarseGrainSystem {
   int getFavoredClusterId_(std::vector<int> siteIds);
 
   bool coarseGrain_(int siteId);
-  std::unordered_map<int,int> getClustersOfSites(std::vector<int> siteIds);
+  std::unordered_map<int,int> getClustersOfSites(const std::vector<int> & siteIds);
   int createCluster_(std::vector<int> siteIds,double internal_time_limit);
   void mergeSitesAndClusters_(std::unordered_map<int,int> sites_and_clusters, int clusterId);
-  double getMinimumTimeConstantFromSitesToNeighbors_(std::vector<int> siteIds);
+  double getTimeConstantFromSitesToNeighbors_(const std::vector<int> & siteIds) const;
   std::unordered_map<int,double> filterSites_();
   std::vector<std::vector<int>> breakIntoIslands_(std::unordered_map<int,double> relevant_sites);
 };

@@ -23,15 +23,14 @@ namespace kmccoarsegrain {
 
   KMC_Cluster& KMC_Cluster_Container::getKMC_Cluster(int clusterId){
     if(exist(clusterId)==false){
+      cerr << "Trying to access cluster with id " << clusterId << endl;
       throw invalid_argument("Cannot get cluster as it is not stored in the"
           " container.");
     }
     return clusters_[clusterId];
   }
 
-  size_t KMC_Cluster_Container::size() { return clusters_.size(); }
-
-  bool KMC_Cluster_Container::exist(int clusterId){
+  bool KMC_Cluster_Container::exist(const int & clusterId) const{
     if(clusters_.count(clusterId)){
       return true;
     }
@@ -45,7 +44,7 @@ namespace kmccoarsegrain {
     }
   }
 
-  bool KMC_Cluster_Container::isOccupied(int clusterId){
+  bool KMC_Cluster_Container::isOccupied(const int & clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot determine if cluster is occupied as it"
           " is not stored in the container.");
@@ -53,7 +52,7 @@ namespace kmccoarsegrain {
     return clusters_[clusterId].isOccupied();
   }
 
-  void KMC_Cluster_Container::vacate(int clusterId){
+  void KMC_Cluster_Container::vacate(const int & clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot vacate cluster as it is not stored in the "
           "container.");
@@ -61,7 +60,7 @@ namespace kmccoarsegrain {
     clusters_[clusterId].vacate();
   }
 
-  void KMC_Cluster_Container::occupy(int clusterId){
+  void KMC_Cluster_Container::occupy(const int & clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot occupy cluster as it is not stored in the "
           "container.");

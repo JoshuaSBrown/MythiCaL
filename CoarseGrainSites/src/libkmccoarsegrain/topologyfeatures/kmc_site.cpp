@@ -91,7 +91,10 @@ vector<int> KMC_Site::getNeighborSiteIds() const {
 }
 
 int KMC_Site::pickNewSiteId(int) {
-//int KMC_Site::pickNewSiteId() {
+  return pickNewSiteId();
+}
+
+int KMC_Site::pickNewSiteId() {
   double number = random_distribution_(random_engine_);
   double threshold = 0.0;
   for (auto pval : probabilityHopToNeighbor_) {
@@ -105,6 +108,10 @@ int KMC_Site::pickNewSiteId(int) {
 }
 
 unordered_map<int,double *> KMC_Site::getNeighborsAndRates(){
+  return neighRates_;
+}
+
+const unordered_map<int,double *> & KMC_Site::getNeighborsAndRatesConst() const{
   return neighRates_;
 }
 
@@ -157,8 +164,6 @@ void KMC_Site::calculateProbabilityHopToNeighbors_() {
 
   probabilityHopToNeighbor_.clear();
   copy(neigh_and_prob.begin(),neigh_and_prob.end(),back_inserter(probabilityHopToNeighbor_));
-
-  
 }
 
 void KMC_Site::calculateDwellTimeConstant_() {

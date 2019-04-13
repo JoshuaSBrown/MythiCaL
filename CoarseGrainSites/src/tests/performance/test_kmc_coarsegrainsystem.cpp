@@ -20,7 +20,15 @@ int main(void){
   cout << "runtime and compares it to the code when a cluster is not " << endl;
   cout << "identified." << endl;
 
- 
+
+  double rate1 = 1.0/1.0;
+  double rate2 = 1.0/400.0;
+  double rate3 = 1.0/100.0;
+  double rate4 = 1.0/5.0;
+  double rate5 = 1.0/300.0;
+  double rate6 = 1.0/0.1;
+
+
   high_resolution_clock::time_point clusterStart; 
   high_resolution_clock::time_point clusterEnd; 
   {
@@ -38,14 +46,6 @@ int main(void){
     // the rates to its neighbors and then continue with the other sites
     //
     // We will exclude rates going from the neighbors to the inner sites
-    
-    double rate1 = 1.0/1.0;
-    double rate2 = 1.0/400.0;
-    double rate3 = 1.0/100.0;
-    double rate4 = 1.0/25.0;
-    double rate5 = 1.0/300.0;
-    double rate6 = 1.0/0.1;
-
     vector<pair<int,double>> rates;
     rates.push_back(pair<int,double>(14,rate2)); // site1->neigh14
     rates.push_back(pair<int,double>(6,rate3)); // site1->neigh6
@@ -139,6 +139,7 @@ int main(void){
     
     KMC_CoarseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
+    CGsystem.setPerformanceRatio(0.2);
     CGsystem.setTimeResolution(100.0);
     CGsystem.setMinCoarseGrainIterationThreshold(10000);
     CGsystem.initializeSystem(ratesToNeighbors);
@@ -176,7 +177,13 @@ int main(void){
       CGsystem.removeWalkerFromSystem(0,electron1);
       escapeTimes.push_back(totalTimeOnCluster);
     }
+
+    vector<vector<int>> clusters = CGsystem.getClusters();
+    if(clusters.size()!=1){
+      throw runtime_error("Test failed because no clusters were identified.");
+    }
     clusterEnd = high_resolution_clock::now();
+
   }
 
   high_resolution_clock::time_point siteStart; 
@@ -196,14 +203,6 @@ int main(void){
     // the rates to its neighbors and then continue with the other sites
     //
     // We will exclude rates going from the neighbors to the inner sites
-    
-    double rate1 = 1.0/1.0;
-    double rate2 = 1.0/400.0;
-    double rate3 = 1.0/100.0;
-    double rate4 = 1.0/25.0;
-    double rate5 = 1.0/300.0;
-    double rate6 = 1.0/0.1;
-
     vector<pair<int,double>> rates;
     rates.push_back(pair<int,double>(14,rate2)); // site1->neigh14
     rates.push_back(pair<int,double>(6,rate3)); // site1->neigh6

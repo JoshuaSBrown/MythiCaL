@@ -115,20 +115,28 @@ int main(void){
     site.resetNeighRate(pair< int,double * >(3,&rate3));
     site.resetNeighRate(pair< int,double * >(4,&rate4));
 
-    assert(static_cast<int>(site.getRateToNeighbor(1))==400);
-    assert(static_cast<int>(site.getRateToNeighbor(2))==200);
-    assert(static_cast<int>(site.getRateToNeighbor(3))==10);
-    assert(static_cast<int>(site.getRateToNeighbor(4))==1);
+    int value = static_cast<int>(site.getRateToNeighbor(1));
+    assert(value==400);
+    value = static_cast<int>(site.getRateToNeighbor(2));
+    assert(value ==200);
+    value = static_cast<int>(site.getRateToNeighbor(3));
+    assert(value==10);
+    value = static_cast<int>(site.getRateToNeighbor(4));
+    assert(value==1);
 
     site.resetNeighRate(pair< int,double * >(1,&rate4));
     site.resetNeighRate(pair< int,double * >(2,&rate3));
     site.resetNeighRate(pair< int,double * >(3,&rate2));
     site.resetNeighRate(pair< int,double * >(4,&rate1));
-  
-    assert(static_cast<int>(site.getRateToNeighbor(4))==400);
-    assert(static_cast<int>(site.getRateToNeighbor(3))==200);
-    assert(static_cast<int>(site.getRateToNeighbor(2))==10);
-    assert(static_cast<int>(site.getRateToNeighbor(1))==1);
+ 
+    value = static_cast<int>(site.getRateToNeighbor(4));
+    assert(value==400);
+    value = static_cast<int>(site.getRateToNeighbor(3));
+    assert(value==200);
+    value = static_cast<int>(site.getRateToNeighbor(2));
+    assert(value==10);
+    value =static_cast<int>(site.getRateToNeighbor(1));
+    assert(value==1);
   }
 
   cout << "Testing: isNeighbor" << endl;

@@ -179,6 +179,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
     // Must be greater than 1
     assert(resolution>1); 
     resolution_ = resolution; 
+    time_increment_ = KMC_TopologyFeature::escape_time_constant_/resolution_;
   }
 
   /**
@@ -266,6 +267,8 @@ class KMC_Cluster : public KMC_TopologyFeature {
   /************************************************************************
    * Local Cluster Variables
    ************************************************************************/
+  /// Previous number of cluster visits
+  int prev_total_visit_freq_;
 
   /// Relates to how coarse grained the dwell time will be
   int resolution_;
@@ -300,6 +303,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * probability given as a value between 0 and 1.
    **/
   std::vector<std::pair<int, double>> probabilityHopToNeighbor_;
+  std::vector<std::pair<int, double>> cumulitive_probabilityHopToNeighbor_;
 
   /**
    * \brief Stores the internal dwell time of the sites in the cluster
@@ -346,12 +350,13 @@ class KMC_Cluster : public KMC_TopologyFeature {
   std::unordered_map<int, double> probabilityOnSite_;
 
   std::vector<std::pair<int,double>> probabilityHopToInternalSite_;
+  std::vector<std::pair<int,double>> cumulitive_probabilityHopToInternalSite_;
 
   /************************************************************************
    * Local Cluster Functions
    ************************************************************************/
 
-  void incrementVisits_();
+  //void incrementVisits_();
 
   std::unordered_map<int,int> getVisitFrequencies_();
 
@@ -382,86 +387,86 @@ class KMC_Cluster : public KMC_TopologyFeature {
   int pickInternalSite_();
 
   /**
-   * \brief Calculates the time constant used to calculate the dwell time
-   *
-   * This time constant determines how much time it will take for the
-   * particle to escape the cluster. It is essentially a constant in an
-   * exponent describing the escape rate. E.g.
-   *
-   * f(t) = A exp(-beta * t)
-   *
-   * A is some constant, t is time, and f(x) describes the probability of
-   * escaping the cluster and where:
-   *
-   * beta = 1/tau
-   *
-   * And tau is the time constant calculated here. So the larger tau is the
-   * longer it will take for the particle to escape.
-   **/
-  void calculateEscapeTimeConstant_();
-  void calculateInternalTimeConstant_();
-  /**
-   * \brief Determines if a particle will stay within a cluster or not
-   *
-   * This function uses a random number to determine if a particle will stay
-   * within a cluster or hop to a site neighboring it.
-   *
-   * \return True if the particle should stay within the cluster, False if
-   * it should not
-   **/
-  bool hopWithinCluster_(int walker_id);
-  //bool hopWithinCluster_();
+     * \brief Calculates the time constant used to calculate the dwell time
+     *
+     * This time constant determines how much time it will take for the
+     * particle to escape the cluster. It is essentially a constant in an
+     * exponent describing the escape rate. E.g.
+     *
+     * f(t) = A exp(-beta * t)
+     *
+     * A is some constant, t is time, and f(x) describes the probability of
+     * escaping the cluster and where:
+     *
+     * beta = 1/tau
+     *
+     * And tau is the time constant calculated here. So the larger tau is the
+     * longer it will take for the particle to escape.
+     **/
+    void calculateEscapeTimeConstant_();
+    void calculateInternalTimeConstant_();
+    /**
+     * \brief Determines if a particle will stay within a cluster or not
+     *
+     * This function uses a random number to determine if a particle will stay
+     * within a cluster or hop to a site neighboring it.
+     *
+     * \return True if the particle should stay within the cluster, False if
+     * it should not
+     **/
+    bool hopWithinCluster_(int walker_id);
+    //bool hopWithinCluster_();
 
-  // First int is the Id of a site within the cluster
-  // pair - first int is the id of the site neighboring the cluster
-  // double is the rate
-  std::unordered_map<int, std::unordered_map<int, double>>
-      getRatesToNeighborsOfCluster_();
+    // First int is the Id of a site within the cluster
+    // pair - first int is the id of the site neighboring the cluster
+    // double is the rate
+    std::unordered_map<int, std::unordered_map<int, double>>
+        getRatesToNeighborsOfCluster_();
 
-  std::unordered_map<int, std::unordered_map<int, double>>
-      getRatesBetweenInternalSites_();
+    std::unordered_map<int, std::unordered_map<int, double>>
+        getRatesBetweenInternalSites_();
 
-  void iterate_();
+    void iterate_();
 
-  void calculateProbabilityHopToNeighbors_();
-  void calculateProbabilityHopToInternalSite_();
-  void calculateProbabilityHopOffInternalSite_();
-  void calculateProbabilityHopBetweenInternalSite_();
-  void calculateInternalDwellTimes_();
-  void calculateSumOfEscapeRatesFromSitesToTheirNeighbors_();
-  void calculateSumOfEscapeRatesFromSitesToInternalSites_();
+    void calculateProbabilityHopToNeighbors_();
+    void calculateProbabilityHopToInternalSite_();
+    void calculateProbabilityHopOffInternalSite_();
+    void calculateProbabilityHopBetweenInternalSite_();
+    void calculateInternalDwellTimes_();
+    void calculateSumOfEscapeRatesFromSitesToTheirNeighbors_();
+    void calculateSumOfEscapeRatesFromSitesToInternalSites_();
 
-  void initializeProbabilityOnSites_();
+    void initializeProbabilityOnSites_();
 
-  /**
-   * \brief Will grab all the internal rates going to each site in the
-   * cluster
-   *
-   * This function organises the rates describing movement within a cluster
-   * such that the first integer in the map is the internal neighbor id of
-   * a site. The vector of pairs contains the directional rate going from
-   * the neighbor to a site. Thus the integer in the pair is the site id
-   * and the double is the rate.
-   *
-   * E.g.
-   *
-   * site1 <- internal_neigh1 -> site2
-   *                |
-   *                v
-   *              site3
-   *
-   * The diagram explains how the contents are stored in the map.
-   **/
-  std::unordered_map<int, std::vector<std::pair<int, double>>>
-      getInternalRatesFromNeighborsComingToSite_();
+    /**
+     * \brief Will grab all the internal rates going to each site in the
+     * cluster
+     *
+     * This function organises the rates describing movement within a cluster
+     * such that the first integer in the map is the internal neighbor id of
+     * a site. The vector of pairs contains the directional rate going from
+     * the neighbor to a site. Thus the integer in the pair is the site id
+     * and the double is the rate.
+     *
+     * E.g.
+     *
+     * site1 <- internal_neigh1 -> site2
+     *                |
+     *                v
+     *              site3
+     *
+     * The diagram explains how the contents are stored in the map.
+     **/
+    std::unordered_map<int, std::vector<std::pair<int, double>>>
+        getInternalRatesFromNeighborsComingToSite_();
 
-  friend void occupyCluster_(KMC_TopologyFeature*,int&);
-  friend void vacateCluster_(KMC_TopologyFeature*,int&);
-  friend bool isOccupiedCluster_(KMC_TopologyFeature*,int&);
-  friend void removeWalkerCluster_(KMC_TopologyFeature *, int&);
-};
+    friend void occupyCluster_(KMC_TopologyFeature*,int&);
+    friend void vacateCluster_(KMC_TopologyFeature*,int&);
+    friend bool isOccupiedCluster_(KMC_TopologyFeature*,int&);
+    friend void removeWalkerCluster_(KMC_TopologyFeature *, int&);
+  };
 
 
-}
+  }
 
 #endif  // KMCCOARSEGRAIN_KMC_CLUSTER_HPP

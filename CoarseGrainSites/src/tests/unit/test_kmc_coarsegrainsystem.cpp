@@ -315,6 +315,7 @@ int main(void){
       CGsystem.setRandomSeed(1);
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);
+      CGsystem.setPerformanceRatio(1.0);
       CGsystem.setMinCoarseGrainIterationThreshold(1000);
       CGsystem.initializeSystem(ratesToNeighbors);
 
@@ -360,12 +361,10 @@ int main(void){
       double sum_times = 0.0;
       for(auto time_site : time_spent_on_sites) sum_times+=time_site;
 
-      int siteId=1;
       double sum_time_ratio = 0.0;
       vector<double> time_ratios;
       for(auto time_site : time_spent_on_sites){
         time_ratios.push_back(time_site/sum_times);
-        ++siteId;
         sum_time_ratio +=time_site/sum_times;
       }
 
@@ -658,6 +657,7 @@ int main(void){
 
       KMC_CoarseGrainSystem CGsystem;
       CGsystem.setMinCoarseGrainIterationThreshold(10);
+      CGsystem.setPerformanceRatio(0.2);
       CGsystem.setRandomSeed(1);
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);

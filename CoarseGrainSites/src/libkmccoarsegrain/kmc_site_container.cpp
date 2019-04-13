@@ -18,7 +18,7 @@ namespace kmccoarsegrain {
     }
   }
 
-  KMC_Site& KMC_Site_Container::getKMC_Site(int siteId){
+  KMC_Site& KMC_Site_Container::getKMC_Site(const int & siteId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Site is not stored in the container.");
     }
@@ -40,8 +40,6 @@ namespace kmccoarsegrain {
   unordered_map<int,KMC_Site> KMC_Site_Container::getKMC_Sites(){
     return sites_;
   } 
-
-  size_t KMC_Site_Container::size() { return sites_.size(); } 
 
   void KMC_Site_Container::setClusterId(int siteId, int clusterId){
     if(sites_.count(siteId)==0){
@@ -79,11 +77,11 @@ namespace kmccoarsegrain {
     return favoredClusterId;
   }
 
-  bool KMC_Site_Container::exist(int siteId){
+  bool KMC_Site_Container::exist(const int & siteId) const{
     return sites_.count(siteId)!=0;
   }
   
-  bool KMC_Site_Container::isOccupied(int siteId){
+  bool KMC_Site_Container::isOccupied(const int & siteId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot determine if site is occupied as it is not"
           " stored in the container");
@@ -91,7 +89,7 @@ namespace kmccoarsegrain {
     return sites_[siteId].isOccupied();
   }
 
-  void KMC_Site_Container::vacate(int siteId){
+  void KMC_Site_Container::vacate(const int & siteId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot vacate as site is not stored in the "
           "container.");
@@ -99,7 +97,7 @@ namespace kmccoarsegrain {
     sites_[siteId].vacate();
   }
 
-  void KMC_Site_Container::occupy(int siteId){
+  void KMC_Site_Container::occupy(const int & siteId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot occupy site as it is not stored in the "
           "container.");
