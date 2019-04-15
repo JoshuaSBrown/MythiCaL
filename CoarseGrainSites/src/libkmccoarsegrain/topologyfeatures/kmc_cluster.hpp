@@ -179,7 +179,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
     // Must be greater than 1
     assert(resolution>1); 
     resolution_ = resolution; 
-    time_increment_ = KMC_TopologyFeature::escape_time_constant_/resolution_;
+    time_increment_ = KMC_TopologyFeature::escape_time_constant_/static_cast<double>(resolution_);
   }
 
   /**
