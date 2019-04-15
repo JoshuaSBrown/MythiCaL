@@ -250,9 +250,9 @@ int main(void){
         ++hop_count;
       }    
 
-      vector<vector<int>> clusters = CGsystem.getClusters();
+      unordered_map<int,vector<int>> clusters = CGsystem.getClusters();
       assert(clusters.size()==1);
-      assert(clusters.at(0).size()==4);
+      assert(clusters.begin()->second.size()==4);
       bool site6_found = false;
       bool site7_found = false;
       bool site10_found = false;

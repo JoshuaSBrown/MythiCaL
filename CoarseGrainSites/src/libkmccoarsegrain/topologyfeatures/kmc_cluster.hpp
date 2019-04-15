@@ -175,13 +175,20 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * \param[in] resolution integer value defining how coarse grained the
    * cluster is
    **/
-  void setResolution(const int resolution) { 
+  void setResolution(const double resolution) { 
     // Must be greater than 1
-    assert(resolution>1); 
+    assert(resolution>=2.0); 
     resolution_ = resolution; 
-    time_increment_ = KMC_TopologyFeature::escape_time_constant_/resolution_;
+    time_increment_ = KMC_TopologyFeature::escape_time_constant_/static_cast<double>(resolution_);
   }
 
+  double getResolution() const {
+    return resolution_;
+  }
+
+  double getTimeIncrement() const {
+    return time_increment_;
+  }
   /**
    * \brief Pick the next site a particle will hop too
    *
@@ -271,7 +278,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
   int prev_total_visit_freq_;
 
   /// Relates to how coarse grained the dwell time will be
-  int resolution_;
+  double resolution_;
 
   /// Number of iterations used to solve the master equation
   long iterations_;

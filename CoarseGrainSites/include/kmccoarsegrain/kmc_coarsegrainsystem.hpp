@@ -169,8 +169,18 @@ class KMC_CoarseGrainSystem {
   void setMinCoarseGrainIterationThreshold(int threshold_min);
   int getMinCoarseGrainIterationThreshold();
 
-  std::vector<std::vector<int>> getClusters();
 
+  /**
+   * @brief Return the clusters
+   *
+   * vector of the indices of the cluster beginning with the id of the cluster
+   *
+   * @return 
+   */
+  std::unordered_map<int,std::vector<int>> getClusters();
+
+  std::unordered_map<int,double> getResolutionOfClusters();
+  std::unordered_map<int,double> getTimeIncrementOfClusters();
   /**
    * \brief Determines how fine grained the time is allowed to be
    *

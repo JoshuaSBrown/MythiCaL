@@ -124,17 +124,12 @@ int main(int argc, char* argv[]){
       int site=4;
       while(site==4 || site==5){
         int walker_index = walker_global_times.begin()->first;
-       // cout << "walker index " << walker_index << endl;
         KMC_Walker& electron = electrons.at(walker_index).second; 
         int electron_id = electrons.at(walker_index).first;
-       // cout << "electron id " << electron_id << endl;
         CGsystem.hop(electron_id,electron);
         // Update the dwell time
-       // cout << "made hop " << endl;
         walker_global_times.begin()->second += electron.getDwellTime();
-       // cout << "Grabed dwell time" << endl;
         site = electron.getPotentialSite();
-       // cout << "Moving to site " << site << endl;
       }
 
       CGsystem.removeWalkerFromSystem(electrons.at(0));
@@ -146,7 +141,9 @@ int main(int argc, char* argv[]){
     }
   }// End of the Coarse grain simulation without clustering 
   high_resolution_clock::time_point nocluster_time_end = high_resolution_clock::now();
-  
+
+  double resolution_of_cluster = 0.0;  
+  double time_increment_of_cluster = 0.0;
   cout << "Running coarse grained Monte Carlo" << endl;
   high_resolution_clock::time_point cluster_time_start = high_resolution_clock::now();
   { // Run with clusters
@@ -173,26 +170,24 @@ int main(int argc, char* argv[]){
       int site=4;
       while(site==4 || site==5){
         int walker_index = walker_global_times.begin()->first;
-    //    cout << "walker index " << walker_index << endl;
         KMC_Walker& electron = electrons.at(walker_index).second; 
         int electron_id = electrons.at(walker_index).first;
-     //   cout << "electron id " << electron_id << endl;
         CGsystem.hop(electron_id,electron);
         // Update the dwell time
-      //  cout << "made hop " << endl;
         walker_global_times.begin()->second += electron.getDwellTime();
-       // cout << "Grabed dwell time" << endl;
         site = electron.getPotentialSite();
-        //cout << "Moving to site " << site << endl;
       }
 
       CGsystem.removeWalkerFromSystem(electrons.at(0));
     } 
     auto clusters = CGsystem.getClusters();
-    if(clusters.size()==0){
-      cerr << "WARNING no clusters were detected by the coarse grained side of the test" << endl;
+    if(clusters.size()!=1){
+      cerr << "WARNING a single cluster was not detected when coarse graining is run" << endl;
     }
-
+    unordered_map<int,double> clusters_resolution = CGsystem.getResolutionOfClusters();
+    resolution_of_cluster = clusters_resolution.begin()->second;
+    unordered_map<int,double> clusters_time_inc = CGsystem.getTimeIncrementOfClusters();
+    time_increment_of_cluster = clusters_time_inc.begin()->second; 
   } // End of cluster coarse grain Monte Carlo
    
      high_resolution_clock::time_point cluster_time_end = high_resolution_clock::now();
@@ -202,7 +197,9 @@ int main(int argc, char* argv[]){
   auto duraction_nocluster = duration_cast<milliseconds>(nocluster_time_end-nocluster_time_start).count();
   auto duraction_coarse = duration_cast<milliseconds>(cluster_time_end-cluster_time_start).count();
 
-  cout << "Crude Monte Carlo Run Time: " << duraction_nocluster << " ms " << endl;
-  cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " ms " << endl;
+  cout << "Crude Monte Carlo Run Time: " << duraction_nocluster << " ms" << endl;
+  cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " ms";
+  cout << " resolution " << resolution_of_cluster;
+  cout << " time increment " << time_increment_of_cluster << endl;
   return 0;
 }

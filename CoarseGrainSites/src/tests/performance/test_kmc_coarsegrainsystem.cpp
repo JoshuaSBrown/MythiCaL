@@ -178,7 +178,7 @@ int main(void){
       escapeTimes.push_back(totalTimeOnCluster);
     }
 
-    vector<vector<int>> clusters = CGsystem.getClusters();
+    unordered_map<int,vector<int>> clusters = CGsystem.getClusters();
     if(clusters.size()!=1){
       throw runtime_error("Test failed because no clusters were identified.");
     }
