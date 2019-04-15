@@ -457,8 +457,17 @@ double KMC_CoarseGrainSystem::getTimeConstantFromSitesToNeighbors_(
   }
   return 1.0/sumRates;
 }
-vector<vector<int>> KMC_CoarseGrainSystem::getClusters(){
+
+unordered_map<int,vector<int>> KMC_CoarseGrainSystem::getClusters(){
   return clusters_->getSiteIdsOfClusters();
+}
+
+unordered_map<int,int> KMC_CoarseGrainSystem::getResolutionOfClusters(){
+  return clusters_->getResolutionOfClusters();
+}
+
+unordered_map<int,double> KMC_CoarseGrainSystem::getTimeIncrementOfClusters(){
+  return clusters_->getTimeIncrementOfClusters();
 }
 
 int KMC_CoarseGrainSystem::getFavoredClusterId_(vector<int> siteIds) {

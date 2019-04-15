@@ -2,6 +2,7 @@
 #define KMCCOARSEGRAIN_KMC_CLUSTER_CONTAINER_HPP
 
 #include <unordered_map>
+#include <vector>
 
 #include "log.hpp"
 #include "kmc_rate_container.hpp"
@@ -36,7 +37,9 @@ class KMC_Cluster_Container {
     double getFastestRateOffCluster(int clusterId);
     std::vector<int> getSiteIdsOfNeighbors(int clusterId);
 
-    std::vector<std::vector<int>> getSiteIdsOfClusters();
+    std::unordered_map<int,int> getResolutionOfClusters();
+    std::unordered_map<int,double> getTimeIncrementOfClusters();
+    std::unordered_map<int,std::vector<int>> getSiteIdsOfClusters();
 
   private:
     std::unordered_map<int,KMC_Cluster> clusters_;

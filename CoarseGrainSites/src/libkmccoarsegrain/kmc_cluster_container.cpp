@@ -108,10 +108,26 @@ namespace kmccoarsegrain {
     return clusters_[clusterId].getSiteIdsNeighboringCluster();
   }
 
-  vector<vector<int>> KMC_Cluster_Container::getSiteIdsOfClusters(){
-    vector<vector<int>> clusters;
+  unordered_map<int,vector<int>> KMC_Cluster_Container::getSiteIdsOfClusters(){
+    unordered_map<int,vector<int>> clusters;
     for(auto cluster : clusters_){
-      clusters.push_back(cluster.second.getSiteIdsInCluster());
+      clusters[cluster.first]=cluster.second.getSiteIdsInCluster();
+    }
+    return clusters;
+  }
+
+  unordered_map<int,int> KMC_Cluster_Container::getResolutionOfClusters(){
+    unordered_map<int,int> clusters;
+    for(auto cluster : clusters_){
+      clusters[cluster.first]=cluster.second.getResolution();
+    }
+    return clusters;
+  }
+
+  unordered_map<int,double> KMC_Cluster_Container::getTimeIncrementOfClusters(){
+    unordered_map<int,double> clusters;
+    for(auto cluster : clusters_){
+      clusters[cluster.first]=cluster.second.getTimeIncrement();
     }
     return clusters;
   }

@@ -182,6 +182,13 @@ class KMC_Cluster : public KMC_TopologyFeature {
     time_increment_ = KMC_TopologyFeature::escape_time_constant_/static_cast<double>(resolution_);
   }
 
+  int getResolution() const {
+    return resolution_;
+  }
+
+  double getTimeIncrement() const {
+    return time_increment_;
+  }
   /**
    * \brief Pick the next site a particle will hop too
    *
