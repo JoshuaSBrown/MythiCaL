@@ -19,5 +19,5 @@ do
   crude_time3=$(grep "Crude Monte Carlo Run Time:" out3.txt | awk '{ print $6}')
   coarse_time_res_inc3=$(grep "Coarse Monte Carlo Run Time:" out3.txt | awk '{print $6"   "$9"   "$12}') 
 
-  echo $time2"   "$crude_time"   "$coarse_time_res_inc"   "$crude_time2"   "$coarse_time_res_inc2"   "$crude_time3"   "$coarse_time_res_inc3 >> performance2.txt 
+  echo "$time2   $crude_time   $coarse_time_res_inc   $crude_time2   $coarse_time_res_inc2   $crude_time3   $coarse_time_res_inc3" >> performance2.txt 
 done
