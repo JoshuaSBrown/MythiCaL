@@ -320,14 +320,14 @@ namespace kmccoarsegrain {
 
     double cluster_time_const = cluster.getTimeConstant();
     // Cut the resolution in half from what it would otherwise be otherwise not worth doing
-    int res = static_cast<int>(floor(cluster_time_const/(2*internal_time_limit)));
-    int allowed_resolution = static_cast<int>(ceil(cluster_time_const/time_resolution_));
-    int chosen_resolution = res;
+    double res = cluster_time_const/(2*internal_time_limit);
+    double allowed_resolution = cluster_time_const/time_resolution_;
+    double chosen_resolution = res;
 
     // The coarser the resolution is the better
     if(allowed_resolution <  chosen_resolution) chosen_resolution=allowed_resolution;
 
-    if(chosen_resolution<2) chosen_resolution=2;
+    if(chosen_resolution<2.0) chosen_resolution=2.0;
    
     cluster.setResolution(chosen_resolution);
     if (seed_set_) {
@@ -462,7 +462,7 @@ unordered_map<int,vector<int>> KMC_CoarseGrainSystem::getClusters(){
   return clusters_->getSiteIdsOfClusters();
 }
 
-unordered_map<int,int> KMC_CoarseGrainSystem::getResolutionOfClusters(){
+unordered_map<int,double> KMC_CoarseGrainSystem::getResolutionOfClusters(){
   return clusters_->getResolutionOfClusters();
 }
 

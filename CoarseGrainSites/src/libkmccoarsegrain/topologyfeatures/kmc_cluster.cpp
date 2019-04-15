@@ -53,7 +53,7 @@ KMC_Cluster::KMC_Cluster() : KMC_TopologyFeature() {
   setId(clusterIdCounter);
   clusterIdCounter++;
   iterations_ = 3;
-  resolution_ = 20;
+  resolution_ = 20.0;
   total_visit_freq_ = 0;
   prev_total_visit_freq_ = 0;
   convergenceTolerance_ = 0.01;
@@ -246,7 +246,7 @@ int KMC_Cluster::getVisitFrequency(int siteId){
       double visits = static_cast<double>(difference)*probabilityOnSite_[site_visit.first]*sitesInCluster_.at(site_visit.first).getTimeConstant();
       visits = visits/internal_dwell_time_.at(site_visit.first);
       visits = escape_time_constant_*visits;
-      visits = visits/static_cast<double>(resolution_);
+      visits = visits/resolution_;
       site_visits_[site_visit.first] += round(visits);
     }
     prev_total_visit_freq_ = total_visit_freq_;

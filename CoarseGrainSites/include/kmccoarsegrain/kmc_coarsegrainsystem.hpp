@@ -179,7 +179,7 @@ class KMC_CoarseGrainSystem {
    */
   std::unordered_map<int,std::vector<int>> getClusters();
 
-  std::unordered_map<int,int> getResolutionOfClusters();
+  std::unordered_map<int,double> getResolutionOfClusters();
   std::unordered_map<int,double> getTimeIncrementOfClusters();
   /**
    * \brief Determines how fine grained the time is allowed to be

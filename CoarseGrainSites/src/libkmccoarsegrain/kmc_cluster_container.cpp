@@ -116,8 +116,8 @@ namespace kmccoarsegrain {
     return clusters;
   }
 
-  unordered_map<int,int> KMC_Cluster_Container::getResolutionOfClusters(){
-    unordered_map<int,int> clusters;
+  unordered_map<int,double> KMC_Cluster_Container::getResolutionOfClusters(){
+    unordered_map<int,double> clusters;
     for(auto cluster : clusters_){
       clusters[cluster.first]=cluster.second.getResolution();
     }

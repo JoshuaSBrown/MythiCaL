@@ -37,7 +37,7 @@ class KMC_Cluster_Container {
     double getFastestRateOffCluster(int clusterId);
     std::vector<int> getSiteIdsOfNeighbors(int clusterId);
 
-    std::unordered_map<int,int> getResolutionOfClusters();
+    std::unordered_map<int,double> getResolutionOfClusters();
     std::unordered_map<int,double> getTimeIncrementOfClusters();
     std::unordered_map<int,std::vector<int>> getSiteIdsOfClusters();
 

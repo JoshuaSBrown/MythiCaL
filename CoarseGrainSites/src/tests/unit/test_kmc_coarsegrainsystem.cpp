@@ -738,7 +738,7 @@ int main(void){
       bool site3_found = false;
       bool site4_found = false;
       bool site5_found = false;
-      for( auto siteId : clusters.at(0) ){
+      for( auto siteId : clusters.begin()->second ){
         if(siteId==1) site1_found = true;
         if(siteId==2) site2_found = true;
         if(siteId==3) site3_found = true;
