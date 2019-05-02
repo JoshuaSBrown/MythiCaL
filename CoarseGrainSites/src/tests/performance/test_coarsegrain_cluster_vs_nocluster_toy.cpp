@@ -183,11 +183,12 @@ int main(int argc, char* argv[]){
     auto clusters = CGsystem.getClusters();
     if(clusters.size()!=1){
       cerr << "WARNING a single cluster was not detected when coarse graining is run" << endl;
+    }else{
+      unordered_map<int,double> clusters_resolution = CGsystem.getResolutionOfClusters();
+      resolution_of_cluster = clusters_resolution.begin()->second;
+      unordered_map<int,double> clusters_time_inc = CGsystem.getTimeIncrementOfClusters();
+      time_increment_of_cluster = clusters_time_inc.begin()->second; 
     }
-    unordered_map<int,double> clusters_resolution = CGsystem.getResolutionOfClusters();
-    resolution_of_cluster = clusters_resolution.begin()->second;
-    unordered_map<int,double> clusters_time_inc = CGsystem.getTimeIncrementOfClusters();
-    time_increment_of_cluster = clusters_time_inc.begin()->second; 
   } // End of cluster coarse grain Monte Carlo
    
      high_resolution_clock::time_point cluster_time_end = high_resolution_clock::now();
@@ -199,7 +200,12 @@ int main(int argc, char* argv[]){
 
   cout << "Crude Monte Carlo Run Time: " << duraction_nocluster << " ms" << endl;
   cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " ms";
-  cout << " resolution " << resolution_of_cluster;
-  cout << " time increment " << time_increment_of_cluster << endl;
+  if(resolution_of_cluster==0.0){
+    cout << " resolution NaN";
+    cout << " time increment NaN" << endl;
+  }else{
+    cout << " resolution " << resolution_of_cluster;
+    cout << " time increment " << time_increment_of_cluster << endl;
+  }
   return 0;
 }
