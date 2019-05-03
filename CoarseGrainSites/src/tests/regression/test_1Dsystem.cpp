@@ -166,7 +166,8 @@ int main(int argc, char* argv[]){
         Electron electron;
         int id = 0;
         electrons.push_back(pair<int,KMC_Walker>(id,electron));
-        electrons.at(0).second.occupySite(0);
+        int siteId = 0;
+        electrons.at(0).second.occupySite(siteId);
         CGsystem.initializeWalkers(electrons);
 
         vector<double> transient_current(sample_rate,0.0);

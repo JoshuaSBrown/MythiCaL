@@ -16,30 +16,38 @@ int main(void) {
   cout << "Testing: Walker occupySite" << endl;
   {
     KMC_Walker walker;
-    walker.occupySite(0);
+    int siteId = 0;
+    walker.occupySite(siteId);
   }
 
   cout << "Testing: Walker getIdOfSiteCurrentlyOccupying" << endl;
   {
     KMC_Walker walker;
-
-    walker.occupySite(2);
+    int siteId = 2;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 2);
-    walker.occupySite(2);
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 2);
-    walker.occupySite(4);
+    siteId = 4;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 4);
-    walker.occupySite(1);
+    siteId = 1;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 1);
-    walker.occupySite(0);
+    siteId = 0;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 0);
-    walker.occupySite(3);
+    siteId = 3;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 3);
-    walker.occupySite(4);
+    siteId = 4;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 4);
-    walker.occupySite(1);
+    siteId = 1;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 1);
-    walker.occupySite(4);
+    siteId = 4;
+    walker.occupySite(siteId);
     assert(walker.getIdOfSiteCurrentlyOccupying() == 4);
   }
 

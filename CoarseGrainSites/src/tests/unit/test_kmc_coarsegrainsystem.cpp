@@ -265,7 +265,8 @@ int main(void){
 
       Electron electron;
       // Place the electron on site 1
-      electron.occupySite(1);
+      int siteId = 1;
+      electron.occupySite(siteId);
 
       vector<pair<int,KMC_Walker>> electrons;
       electrons.push_back(pair<int,KMC_Walker>(1,electron));
@@ -295,8 +296,6 @@ int main(void){
       double sum_times = 0.0;
       for(auto time_site : time_spent_on_sites) sum_times+=time_site;
 
-      int siteId=1;
-
       double sum_time_ratio = 0.0;
       vector<double> time_ratios;
       for(auto time_site : time_spent_on_sites){
@@ -323,7 +322,8 @@ int main(void){
 
       Electron electron;
       // Place the electron on site 1
-      electron.occupySite(1);
+      int siteId = 1;
+      electron.occupySite(siteId);
 
       vector<pair<int,KMC_Walker>> electrons;
       electrons.push_back(pair<int,KMC_Walker>(0,electron));
