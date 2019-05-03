@@ -133,14 +133,14 @@ class KMC_CoarseGrainSystem {
    * \param[in] walker
    **/
   void hop(std::pair<int, KMC_Walker>& walker);
-  void hop(int walker_id, KMC_Walker& walker);
+  void hop(int & walker_id, KMC_Walker& walker);
   //void hop(KMC_Walker& walker);
 
   /**
    * \brief Remove the walker from the system
    **/
   void removeWalkerFromSystem(std::pair<int,KMC_Walker>& walker);
-  void removeWalkerFromSystem(int walker_id,KMC_Walker& walker);
+  void removeWalkerFromSystem(int & walker_id,KMC_Walker& walker);
 
   /**
    * \brief Determine if the site is part of a cluster

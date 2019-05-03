@@ -108,13 +108,15 @@ int main(int argc, char* argv[]){
     CGsystem.setTimeResolution(time_inc);
     CGsystem.initializeSystem(rates);
    // Run the coarse grain simulation for as many walkers as specified
+    int startingSiteId = 4;
     for(int walker_index = 0; walker_index<walkers; ++walker_index){
 
       class Electron : public KMC_Walker {};
       vector<pair<int,KMC_Walker>> electrons; 
       Electron elec;
-      elec.occupySite(4);
-      electrons.push_back(pair<int,KMC_Walker>(0,elec));
+      elec.occupySite(startingSiteId);
+      int electronId = 0;
+      electrons.push_back(pair<int,KMC_Walker>(electronId,elec));
 
       CGsystem.initializeWalkers(electrons);
       // Calculate Walker dwell times and sort 
@@ -154,12 +156,13 @@ int main(int argc, char* argv[]){
     CGsystem.setTimeResolution(time_inc);
     CGsystem.initializeSystem(rates);
 
+    int startingSiteId = 4;
     for(int walker_index = 0; walker_index<walkers; ++walker_index){
 
       class Electron : public KMC_Walker {};
       vector<pair<int,KMC_Walker>> electrons; 
       Electron elec;
-      elec.occupySite(4);
+      elec.occupySite(startingSiteId);
       electrons.push_back(pair<int,KMC_Walker>(0,elec));
 
       CGsystem.initializeWalkers(electrons);

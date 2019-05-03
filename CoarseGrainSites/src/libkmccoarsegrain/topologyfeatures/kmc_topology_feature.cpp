@@ -29,7 +29,7 @@ namespace kmccoarsegrain {
     return feature->occupied_>0;
   }
 
-  bool isOccupiedTopology_(KMC_TopologyFeature* feature,int&){
+  bool isOccupiedTopology_(KMC_TopologyFeature* feature,const int&){
     return feature->occupied_>0;
   }
 

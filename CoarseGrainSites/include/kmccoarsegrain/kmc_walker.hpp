@@ -22,7 +22,7 @@ class KMC_Walker {
    *
    * \param[in] siteId id of the site the walker is to occupy
    **/
-  void occupySite(int siteId) { current_site_ = siteId; }
+  void occupySite(int & siteId) { current_site_ = siteId; }
 
   /**
    * \brief Grabs the id of the site the walker currently resides on
@@ -37,7 +37,7 @@ class KMC_Walker {
    * \param[in] site id the walker will try to move to if it remains
    * unoccupied.
    **/
-  void setPotentialSite(const int siteId) { potential_site_ = siteId; }
+  void setPotentialSite(const int & siteId) { potential_site_ = siteId; }
 
   /**
    * \brief Return the id of the site the walker will attempt to move to
@@ -52,7 +52,7 @@ class KMC_Walker {
   /**
    * \brief Set the dwell time
    **/
-  void setDwellTime(const double dwell_time) { dwell_time_ = dwell_time; }
+  void setDwellTime(const double & dwell_time) { dwell_time_ = dwell_time; }
 
  private:
   /// The site the walker currently resides on

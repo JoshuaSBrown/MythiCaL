@@ -183,10 +183,9 @@ namespace kmccoarsegrain {
     removeWalkerFromSystem(walker.first,walker.second);
   }
 
-  void KMC_CoarseGrainSystem::removeWalkerFromSystem(int walker_id, KMC_Walker& walker) {
+  void KMC_CoarseGrainSystem::removeWalkerFromSystem(int & walker_id, KMC_Walker& walker) {
     LOG("Walker is being removed from system", 1);
     auto siteId = walker.getIdOfSiteCurrentlyOccupying();
-    //sites_->vacate(siteId);
     topology_features_[siteId]->removeWalker(walker_id,siteId);
   }
 
@@ -198,35 +197,25 @@ namespace kmccoarsegrain {
     hop(walker.first,walker.second);
   }
 
-  void KMC_CoarseGrainSystem::hop(int walker_id, KMC_Walker & walker) {
-    //void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
-    LOG("Walker is hopping in system", 1);
+  void KMC_CoarseGrainSystem::hop(int & walker_id, KMC_Walker & walker) {
     auto siteId = walker.getIdOfSiteCurrentlyOccupying();
     int siteToHopToId = walker.getPotentialSite();
     KMC_TopologyFeature * feature = topology_features_[siteId];
     KMC_TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
-    int newId;
-    double hopTime;
 
     if(!feature_to_hop_to->isOccupied(siteToHopToId)){
-      LOG("Hopping to " + to_string(siteToHopToId) + " site", 1);
       feature->vacate(siteId);
       feature_to_hop_to->occupy(siteToHopToId);
-      hopTime = feature_to_hop_to->getDwellTime(walker_id);
-      newId   = feature_to_hop_to->pickNewSiteId(walker_id);
 
       walker.occupySite(siteToHopToId);
-      walker.setDwellTime(hopTime);
-      walker.setPotentialSite(newId);
+      walker.setDwellTime(feature_to_hop_to->getDwellTime(walker_id));
+      walker.setPotentialSite(feature_to_hop_to->pickNewSiteId(walker_id));
     }else{
       feature->vacate(siteId);
       feature->occupy(siteId);
 
-      hopTime = feature->getDwellTime(walker_id);
-      newId   = feature->pickNewSiteId(walker_id);
-
-      walker.setDwellTime(hopTime);
-      walker.setPotentialSite(newId);
+      walker.setDwellTime(feature->getDwellTime(walker_id));
+      walker.setPotentialSite(feature->pickNewSiteId(walker_id));
     }
 
     ++iteration_;

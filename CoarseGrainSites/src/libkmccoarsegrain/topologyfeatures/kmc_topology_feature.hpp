@@ -69,7 +69,7 @@ class KMC_TopologyFeature : public virtual Identity {
   void (*vacate_siteId_ptr_)(KMC_TopologyFeature *,int&);
 
   bool (*isOccupied_ptr_)(KMC_TopologyFeature *);
-  bool (*isOccupied_siteId_ptr_)(KMC_TopologyFeature *,int&);
+  bool (*isOccupied_siteId_ptr_)(KMC_TopologyFeature *,const int&);
 
   void (*remove_ptr_)(KMC_TopologyFeature *,int &);
 
@@ -80,7 +80,7 @@ class KMC_TopologyFeature : public virtual Identity {
   friend void vacateTopology_(KMC_TopologyFeature*,int&);
 
   friend bool isOccupiedTopology_(KMC_TopologyFeature*);
-  friend bool isOccupiedTopology_(KMC_TopologyFeature*,int&);
+  friend bool isOccupiedTopology_(KMC_TopologyFeature*,const int&);
 
   friend void removeWalker_(KMC_TopologyFeature*,int&);
 
@@ -105,7 +105,7 @@ class KMC_TopologyFeature : public virtual Identity {
    * \return True if it is occupied, False if it is not occupied
    **/
   bool isOccupied() { return isOccupied_ptr_(this); }
-  bool isOccupied(int& siteId)  
+  bool isOccupied(const int& siteId)  
   { return isOccupied_siteId_ptr_(this,siteId); }
 
   /**
