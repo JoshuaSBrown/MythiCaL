@@ -136,7 +136,6 @@ namespace kmccoarsegrain {
     return visits;
   }
 
-  //void KMC_CoarseGrainSystem::initializeWalkers(vector<KMC_Walker>& walkers) {
   void KMC_CoarseGrainSystem::initializeWalkers(vector<pair<int,KMC_Walker>>& walkers) {
 
     LOG("Initializeing walkers", 1);
