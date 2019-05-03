@@ -469,7 +469,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
 
     friend void occupyCluster_(KMC_TopologyFeature*,int&);
     friend void vacateCluster_(KMC_TopologyFeature*,int&);
-    friend bool isOccupiedCluster_(KMC_TopologyFeature*,int&);
+    friend bool isOccupiedCluster_(KMC_TopologyFeature*,const int&);
     friend void removeWalkerCluster_(KMC_TopologyFeature *, int&);
   };
 

@@ -97,7 +97,7 @@ int KMC_Site::pickNewSiteId(int) {
 int KMC_Site::pickNewSiteId() {
   double number = random_distribution_(random_engine_);
   double threshold = 0.0;
-  for (auto pval : probabilityHopToNeighbor_) {
+  for (pair<int,double> & pval : probabilityHopToNeighbor_) {
     threshold += pval.second;
     if (number < threshold) return pval.first;
   }

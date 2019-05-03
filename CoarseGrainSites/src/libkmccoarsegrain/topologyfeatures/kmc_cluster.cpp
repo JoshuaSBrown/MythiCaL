@@ -32,7 +32,7 @@ void occupyCluster_(KMC_TopologyFeature* feature, int& siteId){
   site.setToOccupiedStatus(); 
 }
 
-bool isOccupiedCluster_(KMC_TopologyFeature* feature,int& siteId){
+bool isOccupiedCluster_(KMC_TopologyFeature* feature,const int& siteId){
   auto cluster = static_cast<KMC_Cluster *>(feature);
   assert(cluster->sitesInCluster_.count(siteId));
   return cluster->sitesInCluster_[siteId].isOccupied();
