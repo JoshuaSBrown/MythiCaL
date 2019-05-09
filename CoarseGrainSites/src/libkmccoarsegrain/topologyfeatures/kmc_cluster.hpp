@@ -199,7 +199,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * \return site id generated to reproduce the probability of a particle
    * moving to it
    **/
-  int pickNewSiteId(int walker_id);
+  int pickNewSiteId(const int & walker_id);
   //int pickNewSiteId();
 
   /**
@@ -256,13 +256,13 @@ class KMC_Cluster : public KMC_TopologyFeature {
   /**
    * \brief Returns the dwell time, each call will return a different value
    **/
-  double getDwellTime(int walker_id);
+  double getDwellTime(const int & walker_id);
   //double getDwellTime();
 
   double getFastestRateOffCluster();
 
-  void setVisitFrequency(int frequency, int siteId);
-  int getVisitFrequency(int siteId);
+  void setVisitFrequency(int frequency,const int & siteId);
+  int getVisitFrequency(const int & siteId);
 
   /**
    * \brief Prints the contents of the cluster
@@ -379,7 +379,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
    *
    * \return the site id of one of the neighbors
    **/
-  int pickClusterNeighbor_(int walker_id);
+  int pickClusterNeighbor_(const int & walker_id);
   //int pickClusterNeighbor_();
 
   /**
@@ -421,7 +421,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
      * \return True if the particle should stay within the cluster, False if
      * it should not
      **/
-    bool hopWithinCluster_(int walker_id);
+    bool hopWithinCluster_(const int & walker_id) const;
     //bool hopWithinCluster_();
 
     // First int is the Id of a site within the cluster
@@ -467,10 +467,10 @@ class KMC_Cluster : public KMC_TopologyFeature {
     std::unordered_map<int, std::vector<std::pair<int, double>>>
         getInternalRatesFromNeighborsComingToSite_();
 
-    friend void occupyCluster_(KMC_TopologyFeature*,int&);
-    friend void vacateCluster_(KMC_TopologyFeature*,int&);
+    friend void occupyCluster_(KMC_TopologyFeature*,const int&);
+    friend void vacateCluster_(KMC_TopologyFeature*,const int&);
     friend bool isOccupiedCluster_(KMC_TopologyFeature*,const int&);
-    friend void removeWalkerCluster_(KMC_TopologyFeature *, int&);
+    friend void removeWalkerCluster_(KMC_TopologyFeature *,const int&);
   };
 
 

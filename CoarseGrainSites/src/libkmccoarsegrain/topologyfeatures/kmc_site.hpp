@@ -85,7 +85,7 @@ class KMC_Site : public KMC_TopologyFeature {
    *
    * \return Returns the rates to all the neighboring sites as doubles
    **/
-  std::vector<double> getRateToNeighbors();
+  std::vector<double> getRateToNeighbors() const;
 
   /**
    * \brief Find the rate to a neighboring site
@@ -97,7 +97,7 @@ class KMC_Site : public KMC_TopologyFeature {
    *
    * \return The rate from the site to the neighbor
    **/
-  double getRateToNeighbor(const int neighSiteId);
+  double getRateToNeighbor(const int & neighSiteId) const;
   double getFastestRate();
 
   /**
@@ -118,7 +118,7 @@ class KMC_Site : public KMC_TopologyFeature {
    *
    * \return site id of a neigboring site
    **/
-  int pickNewSiteId(int) override;
+  int pickNewSiteId(const int & ) override;
   int pickNewSiteId() override;
 
   /**
@@ -146,7 +146,7 @@ class KMC_Site : public KMC_TopologyFeature {
    *
    * \return the probabiliy of hopping to the neighbor
    **/
-  double getProbabilityOfHoppingToNeighboringSite(const int neighSiteId);
+  double getProbabilityOfHoppingToNeighboringSite(const int & neighSiteId);
 
   std::unordered_map<int,double *> getNeighborsAndRates();
   const std::unordered_map<int,double *>& getNeighborsAndRatesConst() const;

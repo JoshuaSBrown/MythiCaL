@@ -22,7 +22,7 @@ class KMC_Walker {
    *
    * \param[in] siteId id of the site the walker is to occupy
    **/
-  void occupySite(int & siteId) { current_site_ = siteId; }
+  void occupySite(const int & siteId) { current_site_ = siteId; }
 
   /**
    * \brief Grabs the id of the site the walker currently resides on

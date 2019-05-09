@@ -65,15 +65,15 @@ void KMC_Site::resetNeighRate(const pair<int, double*> neighRate) {
   calculateProbabilityHopToNeighbors_();
 }
 
-vector<double> KMC_Site::getRateToNeighbors() {
+vector<double> KMC_Site::getRateToNeighbors() const {
   vector<double> rates;
-  for (auto rate : neighRates_) rates.push_back(*(rate.second));
+  for (auto & rate : neighRates_) rates.push_back(*(rate.second));
   return rates;
 }
 
-double KMC_Site::getRateToNeighbor(const int neighSiteId) {
+double KMC_Site::getRateToNeighbor(const int & neighSiteId) const {
   assert(neighRates_.count(neighSiteId)!=0 && "Error the site Id is not a neighbor of the site ");
-  return *(neighRates_[neighSiteId]);
+  return *(neighRates_.at(neighSiteId));
 }
 
 double KMC_Site::getFastestRate(){
@@ -90,7 +90,7 @@ vector<int> KMC_Site::getNeighborSiteIds() const {
   return neighborIds;
 }
 
-int KMC_Site::pickNewSiteId(int) {
+int KMC_Site::pickNewSiteId(const int &) {
   return pickNewSiteId();
 }
 
@@ -116,7 +116,7 @@ const unordered_map<int,double *> & KMC_Site::getNeighborsAndRatesConst() const{
 }
 
 double KMC_Site::getProbabilityOfHoppingToNeighboringSite(
-    const int neighSiteId) 
+    const int & neighSiteId) 
 {
   assert(neighRates_.count(neighSiteId) != 0 && "Error site "
       " is not a neighbor ");

@@ -12,7 +12,7 @@ namespace kmccoarsegrain {
     ++(feature->total_visit_freq_);
   }
 
-  void occupyTopology_(KMC_TopologyFeature* feature, int&) {
+  void occupyTopology_(KMC_TopologyFeature* feature,const int&) {
     ++(feature->occupied_);
     ++(feature->total_visit_freq_);
   }
@@ -21,7 +21,7 @@ namespace kmccoarsegrain {
     --(feature->occupied_);
   }
 
-  void vacateTopology_(KMC_TopologyFeature* feature,int&){
+  void vacateTopology_(KMC_TopologyFeature* feature,const int&){
     --(feature->occupied_);
   }
 
@@ -33,7 +33,7 @@ namespace kmccoarsegrain {
     return feature->occupied_>0;
   }
 
-  void removeWalker_(KMC_TopologyFeature*, int&){
+  void removeWalker_(KMC_TopologyFeature*,const int&){
     return;
   }
 
@@ -61,7 +61,7 @@ namespace kmccoarsegrain {
     random_engine_ = mt19937(seed);
   }
 
-  double KMC_TopologyFeature::getDwellTime(int){
+  double KMC_TopologyFeature::getDwellTime(const int & ){
     double number = random_distribution_(random_engine_);
     return (-1.0)*log(number) * escape_time_constant_;
   }
