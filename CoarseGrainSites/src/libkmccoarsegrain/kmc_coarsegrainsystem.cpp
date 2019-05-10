@@ -51,7 +51,7 @@ namespace kmccoarsegrain {
    ****************************************************************************/
 
   KMC_CoarseGrainSystem::KMC_CoarseGrainSystem() :
-    performance_ratio_(1.50),
+    performance_ratio_(1.00),
     seed_set_(false),
     seed_(0),
     time_resolution_set_(false),
