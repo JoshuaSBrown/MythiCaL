@@ -15,15 +15,15 @@ namespace kmccoarsegrain {
   class CustomComparitor
   {
     public:
-      int operator()(const pair<double,int>& lhs, const pair<double,int>& rhs)
+      int operator()(const pair<int,double>& lhs, const pair<int,double>& rhs)
       {
         if(lhs.first==rhs.first){
           return 0;
         }
         if(lhs.second==rhs.second){
-          return lhs.first<rhs.first;
+          return lhs.first>rhs.first;
         }
-        return lhs.second < rhs.second;
+        return lhs.second > rhs.second;
       }
   };
 
@@ -99,7 +99,9 @@ int KMC_Site::pickNewSiteId() {
   double threshold = 0.0;
   for (pair<int,double> & pval : probabilityHopToNeighbor_) {
     threshold += pval.second;
-    if (number < threshold) return pval.first;
+    if (number < threshold) {
+			return pval.first;
+		}
   }
   assert("Error cummulitive probability distribution is flawed or "
       " the random number generator has calculated a value greater than 1, or"
@@ -163,7 +165,7 @@ void KMC_Site::calculateProbabilityHopToNeighbors_() {
   }
 
   probabilityHopToNeighbor_.clear();
-  copy(neigh_and_prob.begin(),neigh_and_prob.end(),back_inserter(probabilityHopToNeighbor_));
+	copy(neigh_and_prob.begin(),neigh_and_prob.end(),back_inserter(probabilityHopToNeighbor_));
 }
 
 void KMC_Site::calculateDwellTimeConstant_() {
