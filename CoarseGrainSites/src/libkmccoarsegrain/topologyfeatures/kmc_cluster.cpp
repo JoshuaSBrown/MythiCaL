@@ -23,7 +23,7 @@ static int clusterIdCounter = 0;
 /****************************************************************************
  * Public Facing Functions
  ****************************************************************************/
-void occupyCluster_(KMC_TopologyFeature* feature, int& siteId){
+void occupyCluster_(KMC_TopologyFeature* feature, const int& siteId){
   KMC_Cluster * cluster = static_cast<KMC_Cluster *>(feature);
   
   KMC_Site & site = cluster->sitesInCluster_[siteId];
@@ -38,13 +38,13 @@ bool isOccupiedCluster_(KMC_TopologyFeature* feature,const int& siteId){
   return cluster->sitesInCluster_[siteId].isOccupied();
 }
 
-void vacateCluster_(KMC_TopologyFeature* feature,int& siteId){
+void vacateCluster_(KMC_TopologyFeature* feature,const int& siteId){
   auto cluster = static_cast<KMC_Cluster *>(feature);
   cluster->sitesInCluster_[siteId].vacate();
   cluster->vacate();
 }
 
-void removeWalkerCluster_(KMC_TopologyFeature * feature, int & walker_id){
+void removeWalkerCluster_(KMC_TopologyFeature * feature,const int & walker_id){
   auto cluster = static_cast<KMC_Cluster *>(feature);
   cluster->remaining_walker_dwell_times_.erase(walker_id);
 }
@@ -171,7 +171,7 @@ void KMC_Cluster::migrateSitesFrom(KMC_Cluster& cluster) {
   }
 }
 
-int KMC_Cluster::pickNewSiteId(int walker_id) {
+int KMC_Cluster::pickNewSiteId(const int & walker_id) {
   if (hopWithinCluster_(walker_id)) {
     return pickInternalSite_();
   }
@@ -202,7 +202,7 @@ void KMC_Cluster::setConvergenceIterations(long iterations) {
   iterations_ = iterations;
 }
 
-double KMC_Cluster::getDwellTime(int walker_id) {
+double KMC_Cluster::getDwellTime(const int & walker_id) {
   assert(escape_time_constant_!=constants::unassigned_value && "Cannot get "
       "dwell time of the cluster as the escape_time_constant is not defined.");
   if(remaining_walker_dwell_times_.count(walker_id)==0){
@@ -220,7 +220,7 @@ double KMC_Cluster::getDwellTime(int walker_id) {
   return dwell_time;
 }
 
-void KMC_Cluster::setVisitFrequency(int frequency, int siteId){
+void KMC_Cluster::setVisitFrequency(int frequency,const int & siteId){
   assert(site_visits_.count(siteId) && "Be sure to call occupy site to register"
       " a visit");
   assert(escape_time_constant_!=constants::unassigned_value && "Cannot set the "
@@ -233,7 +233,7 @@ void KMC_Cluster::setVisitFrequency(int frequency, int siteId){
   site_visits_[siteId] = visits;
 }
 
-int KMC_Cluster::getVisitFrequency(int siteId){
+int KMC_Cluster::getVisitFrequency(const int & siteId){
   assert(site_visits_.count(siteId));
   assert(escape_time_constant_!=constants::unassigned_value && "Cannot get the "
       "visit frequency as the escape_time_constant is not defined. Be sure "
@@ -424,14 +424,14 @@ unordered_map<int, vector<pair<int, double>>>
   return internalRates;
 }
 
-bool KMC_Cluster::hopWithinCluster_(int walker_id) {
+bool KMC_Cluster::hopWithinCluster_(const int & walker_id) const {
   assert(remaining_walker_dwell_times_.count(walker_id) && "Walker is not "
       "found within the cluster and does not have a dwell time, error in "
       "hopWithinCluster function call. Make sure you call getDwellTime first.");
-  return remaining_walker_dwell_times_[walker_id]>0;
+  return remaining_walker_dwell_times_.at(walker_id)>0;
 }
 
-int KMC_Cluster::pickClusterNeighbor_(int walker_id) {
+int KMC_Cluster::pickClusterNeighbor_(const int & walker_id) {
   remaining_walker_dwell_times_.erase(walker_id);
 
   double number = random_distribution_(random_engine_);

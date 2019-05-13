@@ -63,26 +63,26 @@ class KMC_TopologyFeature : public virtual Identity {
   /// Create function pointer variables
 
   void (*occupy_ptr_)(KMC_TopologyFeature *);
-  void (*occupy_siteId_ptr_)(KMC_TopologyFeature*, int&);
+  void (*occupy_siteId_ptr_)(KMC_TopologyFeature*,const int&);
  
   void (*vacate_ptr_)(KMC_TopologyFeature *);
-  void (*vacate_siteId_ptr_)(KMC_TopologyFeature *,int&);
+  void (*vacate_siteId_ptr_)(KMC_TopologyFeature *,const int&);
 
   bool (*isOccupied_ptr_)(KMC_TopologyFeature *);
   bool (*isOccupied_siteId_ptr_)(KMC_TopologyFeature *,const int&);
 
-  void (*remove_ptr_)(KMC_TopologyFeature *,int &);
+  void (*remove_ptr_)(KMC_TopologyFeature *,const int &);
 
   friend void occupyTopology_(KMC_TopologyFeature*);
-  friend void occupyTopology_(KMC_TopologyFeature*,int&);
+  friend void occupyTopology_(KMC_TopologyFeature*,const int&);
 
   friend void vacateTopology_(KMC_TopologyFeature*);
-  friend void vacateTopology_(KMC_TopologyFeature*,int&);
+  friend void vacateTopology_(KMC_TopologyFeature*,const int&);
 
   friend bool isOccupiedTopology_(KMC_TopologyFeature*);
   friend bool isOccupiedTopology_(KMC_TopologyFeature*,const int&);
 
-  friend void removeWalker_(KMC_TopologyFeature*,int&);
+  friend void removeWalker_(KMC_TopologyFeature*,const int&);
 
  public:
   KMC_TopologyFeature();
@@ -112,7 +112,7 @@ class KMC_TopologyFeature : public virtual Identity {
    * \brief Indicate that the site is no longer occupied by a particle
    **/
   void vacate() { vacate_ptr_(this); }
-  void vacate(int& siteId) { vacate_siteId_ptr_(this,siteId); }
+  void vacate(const int& siteId) { vacate_siteId_ptr_(this,siteId); }
 
   /**
    * \brief Remove a random walker from the site 
@@ -121,7 +121,7 @@ class KMC_TopologyFeature : public virtual Identity {
    * function should be called, as it ensures that any internal variables 
    * tracking the walker are appropriately reset.
    **/
-  void removeWalker(int walker_id, int site_id) { 
+  void removeWalker(const int & walker_id,const int & site_id) { 
     vacate(site_id);
     remove_ptr_(this,walker_id);
   }
@@ -136,7 +136,7 @@ class KMC_TopologyFeature : public virtual Identity {
   void occupy() { 
     occupy_ptr_(this); 
   }
-  void occupy(int& siteId) { 
+  void occupy(const int& siteId) { 
     occupy_siteId_ptr_(this,siteId); 
   }
 
@@ -166,7 +166,7 @@ class KMC_TopologyFeature : public virtual Identity {
    * \return A time indicating how long a particle was on the site before it
    * hopped
    **/
-  virtual double getDwellTime(int walker_id);
+  virtual double getDwellTime(const int & walker_id);
   //virtual double getDwellTime();
 
   /**
@@ -180,12 +180,12 @@ class KMC_TopologyFeature : public virtual Identity {
    *
    * \return site id of a neigboring site
    **/
-  virtual int pickNewSiteId(int walker_id) = 0;
+  virtual int pickNewSiteId(const int & walker_id) = 0;
   virtual int pickNewSiteId() { return -1;}
 
-  virtual void setVisitFrequency(int frequency) 
+  virtual void setVisitFrequency(const int & frequency) 
   { total_visit_freq_ = frequency;}
-  virtual void setVisitFrequency(int frequency, int) 
+  virtual void setVisitFrequency(const int & frequency, int) 
   { total_visit_freq_ = frequency;}
 
   virtual int getVisitFrequency() 

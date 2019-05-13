@@ -342,10 +342,10 @@ int main(int argc, char* argv[]){
   } // End of coarse grain Monte Carlo
   high_resolution_clock::time_point coarse_time_end = high_resolution_clock::now();
 
-  auto duraction_nocluster = duration_cast<seconds>(setup_time_end-setup_time_start+nocluster_time_end-nocluster_time_start).count();
-  auto duraction_coarse = duration_cast<seconds>(setup_time_end-setup_time_start+coarse_time_end-coarse_time_start).count();
+  auto duraction_nocluster = duration_cast<milliseconds>(setup_time_end-setup_time_start+nocluster_time_end-nocluster_time_start).count();
+  auto duraction_coarse = duration_cast<milliseconds>(setup_time_end-setup_time_start+coarse_time_end-coarse_time_start).count();
 
-  cout << "Coarse nocluster Monte Carlo Run Time: " << duraction_nocluster << " s " << endl;
-  cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " s " << endl;
+  cout << "Coarse nocluster Monte Carlo Run Time: " << duraction_nocluster << " ms " << endl;
+  cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " ms " << endl;
   return 0;
 }

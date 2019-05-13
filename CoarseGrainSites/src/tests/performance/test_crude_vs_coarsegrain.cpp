@@ -339,7 +339,7 @@ int main(int argc, char* argv[]){
         double random_number = distribution(random_number_generator);
         // Attempt to hop
         assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
-        for( auto pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
+        for( const pair<int,double> & pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
           if(random_number < pval_iterator.second){
             int neighId = pval_iterator.first;
             if(siteOccupied.count(neighId)){
@@ -351,7 +351,7 @@ int main(int argc, char* argv[]){
               // Occupy new site
               siteOccupied.insert(neighId);
               if(frequency.count(neighId)){
-                frequency[neighId]++;
+                ++frequency[neighId];
               }else{
                 frequency[neighId]=1;
               }
@@ -438,10 +438,10 @@ int main(int argc, char* argv[]){
   } // End of coarse grain Monte Carlo
   high_resolution_clock::time_point coarse_time_end = high_resolution_clock::now();
 
-  auto duraction_crude = duration_cast<seconds>(setup_time_end-setup_time_start+crude_time_end-crude_time_start).count();
-  auto duraction_coarse = duration_cast<seconds>(setup_time_end-setup_time_start+coarse_time_end-coarse_time_start).count();
+  auto duraction_crude = duration_cast<milliseconds>(setup_time_end-setup_time_start+crude_time_end-crude_time_start).count();
+  auto duraction_coarse = duration_cast<milliseconds>(setup_time_end-setup_time_start+coarse_time_end-coarse_time_start).count();
 
-  cout << "Crude Monte Carlo Run Time: " << duraction_crude << " s " << endl;
-  cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " s " << endl;
+  cout << "Crude Monte Carlo Run Time: " << duraction_crude << " ms " << endl;
+  cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " ms " << endl;
   return 0;
 }

@@ -51,7 +51,7 @@ namespace kmccoarsegrain {
    ****************************************************************************/
 
   KMC_CoarseGrainSystem::KMC_CoarseGrainSystem() :
-    performance_ratio_(1.50),
+    performance_ratio_(1.00),
     seed_set_(false),
     seed_(0),
     time_resolution_set_(false),
@@ -192,13 +192,13 @@ namespace kmccoarsegrain {
     return sites_->getClusterIdOfSite(siteId);
   }
 
-  void KMC_CoarseGrainSystem::hop(pair<int,KMC_Walker>& walker) {
+  void KMC_CoarseGrainSystem::hop(pair<const int,KMC_Walker>& walker) {
     hop(walker.first,walker.second);
   }
 
-  void KMC_CoarseGrainSystem::hop(int & walker_id, KMC_Walker & walker) {
-    auto siteId = walker.getIdOfSiteCurrentlyOccupying();
-    int siteToHopToId = walker.getPotentialSite();
+  void KMC_CoarseGrainSystem::hop(const int & walker_id, KMC_Walker & walker) {
+    const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
+    const int & siteToHopToId = walker.getPotentialSite();
     KMC_TopologyFeature * feature = topology_features_[siteId];
     KMC_TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
 

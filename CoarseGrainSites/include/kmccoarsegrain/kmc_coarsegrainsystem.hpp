@@ -132,8 +132,8 @@ class KMC_CoarseGrainSystem {
    *
    * \param[in] walker
    **/
-  void hop(std::pair<int, KMC_Walker>& walker);
-  void hop(int & walker_id, KMC_Walker& walker);
+  void hop(std::pair<const int, KMC_Walker>& walker);
+  void hop(const int & walker_id, KMC_Walker& walker);
   //void hop(KMC_Walker& walker);
 
   /**
