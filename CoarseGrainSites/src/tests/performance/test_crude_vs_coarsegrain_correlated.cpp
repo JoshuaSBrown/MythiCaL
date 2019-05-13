@@ -17,6 +17,12 @@ using namespace std;
 using namespace std::chrono;
 using namespace kmccoarsegrain;
 
+bool sortbysec(const pair<int,double> &a,                                       
+		const pair<int,double> &b)                                        
+{                                                                               
+	return (a.second > b.second);                                               
+} 
+
 /**
  * \brief class for converting 1d array to 3d and vice versa
  **/
@@ -525,7 +531,7 @@ int main(int argc, char* argv[]){
       }
     }// Calculate sojourn times & sum_rates
 
-    unordered_map<int,unordered_map<int,double>> cummulitive_probability_to_neighbors;
+    unordered_map<int,vector<pair<int,double>>> cummulitive_probability_to_neighbors;
     // Calculate crude probability to neighbors
     {
       for(int x=0; x<distance; ++x){
@@ -548,24 +554,29 @@ int main(int argc, char* argv[]){
             if(zlow-1>0) --zlow;
             if(zhigh+1<distance) ++zhigh;
 
-            unordered_map<int,double> cummulitive_probability;
-            double pval = 0.0;
+            vector<pair<int,double>> probability;
             int siteId = converter.to1D(x,y,z); 
             for( int x2 = xlow; x2<=xhigh; ++x2){
               for( int y2 = ylow; y2<=yhigh; ++y2){
                 for( int z2 = zlow; z2<=zhigh; ++z2){
                   int neighId = converter.to1D(x2,y2,z2);
                   if(siteId!=neighId){
-                    cummulitive_probability[neighId]=rates[siteId][neighId]/sum_rates[siteId];
-                    cummulitive_probability[neighId]+=pval;
-                    pval+=rates[siteId][neighId]/sum_rates[siteId];
+                    probability.push_back(pair<int,double>(neighId,rates[siteId][neighId]/sum_rates[siteId]));
                   }
                 }
               }
             }
-            assert(cummulitive_probability.size()!=0);
-            cummulitive_probability_to_neighbors[siteId] = cummulitive_probability; 
-            assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
+
+						sort(probability.begin(),probability.end(),sortbysec);              
+						vector<pair<int,double>> cummulitive_probability;                   
+						double pval = 0.0;                                                  
+						for( pair<int,double> prob : probability ){                         
+							prob.second+=pval;                                                
+							pval = prob.second;                                               
+							cummulitive_probability.push_back(prob);                          
+						}                                                                   
+						cummulitive_probability_to_neighbors[siteId] = cummulitive_probability;
+						assert(cummulitive_probability_to_neighbors[siteId].size()!=0);   
           }
         }
       }

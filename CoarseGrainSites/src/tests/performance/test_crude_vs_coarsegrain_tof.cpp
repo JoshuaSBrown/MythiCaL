@@ -304,15 +304,12 @@ int main(int argc, char* argv[]){
                   int neighId = converter.to1D(x2,y2,z2);
                   if(siteId!=neighId){
                     probability.push_back(pair<int,double>(neighId,rates[siteId][neighId]/sum_rates[siteId]));
-                    //cummulitive_probability[neighId]+=pval;
-                    //pval+=rates[siteId][neighId]/sum_rates[siteId];
                   }
                 }
               }
             }
 
 						sort(probability.begin(),probability.end(),sortbysec);
-            //assert(cummulitive_probability.size()!=0);
             vector<pair<int,double>> cummulitive_probability;
 						double pval = 0.0;
 						for( pair<int,double> prob : probability ){
