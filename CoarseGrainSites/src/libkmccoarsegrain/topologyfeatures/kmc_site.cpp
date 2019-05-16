@@ -86,7 +86,7 @@ double KMC_Site::getFastestRate(){
 
 vector<int> KMC_Site::getNeighborSiteIds() const {
   vector<int> neighborIds;
-  for (auto neighId : neighRates_) neighborIds.push_back(neighId.first);
+  for (auto & neighId : neighRates_) neighborIds.push_back(neighId.first);
   return neighborIds;
 }
 

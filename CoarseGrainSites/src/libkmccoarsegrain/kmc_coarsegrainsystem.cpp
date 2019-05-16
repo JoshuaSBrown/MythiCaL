@@ -199,8 +199,8 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::hop(const int & walker_id, KMC_Walker & walker) {
     const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
     const int & siteToHopToId = walker.getPotentialSite();
-    KMC_TopologyFeature * feature = topology_features_[siteId];
-    KMC_TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
+    KMC_TopologyFeature *& feature = topology_features_[siteId];
+    KMC_TopologyFeature *& feature_to_hop_to = topology_features_[siteToHopToId];
 
     if(!feature_to_hop_to->isOccupied(siteToHopToId)){
       feature->vacate(siteId);

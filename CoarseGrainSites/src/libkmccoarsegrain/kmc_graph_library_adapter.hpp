@@ -15,12 +15,12 @@ namespace kmccoarsegrain {
   // Can only take arguments of type container<unique_ptr<Edge>>
   template<typename T> 
   T convertSitesOutgoingRatesToUniqueWeightedEdges(
-      KMC_Site_Container site_container, 
-      int siteId)
+      KMC_Site_Container & site_container, 
+      const int & siteId)
   {
     T container;
     Rate_Map rate_map = site_container.getRates();
-    for ( auto neigh : rate_map[siteId] ){
+    for ( auto& neigh : rate_map[siteId] ){
       int neigh_id = neigh.first;
       double * rate = neigh.second;
     
@@ -34,12 +34,12 @@ namespace kmccoarsegrain {
   // Can only take arguments of type container<shared_ptr<Edge>>
   template<typename T> 
   T convertSitesOutgoingRatesToSharedWeightedEdges(
-      KMC_Site_Container site_container, 
-      int siteId)
+      KMC_Site_Container & site_container, 
+      const int & siteId)
   {
     T container;
     Rate_Map rate_map = site_container.getRates();
-    for ( auto neigh : rate_map[siteId] ){
+    for ( auto& neigh : rate_map[siteId] ){
       int neigh_id = neigh.first;
       double * rate = neigh.second;
     

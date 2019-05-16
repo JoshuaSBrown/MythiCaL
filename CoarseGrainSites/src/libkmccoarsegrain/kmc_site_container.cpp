@@ -159,9 +159,8 @@ namespace kmccoarsegrain {
 
   Rate_Map KMC_Site_Container::getRates(){
     Rate_Map rate_map;
-    for( auto site : sites_ ){
-      auto rates = site.second.getNeighborsAndRates();
-      rate_map[site.first] = rates;
+    for( auto & site : sites_ ){
+      rate_map[site.first] = site.second.getNeighborsAndRates();
     }
     return rate_map;
   }
