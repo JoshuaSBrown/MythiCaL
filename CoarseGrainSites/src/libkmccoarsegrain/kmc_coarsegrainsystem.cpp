@@ -396,11 +396,10 @@ double KMC_CoarseGrainSystem::getInternalTimeLimit_(vector<int> siteIds ){
 
   list<weak_ptr<Edge>> edges_weak(edges.begin(), edges.end());
 
-  auto graph_ptr =
-      shared_ptr<Graph<string>>(new Graph<string>(edges_weak, nodes_weak));
+  auto graph_ptr = Graph<string>(edges_weak, nodes_weak);
 
   unordered_map<pair<int, int>, double,hash_functions::hash> verticesAndtimes =
-      maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
+      maxMinimumDistanceBetweenEveryVertex<string>(graph_ptr);
 
   double maxtime = 0.0;
   for (auto verticesAndTime : verticesAndtimes) {

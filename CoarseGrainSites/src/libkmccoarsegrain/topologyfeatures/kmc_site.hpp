@@ -148,7 +148,7 @@ class KMC_Site : public KMC_TopologyFeature {
    **/
   double getProbabilityOfHoppingToNeighboringSite(const int & neighSiteId);
 
-  std::unordered_map<int,double *> getNeighborsAndRates();
+  std::unordered_map<int,double *> & getNeighborsAndRates();
   const std::unordered_map<int,double *>& getNeighborsAndRatesConst() const;
 
   /**

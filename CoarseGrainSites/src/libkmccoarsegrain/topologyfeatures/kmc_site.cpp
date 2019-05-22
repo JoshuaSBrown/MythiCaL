@@ -109,7 +109,7 @@ int KMC_Site::pickNewSiteId() {
   return -1;
 }
 
-unordered_map<int,double *> KMC_Site::getNeighborsAndRates(){
+unordered_map<int,double *> & KMC_Site::getNeighborsAndRates(){
   return neighRates_;
 }
 

@@ -20,7 +20,7 @@ namespace kmccoarsegrain {
   {
     T container;
     Rate_Map rate_map = site_container.getRates();
-    for ( auto& neigh : rate_map[siteId] ){
+    for ( auto& neigh : *rate_map[siteId] ){
       int neigh_id = neigh.first;
       double * rate = neigh.second;
     
@@ -39,7 +39,7 @@ namespace kmccoarsegrain {
   {
     T container;
     Rate_Map rate_map = site_container.getRates();
-    for ( auto& neigh : rate_map[siteId] ){
+    for ( auto& neigh : *rate_map[siteId] ){
       int neigh_id = neigh.first;
       double * rate = neigh.second;
     
@@ -53,13 +53,13 @@ namespace kmccoarsegrain {
   // Same as the above method but for a vector of integers
   template<typename T> 
   T convertSitesOutgoingRatesToSharedWeightedEdges(
-      KMC_Site_Container site_container, 
+      KMC_Site_Container & site_container, 
       std::vector<int> siteIds)
   {
     T container;
     Rate_Map rate_map = site_container.getRates();
     for(auto siteId : siteIds ){
-      for ( auto neigh : rate_map[siteId] ){
+      for ( auto & neigh : *rate_map[siteId] ){
         int neigh_id = neigh.first;
         double * rate = neigh.second;
 
@@ -73,13 +73,13 @@ namespace kmccoarsegrain {
 
   template<typename T> 
   T convertSitesOutgoingRatesToTimeSharedWeightedEdges(
-      KMC_Site_Container site_container, 
+      KMC_Site_Container & site_container, 
       std::vector<int> siteIds)
   {
     T container;
     Rate_Map rate_map = site_container.getRates();
     for(auto siteId : siteIds ){
-      for ( auto neigh : rate_map[siteId] ){
+      for ( auto & neigh : *rate_map[siteId] ){
         int neigh_id = neigh.first;
         double  time = 1.0/(*neigh.second);
         auto edge_ptr = std::shared_ptr<ugly::EdgeDirectedWeighted>(new ugly::EdgeDirectedWeighted(siteId,neigh_id,time));
