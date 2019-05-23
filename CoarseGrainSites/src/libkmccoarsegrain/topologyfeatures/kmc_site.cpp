@@ -42,7 +42,7 @@ KMC_Site::~KMC_Site() {}
 void KMC_Site::setRatesToNeighbors(unordered_map<int, double>& neighRates) {
   assert(neighRates.size()!=0 && "Sites must have at least one rate to a "
     "neighbor. Cannot set rates to neighbors with empty map.");
-  for (auto neighAndRate : neighRates) {
+  for (auto & neighAndRate : neighRates) {
     assert(neighAndRate.second!=0 && "One of the rates is 0.0. You cannot "
         "set a rate to a value of 0.0 as it is meaningless.");
     neighRates_[neighAndRate.first] = &(neighRates[neighAndRate.first]);
@@ -78,7 +78,7 @@ double KMC_Site::getRateToNeighbor(const int & neighSiteId) const {
 
 double KMC_Site::getFastestRate(){
   double rate =0.0;
-  for(auto neigh_rate: neighRates_) {
+  for(auto & neigh_rate: neighRates_) {
     if(*(neigh_rate.second)>rate) rate = *(neigh_rate.second);
   }
   return rate;
@@ -109,11 +109,11 @@ int KMC_Site::pickNewSiteId() {
   return -1;
 }
 
-unordered_map<int,double *> & KMC_Site::getNeighborsAndRates(){
+unordered_map<int,const double *> & KMC_Site::getNeighborsAndRates(){
   return neighRates_;
 }
 
-const unordered_map<int,double *> & KMC_Site::getNeighborsAndRatesConst() const{
+const unordered_map<int,const double *> & KMC_Site::getNeighborsAndRatesConst() const{
   return neighRates_;
 }
 
@@ -143,11 +143,11 @@ std::ostream& operator<<(std::ostream& os,
   os << "Total Visit Frequency: " << site.total_visit_freq_ << endl;
   os << "Escape Time Constant: " << site.escape_time_constant_ << endl;
   os << "Neighbors:Rates" << endl;
-  for (auto rate_ptr : site.neighRates_) {
+  for (auto & rate_ptr : site.neighRates_) {
     os << "\t" << rate_ptr.first << ":" << *(rate_ptr.second) << endl;
   }
   os << "Neighbors:Probability hop to them" << endl;
-  for (auto probability : site.probabilityHopToNeighbor_) {
+  for (auto & probability : site.probabilityHopToNeighbor_) {
     os << "\t" << probability.first << ":" << probability.second << endl;
   }
   return os;
@@ -159,7 +159,7 @@ std::ostream& operator<<(std::ostream& os,
 void KMC_Site::calculateProbabilityHopToNeighbors_() {
   double sumRates = getSumOfRates_();
   set<pair<int,double>,CustomComparitor> neigh_and_prob;
-  for (auto rateToNeigh : neighRates_) {
+  for (auto & rateToNeigh : neighRates_) {
     auto values = pair<int,double> (rateToNeigh.first,(*rateToNeigh.second) / sumRates);
     neigh_and_prob.insert(values);
   }
@@ -175,7 +175,7 @@ void KMC_Site::calculateDwellTimeConstant_() {
 
 double KMC_Site::getSumOfRates_() {
   double sum = 0.0;
-  for (auto rate : neighRates_) {
+  for (auto & rate : neighRates_) {
     sum += *(rate.second);
   }
   return sum;

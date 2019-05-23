@@ -22,7 +22,7 @@ namespace kmccoarsegrain {
     Rate_Map rate_map = site_container.getRates();
     for ( auto& neigh : *rate_map[siteId] ){
       int neigh_id = neigh.first;
-      double * rate = neigh.second;
+      const double * rate = neigh.second;
     
       auto edge_ptr = std::unique_ptr<ugly::EdgeDirectedWeighted>(new ugly::EdgeDirectedWeighted(siteId,neigh_id,*rate));
 
@@ -41,7 +41,7 @@ namespace kmccoarsegrain {
     Rate_Map rate_map = site_container.getRates();
     for ( auto& neigh : *rate_map[siteId] ){
       int neigh_id = neigh.first;
-      double * rate = neigh.second;
+      const double * rate = neigh.second;
     
       auto edge_ptr = std::shared_ptr<ugly::EdgeDirectedWeighted>(new ugly::EdgeDirectedWeighted(siteId,neigh_id,*rate));
 
@@ -61,7 +61,7 @@ namespace kmccoarsegrain {
     for(auto siteId : siteIds ){
       for ( auto & neigh : *rate_map[siteId] ){
         int neigh_id = neigh.first;
-        double * rate = neigh.second;
+        const double * rate = neigh.second;
 
         auto edge_ptr = std::shared_ptr<ugly::EdgeDirectedWeighted>(new ugly::EdgeDirectedWeighted(siteId,neigh_id,*rate));
 

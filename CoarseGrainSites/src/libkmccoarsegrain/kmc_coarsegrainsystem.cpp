@@ -370,8 +370,8 @@ namespace kmccoarsegrain {
     double max_rate_off = 0; 
     for(const int & site_id : siteIds){
       KMC_Site & site = sites_->getKMC_Site(site_id);
-      const unordered_map<int,double *> neigh_and_rates = site.getNeighborsAndRatesConst();
-      for( const pair<int,double *> & neigh_and_rate : neigh_and_rates){
+      const unordered_map<int,const double *> neigh_and_rates = site.getNeighborsAndRatesConst();
+      for( const pair<int,const double *> & neigh_and_rate : neigh_and_rates){
         if(internal_sites.count(neigh_and_rate.first)==0){
           if(*(neigh_and_rate.second) > max_rate_off){
             max_rate_off = *(neigh_and_rate.second);

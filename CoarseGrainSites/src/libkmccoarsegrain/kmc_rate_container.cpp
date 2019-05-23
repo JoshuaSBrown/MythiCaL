@@ -31,7 +31,7 @@ namespace kmccoarsegrain {
 
   }
 
-  double * KMC_Rate_Container::getRate(int siteId, int neighId) {
+  const double * KMC_Rate_Container::getRate(int siteId, int neighId) {
     if(rates_.count(siteId)==0){
       throw invalid_argument("Cannot retrieve rate as it has not been added.");
 		}else if(rates_[siteId]->count(neighId)==0){
