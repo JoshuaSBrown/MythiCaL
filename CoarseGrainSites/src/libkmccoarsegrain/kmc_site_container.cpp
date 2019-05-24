@@ -1,4 +1,4 @@
-
+#include <utility>
 #include "kmc_site_container.hpp"
 
 using namespace std;
@@ -10,6 +10,16 @@ namespace kmccoarsegrain {
       throw invalid_argument("Cannot add site it has already been added.");
     }
     sites_[site.getId()] = site;
+  }
+
+	KMC_Site &  KMC_Site_Container::createKMC_Site(const int & siteId){
+    if(sites_.count(siteId)){
+      throw invalid_argument("Cannot add site it has already been added.");
+    }
+    //return //sites_.emplace(make_pair(siteId,KMC_Site(siteId)));
+		KMC_Site & site = sites_[siteId];
+		site.setId(siteId);
+		return site;
   }
 
   void KMC_Site_Container::addKMC_Sites(vector<KMC_Site>& sites){

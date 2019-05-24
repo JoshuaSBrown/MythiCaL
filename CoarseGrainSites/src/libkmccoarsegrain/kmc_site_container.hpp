@@ -16,7 +16,7 @@ namespace kmccoarsegrain {
 class KMC_Site_Container {
   public:
     KMC_Site_Container() {};
-
+		KMC_Site & createKMC_Site(const int & siteId);
     void addKMC_Site(KMC_Site& site);
     void addKMC_Sites(std::vector<KMC_Site>& sites);
     KMC_Site& getKMC_Site(const int & siteId);

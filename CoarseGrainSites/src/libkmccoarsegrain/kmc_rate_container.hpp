@@ -7,7 +7,7 @@
 
 namespace kmccoarsegrain {
 
-typedef std::unordered_map<int,std::unordered_map<int,const double *> *> Rate_Map;
+typedef std::unordered_map<int,std::unordered_map<int,double> *> Rate_Map;
 /**
  * \brief Class is designed to store rates 
  **/
@@ -18,7 +18,7 @@ class KMC_Rate_Container {
 
     //void addRate(int siteId, int neighId,double * rate);
     void addRates(Rate_Map rates);
-    const double * getRate(int siteId, int neighId);
+    double getRate(int siteId, int neighId);
 
     size_t incomingRateCount(int siteId) const;
     size_t outgoingRateCount(int siteId) const;

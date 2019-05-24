@@ -92,16 +92,18 @@ namespace kmccoarsegrain {
     }
 
     for (auto it = ratesOfAllSites.begin(); it != ratesOfAllSites.end(); ++it) {
-      KMC_Site site;
-      site.setId(it->first);
+      //KMC_Site site;
+			KMC_Site & site = sites_->createKMC_Site(it->first);
+      //site.setId(it->first);
 
-      site.setRatesToNeighbors(it->second);
+      site.setRatesToNeighbors(&(it->second));
       if (seed_set_) {
         site.setRandomSeed(seed_);
         ++seed_;
       }
-      sites_->addKMC_Site(site);
-      topology_features_[it->first] = &(sites_->getKMC_Site(it->first));
+      //sites_->addKMC_Site(site);
+      //topology_features_[it->first] = &(sites_->getKMC_Site(it->first));
+      topology_features_[it->first] = &site;
     }
 
     // Address sites that will act as drains with no rates off of them
@@ -370,11 +372,11 @@ namespace kmccoarsegrain {
     double max_rate_off = 0; 
     for(const int & site_id : siteIds){
       KMC_Site & site = sites_->getKMC_Site(site_id);
-      const unordered_map<int,const double *> neigh_and_rates = site.getNeighborsAndRatesConst();
-      for( const pair<int,const double *> & neigh_and_rate : neigh_and_rates){
+      const unordered_map<int,double> & neigh_and_rates = site.getNeighborsAndRatesConst();
+      for( const pair<int,double> & neigh_and_rate : neigh_and_rates){
         if(internal_sites.count(neigh_and_rate.first)==0){
-          if(*(neigh_and_rate.second) > max_rate_off){
-            max_rate_off = *(neigh_and_rate.second);
+          if((neigh_and_rate.second) > max_rate_off){
+            max_rate_off = (neigh_and_rate.second);
           }
         }
       }
