@@ -37,6 +37,21 @@ namespace kmccoarsegrain {
    * Private Internal Function Declarations
    ****************************************************************************/
 
+
+	KMC_TopologyFeature * returnSite(KMC_CoarseGrainSystem * sys,int siteId){
+		return &(sys->sites_->getKMC_Site(siteId));	
+	}
+
+	KMC_TopologyFeature * returnCluster(KMC_CoarseGrainSystem * sys,int siteId){
+		return &(sys->clusters_->getKMC_Cluster(sys->sites_->getKMC_Site(siteId).getClusterId()));	
+	}
+
+	KMC_TopologyFeature * createSiteSwitchFunctionPointer(KMC_CoarseGrainSystem * sys,int siteId){
+		KMC_Site & site = sys->sites_->createKMC_Site(siteId);
+		sys->topology_features_func_[siteId].feature = &returnSite;	
+		return &site;	
+	}
+
   bool compare(const pair<int,double> &x, const pair<int,double> &y){
     return x.second>y.second;
   }

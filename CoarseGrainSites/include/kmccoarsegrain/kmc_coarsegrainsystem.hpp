@@ -16,12 +16,14 @@ class Graph;
 
 namespace kmccoarsegrain {
 
+class KMC_CoarseGrainSystem;
 class KMC_Site_Container;
 class KMC_Cluster_Container;
 class KMC_TopologyFeature;
 
 class KMC_Walker;
 
+KMC_TopologyFeature * createSiteSwitchFunctionPointer(KMC_CoarseGrainSystem * sys,int siteId);
 /**
  * \brief Coarse Grain System allows abstraction of renormalization of sites
  *
@@ -249,7 +251,17 @@ class KMC_CoarseGrainSystem {
   /// The iteration threshold is reset to the min value if a cluster is found
   int iteration_threshold_min_;
 
-  std::unordered_map<int, KMC_TopologyFeature *> topology_features_;
+	typedef KMC_TopologyFeature * (*top_feature)(KMC_CoarseGrainSystem * sys, int siteId);
+
+	friend KMC_TopologyFeature * returnSite(KMC_CoarseGrainSystem * sys,int siteId);
+	friend KMC_TopologyFeature * returnCluster(KMC_CoarseGrainSystem * sys,int siteId);
+	friend KMC_TopologyFeature * createSiteSwitchFunctionPointer(KMC_CoarseGrainSystem * sys,int siteId);
+	struct DefaultFunc {
+		top_feature feature = &createSiteSwitchFunctionPointer;	
+	};
+
+	std::unordered_map<int,DefaultFunc> topology_features_func_;
+  std::unordered_map<int,KMC_TopologyFeature *> topology_features_;
   /// Stores smart pointers to all the sites
   std::unique_ptr<KMC_Site_Container> sites_;
 
