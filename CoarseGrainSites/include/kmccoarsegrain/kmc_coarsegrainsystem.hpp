@@ -222,6 +222,7 @@ class KMC_CoarseGrainSystem {
   /// Performance ratio
   double performance_ratio_;
 
+  std::unordered_map<int,std::unordered_map<int,double>> * rates_;
   /// Depicts whether a random seed has been set, to yield reproducable data
   bool seed_set_;
 
@@ -251,6 +252,7 @@ class KMC_CoarseGrainSystem {
   /// The iteration threshold is reset to the min value if a cluster is found
   int iteration_threshold_min_;
 
+  friend class BasinExplorer;
 	typedef KMC_TopologyFeature * (*top_feature)(KMC_CoarseGrainSystem * sys, int siteId);
 
 	friend KMC_TopologyFeature * returnSite(KMC_CoarseGrainSystem * sys,int siteId);

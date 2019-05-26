@@ -9,12 +9,14 @@
 
 namespace kmccoarsegrain {
 
+  class KMC_CoarseGrainSystem;
+
 class BasinExplorer{
   public:
     BasinExplorer() : threshold_(0.95), max_exploration_count_(5) {};
     void setThreshold(double threshold);
     void setMaxExplorationCount(int count);
-    std::vector<int> findBasin(KMC_Site_Container& sites,KMC_Cluster_Container& clusters, int siteId);
+    std::vector<int> findBasin(KMC_Site_Container& sites,KMC_Cluster_Container& clusters, KMC_CoarseGrainSystem & sys, int siteId);
   private:
     double threshold_;
     double fastest_rate_;

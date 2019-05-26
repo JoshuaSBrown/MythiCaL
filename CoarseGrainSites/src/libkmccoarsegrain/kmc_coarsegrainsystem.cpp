@@ -39,16 +39,30 @@ namespace kmccoarsegrain {
 
 
 	KMC_TopologyFeature * returnSite(KMC_CoarseGrainSystem * sys,int siteId){
-		return &(sys->sites_->getKMC_Site(siteId));	
+    cout << "Getting site instead of creating one " << endl;
+		return &((sys)->sites_->getKMC_Site(siteId));	
 	}
 
 	KMC_TopologyFeature * returnCluster(KMC_CoarseGrainSystem * sys,int siteId){
-		return &(sys->clusters_->getKMC_Cluster(sys->sites_->getKMC_Site(siteId).getClusterId()));	
+    cout << "Getting cluster" << endl;
+    cout << "Getting cluster " << sys->sites_->getKMC_Site(siteId).getClusterId() << endl;
+		return &((sys)->clusters_->getKMC_Cluster((sys)->sites_->getKMC_Site(siteId).getClusterId()));	
 	}
 
 	KMC_TopologyFeature * createSiteSwitchFunctionPointer(KMC_CoarseGrainSystem * sys,int siteId){
-		KMC_Site & site = sys->sites_->createKMC_Site(siteId);
-		sys->topology_features_func_[siteId].feature = &returnSite;	
+    cout << "Creating site " << siteId << endl;
+    KMC_Site & site = (sys)->sites_->createKMC_Site(siteId);
+		(sys)->topology_features_func_[siteId].feature = &returnSite;	
+    site.setRatesToNeighbors(&((*sys->rates_)[siteId]));
+    if (sys->seed_set_) {
+      site.setRandomSeed(sys->seed_);
+      ++sys->seed_;
+    }
+
+    //cout << "Calling feature funct after makking change " << endl;
+    //cout << "Address of new function " << sys->topology_features_func_[siteId].feature << endl;
+    //(sys)->topology_features_func_[siteId].feature(sys,siteId);
+    cout << "Success" << endl;
 		return &site;	
 	}
 
@@ -106,18 +120,16 @@ namespace kmccoarsegrain {
           "before you can initialize the system.");
     }
 
+    rates_ = &ratesOfAllSites;
+   /* 
     for (auto it = ratesOfAllSites.begin(); it != ratesOfAllSites.end(); ++it) {
-      //KMC_Site site;
 			KMC_Site & site = sites_->createKMC_Site(it->first);
-      //site.setId(it->first);
 
       site.setRatesToNeighbors(&(it->second));
       if (seed_set_) {
         site.setRandomSeed(seed_);
         ++seed_;
       }
-      //sites_->addKMC_Site(site);
-      //topology_features_[it->first] = &(sites_->getKMC_Site(it->first));
       topology_features_[it->first] = &site;
     }
 
@@ -136,7 +148,7 @@ namespace kmccoarsegrain {
       site.setId(drain_site_id);
       sites_->addKMC_Site(site);
       topology_features_[drain_site_id] = &(sites_->getKMC_Site(drain_site_id));
-    }
+    }*/
   }
 
   int KMC_CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){
@@ -157,11 +169,11 @@ namespace kmccoarsegrain {
 
     LOG("Initializeing walkers", 1);
 
-    if (topology_features_.size() == 0) {
+/*    if (topology_features_.size() == 0) {
       throw runtime_error(
           "You must first initialize the system before you "
           "can initialize the walkers");
-    }
+    }*/
 
     for ( size_t index = 0; index<walkers.size(); ++index){
       int siteId = walkers.at(index).second.getIdOfSiteCurrentlyOccupying();
@@ -170,10 +182,20 @@ namespace kmccoarsegrain {
             "You must first place the walker on a known site"
             " before the walker can be initialized.");
       }
-      topology_features_[siteId]->occupy();
+      cout << "Calling feature funct with site " << siteId << endl;
+      cout << "Address of feature " << topology_features_func_[siteId].feature << endl;
+      topology_features_func_[siteId].feature(this,siteId);
+      //topology_features_[siteId]->occupy();
+      cout << "Second call, Calling feature funct with site " << siteId << endl;
+      topology_features_func_[siteId].feature(this,siteId)->occupy();
 
-      auto hopTime = topology_features_[siteId]->getDwellTime(walkers.at(index).first);
-      int newId = topology_features_[siteId]->pickNewSiteId(walkers.at(index).first);
+      //auto hopTime = topology_features_[siteId]->getDwellTime(walkers.at(index).first);
+      //int newId = topology_features_[siteId]->pickNewSiteId(walkers.at(index).first);
+      cout << "Third call, Calling feature funct with site " << siteId << endl;
+      auto hopTime = topology_features_func_[siteId].feature(this,siteId)->getDwellTime(walkers.at(index).first);
+      int newId = topology_features_func_[siteId].feature(this,siteId)->pickNewSiteId(walkers.at(index).first);
+      cout << "Last call, Calling feature funct with site " << siteId << endl;
+      cout << "new id " << newId << endl;
       walkers.at(index).second.setDwellTime(hopTime);
       walkers.at(index).second.setPotentialSite(newId);
     }
@@ -202,7 +224,8 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::removeWalkerFromSystem(int & walker_id, KMC_Walker& walker) {
     LOG("Walker is being removed from system", 1);
     auto siteId = walker.getIdOfSiteCurrentlyOccupying();
-    topology_features_[siteId]->removeWalker(walker_id,siteId);
+    //topology_features_[siteId]->removeWalker(walker_id,siteId);
+    topology_features_func_[siteId].feature((this),siteId)->removeWalker(walker_id,siteId);
   }
 
   int KMC_CoarseGrainSystem::getClusterIdOfSite(int siteId) {
@@ -216,9 +239,13 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::hop(const int & walker_id, KMC_Walker & walker) {
     const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
     const int & siteToHopToId = walker.getPotentialSite();
-    KMC_TopologyFeature *& feature = topology_features_[siteId];
-    KMC_TopologyFeature *& feature_to_hop_to = topology_features_[siteToHopToId];
+    //KMC_TopologyFeature *& feature = topology_features_[siteId];
+    //KMC_TopologyFeature *& feature_to_hop_to = topology_features_[siteToHopToId];
+    cout << "Hopping" << endl;
+    KMC_TopologyFeature * feature = topology_features_func_[siteId].feature(this,siteId);
+    KMC_TopologyFeature * feature_to_hop_to = topology_features_func_[siteToHopToId].feature(this,siteToHopToId);
 
+    cout << "Site id " << siteId << endl;
     if(!feature_to_hop_to->isOccupied(siteToHopToId)){
       feature->vacate(siteId);
       feature_to_hop_to->occupy(siteToHopToId);
@@ -237,6 +264,7 @@ namespace kmccoarsegrain {
     ++iteration_;
     if(iteration_ > iteration_threshold_){
       if(iteration_threshold_min_!=constants::inf_iterations){
+        cout << "Creating Cluster siteToHopTo " << siteToHopToId << endl;
         if(coarseGrain_(siteToHopToId)){
           iteration_threshold_ = iteration_threshold_min_;
         }else{
@@ -253,8 +281,9 @@ namespace kmccoarsegrain {
 
   bool KMC_CoarseGrainSystem::coarseGrain_(int siteId){
     BasinExplorer basin_explorer;
-    auto basin_site_ids = basin_explorer.findBasin(*sites_,*clusters_,siteId);
-
+    cout << "Basin explorer site id " << siteId << endl;
+    auto basin_site_ids = basin_explorer.findBasin(*sites_,*clusters_,*this,siteId);
+    cout << "explored" << endl;
     double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
 
     if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
@@ -318,7 +347,12 @@ namespace kmccoarsegrain {
     cluster.setConvergenceTolerance(0.001);
     vector<KMC_Site> sites;
     for (auto siteId : siteIds){
-      sites.push_back(sites_->getKMC_Site(siteId));
+      if(sites_->exist(siteId)){
+        sites.push_back(sites_->getKMC_Site(siteId));
+      } else {
+        topology_features_func_[siteId].feature(this,siteId);
+        sites.push_back(sites_->getKMC_Site(siteId));
+      }
     }
     cluster.addSites(sites);
     cluster.updateProbabilitiesAndTimeConstant();
@@ -343,7 +377,9 @@ namespace kmccoarsegrain {
 
     for(auto siteId : siteIds){
       sites_->setClusterId(siteId,cluster.getId());  
-      topology_features_[siteId] = &(clusters_->getKMC_Cluster(cluster.getId()));
+      //topology_features_[siteId] = &(clusters_->getKMC_Cluster(cluster.getId()));
+      topology_features_func_[siteId].feature = returnCluster;
+
     }
 
     auto sitesFoundInCluster = cluster.getSiteIdsInCluster();
@@ -364,7 +400,8 @@ namespace kmccoarsegrain {
         } else {
           cluster_ids.insert(site_and_cluster.second);
         }
-        topology_features_[site_and_cluster.first] = &(clusters_->getKMC_Cluster(favoredClusterId));
+        //topology_features_[site_and_cluster.first] = &(clusters_->getKMC_Cluster(favoredClusterId));
+        topology_features_func_[site_and_cluster.first].feature = returnCluster; 
         sites_->setClusterId(site_and_cluster.first,favoredClusterId);
       }
     }

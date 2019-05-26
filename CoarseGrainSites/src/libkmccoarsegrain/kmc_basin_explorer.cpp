@@ -4,7 +4,7 @@
 #include "kmc_basin_explorer.hpp"
 #include "kmc_graph_library_adapter.hpp"
 #include "../../../UGLY/include/ugly/graphvisitor/graphvisitor_largest_known_value.hpp"
-
+#include "../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
 using namespace ugly;
 using namespace std;
 
@@ -14,55 +14,74 @@ namespace kmccoarsegrain {
   typedef vector<weak_ptr<Edge>> weak_edge_vec;
 
   vector<int> BasinExplorer::findBasin(
-      KMC_Site_Container& sites,
-      KMC_Cluster_Container& clusters,
+      KMC_Site_Container& ,
+      KMC_Cluster_Container& ,
+      KMC_CoarseGrainSystem & sys,
       int siteId){
-    
+   
+   cout << "1 siteid " << siteId << endl; 
     auto edges_store = 
-      convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( sites, siteId);
+      convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, siteId);
 
     weak_edge_vec edges_weak(edges_store.begin(),edges_store.end());
 
+   cout << "2 " << endl; 
     GraphVisitorLargestKnownValue gv_largest_known;
     gv_largest_known.setStartingVertex(siteId);
 
-    fastest_rate_ = sites.getFastestRateOffSite(siteId);
-    if(sites.partOfCluster(siteId)){
-      auto & cluster = clusters.getKMC_Cluster(sites.getClusterIdOfSite(siteId));
+    // Create the site if it does not exist
+    if(sys.sites_->exist(siteId)==false){
+      sys.topology_features_func_[siteId].feature(&sys,siteId);
+    }
+    fastest_rate_ = sys.sites_->getFastestRateOffSite(siteId);
+   cout << "3 " << endl; 
+
+    if(sys.sites_->partOfCluster(siteId)){
+      auto & cluster = sys.clusters_->getKMC_Cluster(sys.sites_->getClusterIdOfSite(siteId));
       slowest_rate_ = cluster.getFastestRateOffCluster();
     }else{
       slowest_rate_ = fastest_rate_;
     }
+   cout << "4 " << endl; 
     current_sites_fastest_rate_ = fastest_rate_;
 
-    addEdges_(sites,edges_weak,siteId,gv_largest_known);
+    addEdges_(*sys.sites_,edges_weak,siteId,gv_largest_known);
 
+   cout << "5 " << endl; 
     int exploration_count = 1;
 
     while(gv_largest_known.allEdgesExplored()==false){
       weak_ptr<Edge> next_edge = gv_largest_known.getNextEdge<Edge>();
 
+   cout << "6 " << endl; 
       auto next_vertex = gv_largest_known.chooseTerminalVertex(next_edge);
-
+      if(sys.sites_->exist(next_vertex)==false){
+        sys.topology_features_func_[next_vertex].feature(&sys,next_vertex);
+      }
+   cout << "7 " << endl; 
       gv_largest_known.exploreEdge(next_edge);
-      auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( sites, next_vertex);
+      auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, next_vertex);
       
       weak_edge_vec edges_weak_tmp(edges_tmp.begin(),edges_tmp.end());
       edges_store.insert(edges_tmp.begin(),edges_tmp.end());
 
-      addEdges_(sites,edges_weak_tmp,next_vertex,gv_largest_known);
+   cout << "8 " << endl; 
+      addEdges_(*sys.sites_,edges_weak_tmp,next_vertex,gv_largest_known);
  
       ++exploration_count; 
       if(gv_largest_known.countExploredVertices()>max_exploration_count_){
         vector<int> empty_vec;
         return empty_vec;
       }
+   cout << "9 " << endl; 
     }
+   cout << "10 " << endl; 
     return gv_largest_known.getExploredVertices();
 
   }
 
   void BasinExplorer::addEdges_(
+
       KMC_Site_Container& sites,
       weak_edge_vec edges_weak,
       int vertex,
