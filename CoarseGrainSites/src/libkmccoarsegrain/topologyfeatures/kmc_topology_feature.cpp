@@ -25,11 +25,11 @@ namespace kmccoarsegrain {
     --(feature->occupied_);
   }
 
-  bool isOccupiedTopology_(KMC_TopologyFeature* feature){
+  bool isOccupiedTopology_(const KMC_TopologyFeature* feature){
     return feature->occupied_>0;
   }
 
-  bool isOccupiedTopology_(KMC_TopologyFeature* feature,const int&){
+  bool isOccupiedTopology_(const KMC_TopologyFeature* feature,const int&){
     return feature->occupied_>0;
   }
 
@@ -61,7 +61,7 @@ namespace kmccoarsegrain {
     random_engine_ = mt19937(seed);
   }
 
-  double KMC_TopologyFeature::getDwellTime(const int & ){
+  double KMC_TopologyFeature::getDwellTime(const int & ) {
     double number = random_distribution_(random_engine_);
     return (-1.0)*log(number) * escape_time_constant_;
   }

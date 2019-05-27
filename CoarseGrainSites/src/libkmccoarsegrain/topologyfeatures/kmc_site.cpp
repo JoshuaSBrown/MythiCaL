@@ -42,28 +42,10 @@ void KMC_Site::setRatesToNeighbors(unordered_map<int, double> * neighRates) {
   assert(neighRates->size()!=0 && "Sites must have at least one rate to a "
     "neighbor. Cannot set rates to neighbors with empty map.");
 	neighRates_ = neighRates;
-  /*for (auto & neighAndRate : neighRates) {
-    assert(neighAndRate.second!=0 && "One of the rates is 0.0. You cannot "
-        "set a rate to a value of 0.0 as it is meaningless.");
-    neighRates_[neighAndRate.first] = &(neighRates[neighAndRate.first]);
-  }*/
   calculateDwellTimeConstant_();
   calculateProbabilityHopToNeighbors_();
 }
-/*
-void KMC_Site::addNeighRate(const pair<int, double*> neighRate) {
 
-  assert(neighRates_->count(neighRate.first)==0 && "That neighbor has already been added.");
-  (*neighRates_)[neighRate.first] = neighRate.second;
-  calculateDwellTimeConstant_();
-  calculateProbabilityHopToNeighbors_();
-}*/
-/*
-void KMC_Site::resetNeighRate(const pair<int, double*> neighRate) {
-  neighRates_[neighRate.first] = neighRate.second;
-  calculateDwellTimeConstant_();
-  calculateProbabilityHopToNeighbors_();
-}*/
 
 vector<double> KMC_Site::getRateToNeighbors() const {
   vector<double> rates;
@@ -76,7 +58,7 @@ double KMC_Site::getRateToNeighbor(const int & neighSiteId) const {
   return neighRates_->at(neighSiteId);
 }
 
-double KMC_Site::getFastestRate(){
+double KMC_Site::getFastestRate() const {
   double rate =0.0;
   for(auto & neigh_rate: *neighRates_) {
     if((neigh_rate.second>rate)) rate = (neigh_rate.second);
@@ -109,7 +91,7 @@ int KMC_Site::pickNewSiteId() {
   return -1;
 }
 
-unordered_map<int,double > & KMC_Site::getNeighborsAndRates(){
+unordered_map<int,double > & KMC_Site::getNeighborsAndRates() const {
   return *neighRates_;
 }
 

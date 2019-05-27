@@ -17,35 +17,47 @@ class KMC_Site_Container {
   public:
     KMC_Site_Container() {};
 		KMC_Site & createKMC_Site(const int & siteId);
+
     void addKMC_Site(KMC_Site& site);
     void addKMC_Sites(std::vector<KMC_Site>& sites);
+
     KMC_Site& getKMC_Site(const int & siteId);
 
-    std::unordered_map<int,KMC_Site> getKMC_Sites(std::vector<int> siteIds);
-    std::unordered_map<int,KMC_Site> getKMC_Sites();
+//    std::unordered_map<int,KMC_Site> getKMC_Sites(std::vector<int> siteIds) const;
+//    std::unordered_map<int,KMC_Site> getKMC_Sites() const;
     size_t size() const {return sites_.size();}
 
-    void setClusterId(int siteId, int clusterId);
-    int getClusterIdOfSite(int siteId);
-    bool partOfCluster(int siteId);
-    int getSmallestClusterId(std::vector<int> siteIds);
+    void setClusterId(const int & siteId,const int &clusterId);
+
+    int getClusterIdOfSite(const int & siteId) const;
+
+    bool partOfCluster(const int & siteId) const;
+
+    int getSmallestClusterId(std::vector<int> siteIds) const;
 
     bool exist(const int & siteId) const;
 
-    bool isOccupied(const int & siteId);
+    bool isOccupied(const int & siteId) const;
+
     void vacate(const int & siteId);
+
     void occupy(const int & siteId);
 
-    std::vector<int> getSiteIds(); 
-    double getDwellTime(int siteId);
-    double getTimeConstant(int siteId);
+    std::vector<int> getSiteIds() const; 
 
-    std::unordered_map<int,double> & getNeighborsAndRates(const int siteId);
-    Rate_Map getRates();
+    double getDwellTime(const int &siteId);
 
-    double getFastestRateOffSite(int siteId);
-    double getRateToNeighborOfSite(int siteId, int neighId);
-    std::vector<int> getSiteIdsOfNeighbors(int siteId);
+    double getTimeConstant(const int &siteId) const;
+
+    std::unordered_map<int,double> & getNeighborsAndRates(const int & siteId);
+
+    Rate_Map getRates() const;
+
+    double getFastestRateOffSite(const int & siteId) const;
+
+    double getRateToNeighborOfSite(const int & siteId, const int & neighId) const;
+
+    std::vector<int> getSiteIdsOfNeighbors(const int & siteId) const;
   private:
     std::unordered_map<int,KMC_Site> sites_;
 

@@ -46,7 +46,10 @@ int main(void){
     KMC_Site site;
     site.setId(1);
     double rate = 1.0;
-    site.addNeighRate(pair<int, double *>(2,&rate));
+    unordered_map<int,double> rates;
+    rates[2] = rate;
+    site.setRatesToNeighbors(&rates);
+    //site.addNeighRate(pair<int, double *>(2,&rate));
 
     KMC_Cluster cluster;
     cluster.addSite(site);
@@ -72,14 +75,21 @@ int main(void){
     KMC_Site site;
     site.setId(1);
     site.setVisitFrequency(5);
-    site.addNeighRate(pair<int,double *>(2,&rate));
+    unordered_map<int,double> rates;
+    rates[2]= rate;
+    //site.addNeighRate(pair<int,double *>(2,&rate));
+    site.setRatesToNeighbors(&rates);
     assert(site.getVisitFrequency()==5);
 
     KMC_Site site2;
     site2.setId(2);
     site2.setVisitFrequency(3);
-    site2.addNeighRate(pair<int,double *>(1,&rate));
-    site2.addNeighRate(pair<int,double *>(3,&rate));
+    unordered_map<int,double> rates2;
+    //site2.addNeighRate(pair<int,double *>(1,&rate));
+    //site2.addNeighRate(pair<int,double *>(3,&rate));
+    rates2[1] = rate;
+    rates2[3] = rate;
+    site2.setRatesToNeighbors(&rates2);
     assert(site2.getVisitFrequency()==3);
 
     KMC_Cluster cluster;
@@ -99,14 +109,22 @@ int main(void){
     KMC_Site site;
     site.setId(1);
     site.setVisitFrequency(5);
-    site.addNeighRate(pair<int,double *>(2,&rate));
+    //site.addNeighRate(pair<int,double *>(2,&rate));
+    unordered_map<int,double> rates;
+    rates[2] = rate;
+    site.setRatesToNeighbors(&rates);
     assert(site.getVisitFrequency()==5);
 
     KMC_Site site2;
     site2.setId(2);
     site2.setVisitFrequency(3);
-    site2.addNeighRate(pair<int,double *>(1,&rate));
-    site2.addNeighRate(pair<int,double *>(3,&rate));
+    unordered_map<int,double> rates2;
+    rates2[1] = rate;
+    rates2[3] = rate;
+    site2.setRatesToNeighbors(&rates2);
+//    site2.addNeighRate(pair<int,double *>(1,&rate));
+//    site2.addNeighRate(pair<int,double *>(3,&rate));
+      
     assert(site2.getVisitFrequency()==3);
 
     KMC_Cluster cluster;
@@ -137,12 +155,17 @@ int main(void){
     KMC_Site site;
     site.setId(1);
     double rate = 1;
-    site.addNeighRate(pair<int, double *>(2,&rate));
-    
+    unordered_map<int,double> rates;
+    rates[2] = rate;
+    //site.addNeighRate(pair<int, double *>(2,&rate));
+    site.setRatesToNeighbors(&rates);
     KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
-    site2.addNeighRate(pair<int, double *>(1,&rate2));
+    unordered_map<int,double> rates2;
+    rates2[1] = rate2;
+    //site2.addNeighRate(pair<int, double *>(1,&rate2));
+    site2.setRatesToNeighbors(&rates2);
   
     KMC_Cluster cluster;
     cluster.addSite(site);
@@ -170,19 +193,27 @@ int main(void){
     KMC_Site site;
     site.setId(1);
     double rate = 1;
-    site.addNeighRate(pair<int, double *>(2,&rate));
-    
+    unordered_map<int,double> rates;
+    rates[2] = rate;
+    //site.addNeighRate(pair<int, double *>(2,&rate));
+    site.setRatesToNeighbors(&rates);
     KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
     double rate3 = 1;
-    site2.addNeighRate(pair<int, double *>(1,&rate2));
-    site2.addNeighRate(pair<int, double *>(3,&rate3));
-  
+    unordered_map<int,double> rates2;
+    rates2[1]=rate2;
+    rates2[3]=rate3;
+    //site2.addNeighRate(pair<int, double *>(1,&rate2));
+    //site2.addNeighRate(pair<int, double *>(3,&rate3));
+    site2.setRatesToNeighbors(&rates2);
     KMC_Site site3;
     site3.setId(3);
     double rate4 = 1;
-    site3.addNeighRate(pair<int, double *>(2,&rate4));
+    unordered_map<int,double> rates3;
+    rates3[2] = rate4;
+    //site3.addNeighRate(pair<int, double *>(2,&rate4));
+    site3.setRatesToNeighbors(&rates3);
 
     assert(static_cast<int>(10*site.getProbabilityOfHoppingToNeighboringSite(2))==10);
     assert(static_cast<int>(10*site2.getProbabilityOfHoppingToNeighboringSite(1))==5);
@@ -226,15 +257,23 @@ int main(void){
     site2.setId(2);
     double rate2 = 1;
     double rate3 = 1;
-    site2.addNeighRate(pair<int, double *>(1,&rate2));
-    site2.addNeighRate(pair<int, double *>(3,&rate3));
-  
+    unordered_map<int,double> rates2;
+    rates2[1] = rate2;
+    rates2[3] = rate3;
+    //site2.addNeighRate(pair<int, double *>(1,&rate2));
+    //site2.addNeighRate(pair<int, double *>(3,&rate3));
+    site2.setRatesToNeighbors(&rates2); 
+
     KMC_Site site3;
     site3.setId(3);
     double rate4 = 1;
     double rate5 = 1;
-    site3.addNeighRate(pair<int, double *>(2,&rate4));
-    site3.addNeighRate(pair<int, double *>(4,&rate5));
+    unordered_map<int,double> rates3;
+    rates3[2] = rate4;
+    rates3[4] = rate5;
+    //site3.addNeighRate(pair<int, double *>(2,&rate4));
+    //site3.addNeighRate(pair<int, double *>(4,&rate5));
+    site3.setRatesToNeighbors(&rates3);
 
     KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
@@ -257,22 +296,34 @@ int main(void){
     site.setId(1);
     double rate = 1;
     double rate6 = 1;
-    site.addNeighRate(pair<int, double *>(2,&rate));
-    site.addNeighRate(pair<int, double *>(5,&rate6));
- 
+    unordered_map<int,double> rates;
+    rates[2] = rate;
+    rates[5] = rate6;
+    //site.addNeighRate(pair<int, double *>(2,&rate));
+    //site.addNeighRate(pair<int, double *>(5,&rate6));
+    site.setRatesToNeighbors(&rates);
+
     KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
     double rate3 = 1;
-    site2.addNeighRate(pair<int, double *>(1,&rate2));
-    site2.addNeighRate(pair<int , double *>(3,&rate3));
-  
+    unordered_map<int,double> rates2;
+    rates2[1] = rate2;
+    rates2[3] = rate3;
+    //site2.addNeighRate(pair<int, double *>(1,&rate2));
+    //site2.addNeighRate(pair<int , double *>(3,&rate3));
+    site2.setRatesToNeighbors(&rates2); 
+
     KMC_Site site3;
     site3.setId(3);
     double rate4 = 1;
-    site3.addNeighRate(pair<int , double *>(2,&rate4));
     double rate5 = 1;
-    site3.addNeighRate(pair<int , double *>(4,&rate5));
+    unordered_map<int,double> rates3;
+    rates3[2] = rate4;
+    rates3[4] = rate5;
+    //site3.addNeighRate(pair<int , double *>(2,&rate4));
+    //site3.addNeighRate(pair<int , double *>(4,&rate5));
+    site3.setRatesToNeighbors(&rates3);
 
     KMC_Cluster cluster;
     cluster.setConvergenceIterations(6);
@@ -297,32 +348,51 @@ int main(void){
     site.setId(1);
     double rate = 1;
     double rate6 = 0.001;
-    site.addNeighRate(pair<int, double *>(2,&rate));
-    site.addNeighRate(pair<int, double *>(5,&rate6));
- 
+    unordered_map<int,double> rates;
+    rates[2] = rate;
+    rates[5] = rate6;
+    //site.addNeighRate(pair<int, double *>(2,&rate));
+    //site.addNeighRate(pair<int, double *>(5,&rate6));
+    site.setRatesToNeighbors(&rates); 
+
     KMC_Site site2;
     site2.setId(2);
     double rate2 = 1;
     double rate3 = 1;
-    site2.addNeighRate(pair<int, double *>(1,&rate2));
-    site2.addNeighRate(pair<int , double *>(3,&rate3));
-  
+    unordered_map<int,double> rates2;
+    rates2[1] = rate2;
+    rates2[3] = rate3;
+    
+    //site2.addNeighRate(pair<int, double *>(1,&rate2));
+    //site2.addNeighRate(pair<int , double *>(3,&rate3));
+    site2.setRatesToNeighbors(&rates2); 
+
     KMC_Site site3;
     site3.setId(3);
     double rate4 = 1;
-    site3.addNeighRate(pair<int , double *>(2,&rate4));
     double rate5 = 0.001;
-    site3.addNeighRate(pair<int , double *>(4,&rate5));
+    unordered_map<int,double> rates3;
+    rates3[2] = rate4;
+    rates3[4] = rate5;
+    //site3.addNeighRate(pair<int , double *>(2,&rate4));
+    //site3.addNeighRate(pair<int , double *>(4,&rate5));
+    site3.setRatesToNeighbors(&rates3);
 
     KMC_Site site4;
     site4.setId(4);
     double rate7 = 1;
-    site4.addNeighRate(pair<int, double *>(3,&rate7));
+    unordered_map<int,double> rates4;
+    rates4[3] = rate7;
+    site4.setRatesToNeighbors(&rates4);
+//    site4.addNeighRate(pair<int, double *>(3,&rate7));
 
     KMC_Site site5;
     site5.setId(5);
     double rate8 = 1;
-    site5.addNeighRate(pair<int, double *>(1,&rate8));
+    unordered_map<int,double> rates5;
+    rates5[1] =rate8;
+//    site5.addNeighRate(pair<int, double *>(1,&rate8));
+    site5.setRatesToNeighbors(&rates5);
 
     KMC_Cluster cluster;
     cluster.setConvergenceIterations(50);

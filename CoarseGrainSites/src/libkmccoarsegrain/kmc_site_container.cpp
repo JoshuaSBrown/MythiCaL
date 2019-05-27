@@ -16,7 +16,6 @@ namespace kmccoarsegrain {
     if(sites_.count(siteId)){
       throw invalid_argument("Cannot add site it has already been added.");
     }
-    //return //sites_.emplace(make_pair(siteId,KMC_Site(siteId)));
 		KMC_Site & site = sites_[siteId];
 		site.setId(siteId);
 		return site;
@@ -35,48 +34,32 @@ namespace kmccoarsegrain {
     return sites_[siteId];
   }
 
-  unordered_map<int,KMC_Site> KMC_Site_Container::getKMC_Sites(vector<int> siteIds){
-    unordered_map<int,KMC_Site> sites;
-    for( auto siteId : siteIds ){
-      if(sites_.count(siteId)){
-        sites[siteId] = sites_[siteId];
-      }else{
-        throw invalid_argument("Site is not found in the container.");
-      }
-    }
-    return sites;
-  }
-
-  unordered_map<int,KMC_Site> KMC_Site_Container::getKMC_Sites(){
-    return sites_;
-  } 
-
-  void KMC_Site_Container::setClusterId(int siteId, int clusterId){
+  void KMC_Site_Container::setClusterId(const int & siteId, const int & clusterId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Site is not stored in the container.");
     }
     sites_[siteId].setClusterId(clusterId);
   }
 
-  int KMC_Site_Container::getClusterIdOfSite(int siteId) {
+  int KMC_Site_Container::getClusterIdOfSite(const int & siteId) const{
     if(sites_.count(siteId)==0){
       throw invalid_argument("Site is not stored in the container.");
     }
-    return sites_[siteId].getClusterId();
+    return sites_.at(siteId).getClusterId();
   }
 
-  bool KMC_Site_Container::partOfCluster(int siteId){
+  bool KMC_Site_Container::partOfCluster(const int & siteId) const{
     if(sites_.count(siteId)==0){
       throw invalid_argument("Site is not stored in the container.");
     }
-    return sites_[siteId].partOfCluster();
+    return sites_.at(siteId).partOfCluster();
   }
 
-  int KMC_Site_Container::getSmallestClusterId(vector<int> siteIds){
+  int KMC_Site_Container::getSmallestClusterId(vector<int> siteIds) const {
     LOG("Getting the favored cluster Id", 1);
     int favoredClusterId = constants::unassignedId;
-    for (auto siteId : siteIds) {
-      int clusterId = sites_[siteId].getClusterId();
+    for (const int & siteId : siteIds) {
+      int clusterId = sites_.at(siteId).getClusterId();
       if (favoredClusterId == constants::unassignedId) {
         favoredClusterId = clusterId;
       } else if (clusterId != constants::unassignedId &&
@@ -91,12 +74,12 @@ namespace kmccoarsegrain {
     return sites_.count(siteId)!=0;
   }
   
-  bool KMC_Site_Container::isOccupied(const int & siteId){
+  bool KMC_Site_Container::isOccupied(const int & siteId) const{
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot determine if site is occupied as it is not"
           " stored in the container");
     }
-    return sites_[siteId].isOccupied();
+    return sites_.at(siteId).isOccupied();
   }
 
   void KMC_Site_Container::vacate(const int & siteId){
@@ -114,92 +97,64 @@ namespace kmccoarsegrain {
     }
     sites_[siteId].occupy();
   }
-/*
-  Rate_Map KMC_Site_Container::getInternalRates(vector<int> siteIds){
-    
-  }
 
-  Rate_Map KMC_Site_Container::getExternalRates(vector<int> siteIds){
-
-  }
-*/
-  vector<int> KMC_Site_Container::getSiteIds(){
+  vector<int> KMC_Site_Container::getSiteIds() const{
     vector<int> siteIds;
-    for(auto site : sites_ ){
+    for(const pair<int,KMC_Site> & site : sites_ ){
       siteIds.push_back(site.first);
     }
     return siteIds;
   }
-/*
-  double KMC_Site_Container::getMaxTraverseTimeOfConnectedSites(vector<int> siteIds){
-    auto edges = createEdges_(sites_, siteIds);
-    auto nodes = createNodes_(siteIds);
-    list<weak_ptr<Edge>> edges_weak(edges.begin(), edges.end());
-    unordered_map<int, weak_ptr<GraphNode<string>>> nodes_weak;
-    for (auto map_iter : nodes) nodes_weak[map_iter.first] = map_iter.second;
 
-    auto graph_ptr =
-      shared_ptr<Graph<string>>(new Graph<string>(edges_weak, nodes_weak));
-
-    unordered_map<pair<int, int>, double,hash_functions::hash> verticesAndtimes =
-      maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
-
-    double maxtime = 0.0;
-    for (auto verticesAndTime : verticesAndtimes) {
-      if (verticesAndTime.second > maxtime) maxtime = verticesAndTime.second;
-    }
-    return maxtime;
-  }
-*/
-  double KMC_Site_Container::getDwellTime(int siteId){
+  double KMC_Site_Container::getDwellTime(const int & siteId) {
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot get site dwell time as site is not in the "
           "container.");
     }
-    return sites_[siteId].getDwellTime(constants::unassignedId);
+    return sites_.at(siteId).getDwellTime(constants::unassignedId);
   }
 
-  double KMC_Site_Container::getTimeConstant(int siteId){
+  double KMC_Site_Container::getTimeConstant(const int & siteId) const {
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot get site time constant as site is not in "
           "the container.");
     }
-    return sites_[siteId].getTimeConstant();
+    return sites_.at(siteId).getTimeConstant();
   }
 
-  Rate_Map KMC_Site_Container::getRates(){
+  Rate_Map KMC_Site_Container::getRates() const {
     Rate_Map rate_map;
-    for( auto & site : sites_ ){
+    for( const pair<int,KMC_Site> & site : sites_ ){
       rate_map[site.first] = &(site.second.getNeighborsAndRates());
     }
     return rate_map;
   }
 
-  std::unordered_map<int,double> & getNeighborsAndRates(const int siteId){
+  std::unordered_map<int,double> & KMC_Site_Container::getNeighborsAndRates(const int & siteId){
     return sites_[siteId].getNeighborsAndRates();
   }
 
-  double KMC_Site_Container::getFastestRateOffSite(int siteId){
+  double KMC_Site_Container::getFastestRateOffSite(const int & siteId) const{
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot get fastest rate off site as it is not "
           "stored in the container.");
     }
-    return sites_[siteId].getFastestRate();
+    return sites_.at(siteId).getFastestRate();
   }
 
-  double KMC_Site_Container::getRateToNeighborOfSite(int siteId, int neighId){
+  double KMC_Site_Container::getRateToNeighborOfSite(const int & siteId, const int & neighId) const{
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot get rate from site to neighbor as site is "
           "not stored in the container");
     }
-    return sites_[siteId].getRateToNeighbor(neighId);    
+    return sites_.at(siteId).getRateToNeighbor(neighId);    
   }
 
-  vector<int> KMC_Site_Container::getSiteIdsOfNeighbors(int siteId){
+  vector<int> KMC_Site_Container::getSiteIdsOfNeighbors(const int & siteId) const{
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot get neighbor site ids from site as site is "
           "not stored in the container");
     }
-    return sites_[siteId].getNeighborSiteIds();
+    return sites_.at(siteId).getNeighborSiteIds();
   }
 }

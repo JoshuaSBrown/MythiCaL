@@ -331,16 +331,16 @@ namespace kmccoarsegrain {
     KMC_Cluster cluster;
     cluster.setConvergenceMethod(KMC_Cluster::Method::converge_by_tolerance);
     cluster.setConvergenceTolerance(0.001);
-    vector<KMC_Site> sites;
-    for (auto siteId : siteIds){
+    vector<KMC_Site *> sites;
+    for (const int & siteId : siteIds){
       //if(sites_->exist(siteId)){
       if(topology_->siteExist(siteId)){
-        sites.push_back(topology_->getKMC_Site(siteId));
+        sites.push_back(&topology_->getKMC_Site(siteId));
         //sites.push_back(sites_->getKMC_Site(siteId));
       } else {
         topology_->features[siteId].feature(*topology_,siteId);
         //sites.push_back(sites_->getKMC_Site(siteId));
-        sites.push_back(topology_->getKMC_Site(siteId));
+        sites.push_back(&topology_->getKMC_Site(siteId));
       }
     }
     cluster.addSites(sites);
@@ -378,20 +378,20 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::mergeSitesAndClusters_( unordered_map<int,int> sites_and_clusters,int favoredClusterId) {
 
     LOG("Merging sites to cluster", 1);
-    vector<KMC_Site> isolated_sites;
+    vector<KMC_Site *> isolated_sites;
     unordered_set<int> cluster_ids;
 
-    for (auto site_and_cluster : sites_and_clusters) { 
+    for (const pair<int,int> & site_and_cluster : sites_and_clusters) { 
       if(site_and_cluster.second != favoredClusterId){ 
         if (site_and_cluster.second == constants::unassignedId) {
-          isolated_sites.push_back(topology_->getKMC_Site(site_and_cluster.first));
+          isolated_sites.push_back(&topology_->getKMC_Site(site_and_cluster.first));
           //isolated_sites.push_back(sites_->getKMC_Site(site_and_cluster.first));
         } else {
           cluster_ids.insert(site_and_cluster.second);
         }
         //topology_features_[site_and_cluster.first] = &(clusters_->getKMC_Cluster(favoredClusterId));
         topology_->features[site_and_cluster.first].feature = returnCluster; 
-        topology_->setClusterId(site_and_cluster.first,favoredClusterId);
+        topology_->setSitesClusterId(site_and_cluster.first,favoredClusterId);
         //sites_->setClusterId(site_and_cluster.first,favoredClusterId);
       }
     }
@@ -472,11 +472,11 @@ bool KMC_CoarseGrainSystem::sitesSatisfyEquilibriumCondition_(
 double KMC_CoarseGrainSystem::getTimeConstantFromSitesToNeighbors_(
    const vector<int> & siteIds) const {
 
-  return topology_->getTimeConstantFromSitesToNeighbors_(siteIds);
+  return topology_->getTimeConstantFromSitesToNeighbors(siteIds);
 }
 
 unordered_map<int,vector<int>> KMC_CoarseGrainSystem::getClusters(){
-  return topology_->getSiteIdsOfClusters();
+  return topology_->getClusters();
 }
 
 unordered_map<int,double> KMC_CoarseGrainSystem::getResolutionOfClusters(){
@@ -488,7 +488,7 @@ unordered_map<int,double> KMC_CoarseGrainSystem::getTimeIncrementOfClusters(){
 }
 
 int KMC_CoarseGrainSystem::getFavoredClusterId_(vector<int> siteIds) {
-  topology_->getFavoredClusterId();
+  return topology_->getFavoredClusterId(siteIds);
 }
 
 

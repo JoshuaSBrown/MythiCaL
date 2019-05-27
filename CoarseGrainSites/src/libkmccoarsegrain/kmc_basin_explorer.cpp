@@ -24,7 +24,7 @@ namespace kmccoarsegrain {
    
    cout << "1 siteid " << siteId << endl; 
     auto edges_store = 
-      convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getRates(siteId), siteId);
+      convertASitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getSiteRates(siteId), siteId);
 
     weak_edge_vec edges_weak(edges_store.begin(),edges_store.end());
 
@@ -72,7 +72,7 @@ namespace kmccoarsegrain {
       }
    cout << "7 " << endl; 
       gv_largest_known.exploreEdge(next_edge);
-      auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getRates(next_vertex), next_vertex);
+      auto edges_tmp = convertASitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getSiteRates(next_vertex), next_vertex);
       //auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, next_vertex);
       
       weak_edge_vec edges_weak_tmp(edges_tmp.begin(),edges_tmp.end());

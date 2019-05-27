@@ -15,13 +15,13 @@ namespace kmccoarsegrain {
     clusters_[cluster.getId()]=cluster; 
   }
 
-  void KMC_Cluster_Container::addKMC_Clusters(vector<KMC_Cluster>& clusters){
+/*  void KMC_Cluster_Container::addKMC_Clusters(vector<KMC_Cluster>& clusters){
     for( auto & cluster : clusters){
       addKMC_Cluster(cluster);
     }
-  }
+  }*/
 
-  KMC_Cluster& KMC_Cluster_Container::getKMC_Cluster(int clusterId){
+  KMC_Cluster& KMC_Cluster_Container::getKMC_Cluster(const int & clusterId){
     if(exist(clusterId)==false){
       cerr << "Trying to access cluster with id " << clusterId << endl;
       throw invalid_argument("Cannot get cluster as it is not stored in the"
@@ -37,19 +37,19 @@ namespace kmccoarsegrain {
     return false;
   }
 
-  void KMC_Cluster_Container::erase(int clusterId){
+  void KMC_Cluster_Container::erase(const int & clusterId){
     auto iter = clusters_.find(clusterId);
     if(iter!=clusters_.end()){
       clusters_.erase(iter);
     }
   }
 
-  bool KMC_Cluster_Container::isOccupied(const int & clusterId){
+  bool KMC_Cluster_Container::isOccupied(const int & clusterId) const{
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot determine if cluster is occupied as it"
           " is not stored in the container.");
     }
-    return clusters_[clusterId].isOccupied();
+    return clusters_.at(clusterId).isOccupied();
   }
 
   void KMC_Cluster_Container::vacate(const int & clusterId){
@@ -68,15 +68,15 @@ namespace kmccoarsegrain {
     clusters_[clusterId].occupy();
   }
 
-  vector<int> KMC_Cluster_Container::getClusterIds(){
+  vector<int> KMC_Cluster_Container::getClusterIds() const {
     vector<int> clusterids;
-    for( auto cluster_pair : clusters_){
+    for( const pair<int,KMC_Cluster> & cluster_pair : clusters_){
       clusterids.push_back(cluster_pair.first);
     }
     return clusterids;
   }
 
-  double KMC_Cluster_Container::getDwellTime(int walker_id, int clusterId){
+  double KMC_Cluster_Container::getDwellTime(const int & walker_id,const int & clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot get cluster dwell time as it is not stored"
           " in the container.");
@@ -84,49 +84,49 @@ namespace kmccoarsegrain {
     return clusters_[clusterId].getDwellTime(walker_id);
   }
 
-  double KMC_Cluster_Container::getTimeConstant(int clusterId){
+  double KMC_Cluster_Container::getTimeConstant(const int & clusterId) const{
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot get cluster time constant as it is not "
           "stored in the container.");
     }
-    return clusters_[clusterId].getTimeConstant();
+    return clusters_.at(clusterId).getTimeConstant();
   }
 
-  double KMC_Cluster_Container::getFastestRateOffCluster(int clusterId){
+  double KMC_Cluster_Container::getFastestRateOffCluster(const int & clusterId) const {
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot get fastest rate off cluaster as it is not"
           " stored in the container.");
     }
-    return clusters_[clusterId].getFastestRateOffCluster();
+    return clusters_.at(clusterId).getFastestRateOffCluster();
   }
 
-  vector<int> KMC_Cluster_Container::getSiteIdsOfNeighbors(int clusterId){
+  vector<int> KMC_Cluster_Container::getSiteIdsOfNeighbors(const int & clusterId) const {
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot get site ids neighboring cluster as the "
           " cluster is not stored in the container.");
     }
-    return clusters_[clusterId].getSiteIdsNeighboringCluster();
+    return clusters_.at(clusterId).getSiteIdsNeighboringCluster();
   }
 
-  unordered_map<int,vector<int>> KMC_Cluster_Container::getSiteIdsOfClusters(){
+  unordered_map<int,vector<int>> KMC_Cluster_Container::getSiteIdsOfClusters() const {
     unordered_map<int,vector<int>> clusters;
-    for(auto cluster : clusters_){
+    for(const pair<int,KMC_Cluster> & cluster : clusters_){
       clusters[cluster.first]=cluster.second.getSiteIdsInCluster();
     }
     return clusters;
   }
 
-  unordered_map<int,double> KMC_Cluster_Container::getResolutionOfClusters(){
+  unordered_map<int,double> KMC_Cluster_Container::getResolutionOfClusters() const{
     unordered_map<int,double> clusters;
-    for(auto cluster : clusters_){
+    for(const pair<int,KMC_Cluster> & cluster : clusters_){
       clusters[cluster.first]=cluster.second.getResolution();
     }
     return clusters;
   }
 
-  unordered_map<int,double> KMC_Cluster_Container::getTimeIncrementOfClusters(){
+  unordered_map<int,double> KMC_Cluster_Container::getTimeIncrementOfClusters() const {
     unordered_map<int,double> clusters;
-    for(auto cluster : clusters_){
+    for(const pair<int,KMC_Cluster> & cluster : clusters_){
       clusters[cluster.first]=cluster.second.getTimeIncrement();
     }
     return clusters;

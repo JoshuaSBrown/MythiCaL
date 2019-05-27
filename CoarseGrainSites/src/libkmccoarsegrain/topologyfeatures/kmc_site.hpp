@@ -50,7 +50,7 @@ class KMC_Site : public KMC_TopologyFeature {
    * \param[in] neighborRate The first int is the site id of neighboring
    * site, this is followed by a pointer to actual rate.
    **/
-  void addNeighRate(const std::pair<int, double*> neighRate);
+  //void addNeighRate(const std::pair<int, double*> neighRate);
 
   /**
    * \brief Reset the rate to a neighboring site
@@ -101,7 +101,7 @@ class KMC_Site : public KMC_TopologyFeature {
    * \return The rate from the site to the neighbor
    **/
   double getRateToNeighbor(const int & neighSiteId) const;
-  double getFastestRate();
+  double getFastestRate() const;
 
   /**
    * \brief Get the ids of all the neighboring sites
@@ -151,7 +151,7 @@ class KMC_Site : public KMC_TopologyFeature {
    **/
   double getProbabilityOfHoppingToNeighboringSite(const int & neighSiteId);
 
-  std::unordered_map<int,double> & getNeighborsAndRates();
+  std::unordered_map<int,double> & getNeighborsAndRates() const;
   const std::unordered_map<int,double>& getNeighborsAndRatesConst() const;
 
   /**
