@@ -13,15 +13,18 @@ namespace kmccoarsegrain {
   typedef unordered_set<shared_ptr<Edge>> shared_edge_set;
   typedef vector<weak_ptr<Edge>> weak_edge_vec;
 
-  vector<int> BasinExplorer::findBasin(
+/*  vector<int> BasinExplorer::findBasin(
       KMC_Site_Container& ,
       KMC_Cluster_Container& ,
       KMC_CoarseGrainSystem & sys,
+      int siteId){*/
+  vector<int> BasinExplorer::findBasin(
+      KMC_Dynamic_Topology & topology, 
       int siteId){
    
    cout << "1 siteid " << siteId << endl; 
     auto edges_store = 
-      convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, siteId);
+      convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getRates(siteId), siteId);
 
     weak_edge_vec edges_weak(edges_store.begin(),edges_store.end());
 
@@ -30,22 +33,28 @@ namespace kmccoarsegrain {
     gv_largest_known.setStartingVertex(siteId);
 
     // Create the site if it does not exist
-    if(sys.sites_->exist(siteId)==false){
-      sys.topology_features_func_[siteId].feature(&sys,siteId);
+    if(topology.siteExist(siteId)==false){
+      //sys.topology_features_func_[siteId].feature(&sys,siteId);
+      topology.features[siteId].feature(topology,siteId);
     }
-    fastest_rate_ = sys.sites_->getFastestRateOffSite(siteId);
+    //fastest_rate_ = sys.sites_->getFastestRateOffSite(siteId);
+    fastest_rate_ = topology.getFastestRateOffSite(siteId);
    cout << "3 " << endl; 
 
-    if(sys.sites_->partOfCluster(siteId)){
-      auto & cluster = sys.clusters_->getKMC_Cluster(sys.sites_->getClusterIdOfSite(siteId));
-      slowest_rate_ = cluster.getFastestRateOffCluster();
+    //if(sys.sites_->partOfCluster(siteId)){
+    if(topology.partOfCluster(siteId)){
+//      auto & cluster = sys.clusters_->getKMC_Cluster(sys.sites_->getClusterIdOfSite(siteId));
+      int clusterId = topology.getClusterIdOfSite(siteId);
+      slowest_rate_ = topology.getFastestRateOffCluster(clusterId);
+//      slowest_rate_ = cluster.getFastestRateOffCluster();
     }else{
       slowest_rate_ = fastest_rate_;
     }
    cout << "4 " << endl; 
     current_sites_fastest_rate_ = fastest_rate_;
 
-    addEdges_(*sys.sites_,edges_weak,siteId,gv_largest_known);
+//    addEdges_(*sys.sites_,edges_weak,siteId,gv_largest_known);
+    addEdges_(topology,edges_weak,siteId,gv_largest_known);
 
    cout << "5 " << endl; 
     int exploration_count = 1;
@@ -55,18 +64,23 @@ namespace kmccoarsegrain {
 
    cout << "6 " << endl; 
       auto next_vertex = gv_largest_known.chooseTerminalVertex(next_edge);
-      if(sys.sites_->exist(next_vertex)==false){
-        sys.topology_features_func_[next_vertex].feature(&sys,next_vertex);
+      //if(sys.sites_->exist(next_vertex)==false){
+      if(topology.siteExist(next_vertex)==false){
+//        sys.topology_features_func_[next_vertex].feature(&sys,next_vertex);
+        topology.features[next_vertex].feature(topology,next_vertex);
+        
       }
    cout << "7 " << endl; 
       gv_largest_known.exploreEdge(next_edge);
-      auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, next_vertex);
+      auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getRates(next_vertex), next_vertex);
+      //auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, next_vertex);
       
       weak_edge_vec edges_weak_tmp(edges_tmp.begin(),edges_tmp.end());
       edges_store.insert(edges_tmp.begin(),edges_tmp.end());
 
    cout << "8 " << endl; 
-      addEdges_(*sys.sites_,edges_weak_tmp,next_vertex,gv_largest_known);
+      //addEdges_(*sys.sites_,edges_weak_tmp,next_vertex,gv_largest_known);
+      addEdges_(topology,edges_weak_tmp,next_vertex,gv_largest_known);
  
       ++exploration_count; 
       if(gv_largest_known.countExploredVertices()>max_exploration_count_){
@@ -82,17 +96,18 @@ namespace kmccoarsegrain {
 
   void BasinExplorer::addEdges_(
 
-      KMC_Site_Container& sites,
+      KMC_Dynamic_Topology& topology,
       weak_edge_vec edges_weak,
       int vertex,
       GraphVisitorLargestKnownValue & gv_largest_known){
 
     for(auto edge : edges_weak){
       if(gv_largest_known.edgeCanBeAdded(edge)){
-        double rate = getRate_(sites,edge, vertex);
+        double rate = getRate_(topology,edge, vertex);
         updateFastestRate_(rate);
 
-        current_sites_fastest_rate_ = sites.getFastestRateOffSite(vertex);
+       // current_sites_fastest_rate_ = sites.getFastestRateOffSite(vertex);
+        current_sites_fastest_rate_ = topology.getFastestRateOffSite(vertex);
         // The problem with this is it is updating as it accessing nodes.
 
         if(rateFastEnough_(rate)){
@@ -134,10 +149,11 @@ namespace kmccoarsegrain {
     return false;
   }
 
-  double BasinExplorer::getRate_(KMC_Site_Container& sites,std::weak_ptr<Edge> edge, int vertex){
+  double BasinExplorer::getRate_(KMC_Dynamic_Topology & topology,std::weak_ptr<Edge> edge, int vertex){
     double rate;
     if(auto ed = edge.lock()){
-      rate = sites.getRateToNeighborOfSite(vertex,ed->getOtherVertex(vertex));
+      //rate = sites.getRateToNeighborOfSite(vertex,ed->getOtherVertex(vertex));
+      rate = topology.getRate(vertex,ed->getOtherVertex(vertex));
     }else{
       throw runtime_error("Edge is no longer accesible in memory.");
     }

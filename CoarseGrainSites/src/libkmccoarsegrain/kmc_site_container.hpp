@@ -40,6 +40,7 @@ class KMC_Site_Container {
     double getDwellTime(int siteId);
     double getTimeConstant(int siteId);
 
+    std::unordered_map<int,double> & getNeighborsAndRates(const int siteId);
     Rate_Map getRates();
 
     double getFastestRateOffSite(int siteId);

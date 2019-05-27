@@ -175,6 +175,10 @@ namespace kmccoarsegrain {
     return rate_map;
   }
 
+  std::unordered_map<int,double> & getNeighborsAndRates(const int siteId){
+    return sites_[siteId].getNeighborsAndRates();
+  }
+
   double KMC_Site_Container::getFastestRateOffSite(int siteId){
     if(sites_.count(siteId)==0){
       throw invalid_argument("Cannot get fastest rate off site as it is not "
