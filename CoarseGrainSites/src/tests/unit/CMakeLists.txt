@@ -1,14 +1,14 @@
 
 foreach(PROG 
     test_identity 
-    #    test_kmc_basin_explorer
+    test_kmc_basin_explorer
     test_kmc_cluster 
     test_kmc_cluster_container
     #test_kmc_coarsegrainsystem
     #test_kmc_coarsegrainsystem2
     test_kmc_graph_library_adapter
-    #test_kmc_queue
-    #test_kmc_walker
+    test_kmc_queue
+    test_kmc_walker
     test_kmc_rate_container
     test_kmc_site
     test_kmc_site_container)
