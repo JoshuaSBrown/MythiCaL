@@ -174,19 +174,19 @@ namespace kmccoarsegrain {
             "You must first place the walker on a known site"
             " before the walker can be initialized.");
       }
-      cout << "Calling feature funct with site " << siteId << endl;
+      //cout << "Calling feature funct with site " << siteId << endl;
       topology_->features[siteId].feature(*topology_,siteId);
       //topology_features_[siteId]->occupy();
-      cout << "Second call, Calling feature funct with site " << siteId << endl;
+      //cout << "Second call, Calling feature funct with site " << siteId << endl;
       topology_->features[siteId].feature(*topology_,siteId)->occupy();
 
       //auto hopTime = topology_features_[siteId]->getDwellTime(walkers.at(index).first);
       //int newId = topology_features_[siteId]->pickNewSiteId(walkers.at(index).first);
-      cout << "Third call, Calling feature funct with site " << siteId << endl;
+      //cout << "Third call, Calling feature funct with site " << siteId << endl;
       auto hopTime = topology_->features[siteId].feature(*topology_,siteId)->getDwellTime(walkers.at(index).first);
       int newId = topology_->features[siteId].feature(*topology_,siteId)->pickNewSiteId(walkers.at(index).first);
-      cout << "Last call, Calling feature funct with site " << siteId << endl;
-      cout << "new id " << newId << endl;
+      //cout << "Last call, Calling feature funct with site " << siteId << endl;
+      //cout << "new id " << newId << endl;
       walkers.at(index).second.setDwellTime(hopTime);
       walkers.at(index).second.setPotentialSite(newId);
     }
@@ -232,13 +232,13 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::hop(const int & walker_id, KMC_Walker & walker) {
     const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
     const int & siteToHopToId = walker.getPotentialSite();
-    cout << "Hopping" << endl;
+    //cout << "Hopping" << endl;
     //KMC_TopologyFeature * feature = topology_features_func_[siteId].feature(this,siteId);
     //KMC_TopologyFeature * feature_to_hop_to = topology_features_func_[siteToHopToId].feature(this,siteToHopToId);
     KMC_TopologyFeature * feature = topology_->features[siteId].feature(*topology_,siteId);
     KMC_TopologyFeature * feature_to_hop_to = topology_->features[siteToHopToId].feature(*topology_,siteToHopToId);
 
-    cout << "Site id " << siteId << endl;
+    //cout << "Site id " << siteId << endl;
     if(!feature_to_hop_to->isOccupied(siteToHopToId)){
       feature->vacate(siteId);
       feature_to_hop_to->occupy(siteToHopToId);
