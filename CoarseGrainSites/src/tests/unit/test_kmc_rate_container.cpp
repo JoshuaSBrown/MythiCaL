@@ -13,8 +13,8 @@ int main(void){
     KMC_Rate_Container rate_container;
     Rate_Map rate_map;
     double rate = 1.0;
-		unordered_map<int,const double *> rate_map_elem;
-		rate_map_elem[2] = &rate;
+		unordered_map<int,double> rate_map_elem;
+		rate_map_elem[2] = rate;
     rate_map[1] = &rate_map_elem; 
     KMC_Rate_Container rate_containter2(rate_map);
   }
@@ -25,10 +25,10 @@ int main(void){
     double rate2 = 2.0;
 
     Rate_Map rate_map;
-		unordered_map<int,const double *> rate_map_elem;
-		rate_map_elem[2] = &rate;
-		unordered_map<int,const double *> rate_map_elem2;
-		rate_map_elem2[2] = &rate2;
+		unordered_map<int,double> rate_map_elem;
+		rate_map_elem[2] = rate;
+		unordered_map<int,double> rate_map_elem2;
+		rate_map_elem2[2] = rate2;
     rate_map[1] = &rate_map_elem; 
     rate_map[3] = &rate_map_elem2;
 
@@ -44,10 +44,10 @@ int main(void){
     double rate2 = 2.0;
 
     Rate_Map rate_map;
-		unordered_map<int,const double *> rate_map_elem;
-		rate_map_elem[2] = &rate;
-		unordered_map<int,const double *> rate_map_elem2;
-		rate_map_elem2[2] = &rate2;
+		unordered_map<int,double> rate_map_elem;
+		rate_map_elem[2] = rate;
+		unordered_map<int,double> rate_map_elem2;
+		rate_map_elem2[2] = rate2;
     rate_map[1] = &rate_map_elem; 
     rate_map[3] = &rate_map_elem2;
 
@@ -76,10 +76,10 @@ int main(void){
     double rate = 1.0;
     double rate2 = 2.0;
     Rate_Map rate_map;
-		unordered_map<int,const double *> rate_map_elem;
-		rate_map_elem[2] = &rate;
-		unordered_map<int,const double *> rate_map_elem2;
-		rate_map_elem2[2] = &rate2;
+		unordered_map<int,double> rate_map_elem;
+		rate_map_elem[2] = rate;
+		unordered_map<int,double> rate_map_elem2;
+		rate_map_elem2[2] = rate2;
     rate_map[1] = &rate_map_elem; 
     rate_map[3] = &rate_map_elem2;
 
@@ -100,20 +100,20 @@ int main(void){
     double rate2 = 2.0;
 
     Rate_Map rate_map;
-		unordered_map<int,const double *> rate_map_elem;
-		rate_map_elem[2] = &rate;
-		unordered_map<int,const double *> rate_map_elem2;
-		rate_map_elem2[2] = &rate2;
+		unordered_map<int,double> rate_map_elem;
+		rate_map_elem[2] = rate;
+		unordered_map<int,double> rate_map_elem2;
+		rate_map_elem2[2] = rate2;
     rate_map[1] = &rate_map_elem; 
     rate_map[3] = &rate_map_elem2;
 
     KMC_Rate_Container rate_container(rate_map);
 
-    const double * rate_ = rate_container.getRate(1,2);
-    const double * rate2_ = rate_container.getRate(3,2);
+    const double rate_ = rate_container.getRate(1,2);
+    const double rate2_ = rate_container.getRate(3,2);
 
-    assert(*rate_==rate);
-    assert(*rate2_==rate2);
+    assert(rate_==rate);
+    assert(rate2_==rate2);
 
     bool throw_error = false;
     try{
@@ -204,12 +204,12 @@ int main(void){
     double rate3 = 3.0;
 
     Rate_Map rate_map;
-		unordered_map<int,const double *> rate_map_elem;
-		rate_map_elem[2] = &rate;
-		unordered_map<int,const double *> rate_map_elem2;
-		rate_map_elem2[2] = &rate2;
-		unordered_map<int,const double *> rate_map_elem3;
-		rate_map_elem2[3] = &rate3;
+		unordered_map<int,double> rate_map_elem;
+		rate_map_elem[2] = rate;
+		unordered_map<int,double> rate_map_elem2;
+		rate_map_elem2[2] = rate2;
+		unordered_map<int,double> rate_map_elem3;
+		rate_map_elem2[3] = rate3;
     rate_map[1] = &rate_map_elem; 
     rate_map[3] = &rate_map_elem2;
     rate_map[4] = &rate_map_elem3;
@@ -239,12 +239,12 @@ int main(void){
     double rate3 = 3.0;
 
     Rate_Map rate_map;
-		unordered_map<int,const double *> rate_map_elem;
-		rate_map_elem[2] = &rate;
-		unordered_map<int,const double *> rate_map_elem2;
-		rate_map_elem2[2] = &rate2;
-		unordered_map<int,const double *> rate_map_elem3;
-		rate_map_elem2[3] = &rate3;
+		unordered_map<int,double> rate_map_elem;
+		rate_map_elem[2] = rate;
+		unordered_map<int,double> rate_map_elem2;
+		rate_map_elem2[2] = rate2;
+		unordered_map<int,double> rate_map_elem3;
+		rate_map_elem2[3] = rate3;
     rate_map[1] = &rate_map_elem; 
     rate_map[3] = &rate_map_elem2;
     rate_map[4] = &rate_map_elem3;
