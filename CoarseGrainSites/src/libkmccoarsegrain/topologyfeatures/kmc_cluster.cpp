@@ -437,7 +437,11 @@ int KMC_Cluster::pickClusterNeighbor_(const int & walker_id) {
 
   double number = random_distribution_(random_engine_);
   for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
-    if (number < pval.second) return pval.first;
+
+    if (number < pval.second) {
+			//cout << "Hopping to external site " << pval.first << endl;
+			return pval.first;
+		}
   }
   assert("Cummulitive probability distribution is flawed or random "
       "number is greater than 1");
@@ -449,6 +453,7 @@ int KMC_Cluster::pickInternalSite_() {
   double number = random_distribution_(random_engine_);
   for (const pair<int,double> & pval : cumulitive_probabilityHopToInternalSite_) {
     if (number < pval.second) {
+			//cout << "Hopping to internal site " << pval.first << endl;
       return pval.first;
     }
   }

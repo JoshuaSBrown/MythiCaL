@@ -81,7 +81,7 @@ namespace kmccoarsegrain {
    ****************************************************************************/
 
   KMC_CoarseGrainSystem::KMC_CoarseGrainSystem() :
-    performance_ratio_(1.00),
+    performance_ratio_(1.40),
     //seed_set_(false),
     //seed_(0),
     time_resolution_set_(false),
@@ -258,9 +258,12 @@ namespace kmccoarsegrain {
     if(iteration_ > iteration_threshold_){
       if(iteration_threshold_min_!=constants::inf_iterations){
        // cout << "Creating Cluster siteToHopTo " << siteToHopToId << endl;
+
         if(coarseGrain_(siteToHopToId)){
+	//				cout << "Coarse graining yes" << endl;
           iteration_threshold_ = iteration_threshold_min_;
         }else{
+	//				cout << "Coarse graining no" << endl;
           iteration_threshold_*=2;
         }
       }
@@ -273,29 +276,98 @@ namespace kmccoarsegrain {
    ****************************************************************************/
 
   bool KMC_CoarseGrainSystem::coarseGrain_(int siteId){
+
+		//for(int max_cluster_size=2; max_cluster_size<6;++max_cluster_size){
     BasinExplorer basin_explorer;
+		//basin_explorer.setMaxExplorationCount(max_cluster_size);
    // cout << "Basin explorer site id " << siteId << endl;
-//    auto basin_site_ids = basin_explorer.findBasin(*sites_,*clusters_,*this,siteId);
-    auto basin_site_ids = basin_explorer.findBasin(*topology_,siteId);
-   // cout << "explored" << endl;
-    double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
+	 //    auto basin_site_ids = basin_explorer.findBasin(*sites_,*clusters_,*this,siteId);
+		vector<int> basin_site_ids = basin_explorer.findBasin(*topology_,siteId);
+		//vector<int> basin_site_ids_fresh = basin_explorer.findBasin(*topology_,siteId);
+		// cout << "explored" << endl;
+		//if(basin_site_ids_fresh.size()>1){
+		if(basin_site_ids.size()>1){
 
-    if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
-      auto sites_and_clusters = getClustersOfSites(basin_site_ids);
-      auto number_clusters = countUniqueClusters(sites_and_clusters);
+			//////////////////////
+			// Determine which sites are part of a cluster and which are not
+/*			set<int> clusters;
+			for(int & siteIdtemp : basin_site_ids_fresh ){
+				if(topology_->partOfCluster(siteIdtemp)){
+					clusters.insert(topology_->getClusterIdOfSite(siteId));
+				}
+			}
+			cout << "Number of clusters " << clusters.size() << endl;
+			set<int> sites_already_in_cluster;
+			for( const int & clusterId : clusters){
+				vector<int> sites_in_cluster = topology_->getKMC_Cluster(clusterId).getSiteIdsInCluster();
+				for( int & siteIdtemp : sites_in_cluster ){
+					sites_already_in_cluster.insert(siteIdtemp);
+				}
+			}
+			cout << "Sites in clusters " << sites_already_in_cluster.size() << endl;	
 
-      if(number_clusters==1 &&
-          sites_and_clusters.begin()->second==constants::unassignedId)
-      {
-        createCluster_(basin_site_ids,internal_time_limit);
-        return true;
-      }else if(number_clusters!=1){
-        // Joint clusters and sites to an existing cluster
-        int favored_clusterId = getFavoredClusterId(sites_and_clusters);
-        mergeSitesAndClusters_(sites_and_clusters,favored_clusterId);
-        return true;
-      }
-    }
+			vector<int> sites_not_already_in_cluster;
+			for(int & siteIdtemp : basin_site_ids_fresh){
+				if(sites_already_in_cluster.count(siteIdtemp)==0){
+					sites_not_already_in_cluster.push_back(siteIdtemp);
+				}			
+			}		
+		
+			cout << "Number of sites not in a cluster " << sites_not_already_in_cluster.size() << endl;	
+			vector<int> basin_site_ids;
+			for( const int & siteIdtemp : sites_already_in_cluster){
+				basin_site_ids.push_back(siteIdtemp);
+			}
+			cout << "Starting basin number of sites " << basin_site_ids.size() << endl;
+			int index = -1;
+			if(clusters.size()==0){
+				// If no cluster start with 2 sites
+				basin_site_ids.push_back(sites_not_already_in_cluster.at(0));
+				basin_site_ids.push_back(sites_not_already_in_cluster.at(1));
+				index = 1;
+			} else if(clusters.size()==1 ){
+				// If with a single cluster add a single site
+				basin_site_ids.push_back(sites_not_already_in_cluster.at(index));
+				index = 0;
+			}
+
+			// Run at least once
+			bool first_round = true;
+			while(index < static_cast<int>(sites_not_already_in_cluster.size()) || index==-1){	
+				cout << "Checking for cluster in sites " << endl;
+				for( int & siteIdtemp : basin_site_ids ){
+					cout << siteIdtemp << " ";
+				}
+				cout << endl;
+				if(first_round==false){
+					basin_site_ids.push_back(sites_not_already_in_cluster.at(index));
+				}*/
+				////////////////////
+				double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
+
+				if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
+					auto sites_and_clusters = getClustersOfSites(basin_site_ids);
+					auto number_clusters = countUniqueClusters(sites_and_clusters);
+
+					if(number_clusters==1 &&
+							sites_and_clusters.begin()->second==constants::unassignedId)
+					{
+						createCluster_(basin_site_ids,internal_time_limit);
+						return true;
+					}else if(number_clusters!=1){
+						// Joint clusters and sites to an existing cluster
+						int favored_clusterId = getFavoredClusterId(sites_and_clusters);
+						mergeSitesAndClusters_(sites_and_clusters,favored_clusterId);
+						return true;
+					}
+				}
+				///////////////////
+/*				++index;
+				first_round = false;
+			}*/
+				
+		}
+		//}
     return false;
   }
 

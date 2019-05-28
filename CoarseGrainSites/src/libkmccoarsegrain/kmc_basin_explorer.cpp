@@ -28,6 +28,7 @@ namespace kmccoarsegrain {
     weak_edge_vec edges_weak(edges_store.begin(),edges_store.end());
 
     GraphVisitorLargestKnownValue gv_largest_known;
+		//cout << "Explorgin starting at site " << siteId << endl;
     gv_largest_known.setStartingVertex(siteId);
 
     // Create the site if it does not exist
@@ -38,12 +39,9 @@ namespace kmccoarsegrain {
     //fastest_rate_ = sys.sites_->getFastestRateOffSite(siteId);
     fastest_rate_ = topology.getFastestRateOffSite(siteId);
 
-    //if(sys.sites_->partOfCluster(siteId)){
     if(topology.partOfCluster(siteId)){
-//      auto & cluster = sys.clusters_->getKMC_Cluster(sys.sites_->getClusterIdOfSite(siteId));
       int clusterId = topology.getClusterIdOfSite(siteId);
       slowest_rate_ = topology.getFastestRateOffCluster(clusterId);
-//      slowest_rate_ = cluster.getFastestRateOffCluster();
     }else{
       slowest_rate_ = fastest_rate_;
     }
@@ -58,6 +56,7 @@ namespace kmccoarsegrain {
       weak_ptr<Edge> next_edge = gv_largest_known.getNextEdge<Edge>();
 
       auto next_vertex = gv_largest_known.chooseTerminalVertex(next_edge);
+			//cout << "Exploring next vertex " << next_vertex << endl;
       //if(sys.sites_->exist(next_vertex)==false){
       if(topology.siteExist(next_vertex)==false){
 //        sys.topology_features_func_[next_vertex].feature(&sys,next_vertex);
@@ -76,8 +75,11 @@ namespace kmccoarsegrain {
  
       ++exploration_count; 
       if(gv_largest_known.countExploredVertices()>max_exploration_count_){
-        vector<int> empty_vec;
-        return empty_vec;
+				//cout << "Cannot add more vertices exiting find basin" << endl;
+        //vector<int> empty_vec;
+        //return empty_vec;
+				return gv_largest_known.getExploredVertices();
+
       }
     }
     return gv_largest_known.getExploredVertices();
@@ -136,6 +138,7 @@ namespace kmccoarsegrain {
     double coef2 = (rate-current_sites_fastest_rate_)/current_sites_fastest_rate_;
     double ratio = coef1*coef2;
     if(ratio>threshold_ || rate >= slowest_rate_*.9999) return true;
+	//	if(rate>slowest_rate_) return true;
     return false;
   }
 
