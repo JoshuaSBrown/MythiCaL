@@ -29,16 +29,16 @@ int main(void){
 
     unordered_map<int, double> neigh_rates_site1;
     neigh_rates_site1[2] = rate1;
-    site1.setRatesToNeighbors(neigh_rates_site1);
+    site1.setRatesToNeighbors(&neigh_rates_site1);
 
     unordered_map<int, double> neigh_rates_site2;
     neigh_rates_site2[1] = rate2;
     neigh_rates_site2[3] = rate3;
-    site2.setRatesToNeighbors(neigh_rates_site2);
+    site2.setRatesToNeighbors(&neigh_rates_site2);
      
     unordered_map<int, double> neigh_rates_site3;
     neigh_rates_site3[2] = rate4;
-    site3.setRatesToNeighbors(neigh_rates_site3);
+    site3.setRatesToNeighbors(&neigh_rates_site3);
 
     KMC_Site_Container site_container;
     site_container.addKMC_Site(site1);
@@ -47,7 +47,8 @@ int main(void){
    
     cout << "Test with: list" << endl;
     { 
-      auto edges = convertSitesOutgoingRatesToUniqueWeightedEdges<list<unique_ptr<Edge>>>(site_container,2);
+      int id = 2;
+      auto edges = convertASitesOutgoingRatesToUniqueWeightedEdges<list<unique_ptr<Edge>>>(site_container.getNeighborsAndRates(id),id);
 
       assert(edges.size()==2);
 
@@ -65,7 +66,7 @@ int main(void){
 
     cout << "Test with: vector" << endl;
     { 
-      auto edges = convertSitesOutgoingRatesToUniqueWeightedEdges<vector<unique_ptr<Edge>>>(site_container,2);
+      auto edges = convertASitesOutgoingRatesToUniqueWeightedEdges<vector<unique_ptr<Edge>>>(site_container.getNeighborsAndRates(2),2);
 
       assert(edges.size()==2);
 
@@ -83,7 +84,7 @@ int main(void){
 
     cout << "Test with: set" << endl;
     { 
-      auto edges = convertSitesOutgoingRatesToUniqueWeightedEdges<set<unique_ptr<Edge>>>(site_container,2);
+      auto edges = convertASitesOutgoingRatesToUniqueWeightedEdges<set<unique_ptr<Edge>>>(site_container.getNeighborsAndRates(2),2);
 
       assert(edges.size()==2);
 
