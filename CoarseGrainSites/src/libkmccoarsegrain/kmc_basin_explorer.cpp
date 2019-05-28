@@ -22,13 +22,11 @@ namespace kmccoarsegrain {
       KMC_Dynamic_Topology & topology, 
       int siteId){
    
-   cout << "1 siteid " << siteId << endl; 
     auto edges_store = 
       convertASitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getSiteRates(siteId), siteId);
 
     weak_edge_vec edges_weak(edges_store.begin(),edges_store.end());
 
-   cout << "2 " << endl; 
     GraphVisitorLargestKnownValue gv_largest_known;
     gv_largest_known.setStartingVertex(siteId);
 
@@ -39,7 +37,6 @@ namespace kmccoarsegrain {
     }
     //fastest_rate_ = sys.sites_->getFastestRateOffSite(siteId);
     fastest_rate_ = topology.getFastestRateOffSite(siteId);
-   cout << "3 " << endl; 
 
     //if(sys.sites_->partOfCluster(siteId)){
     if(topology.partOfCluster(siteId)){
@@ -50,19 +47,16 @@ namespace kmccoarsegrain {
     }else{
       slowest_rate_ = fastest_rate_;
     }
-   cout << "4 " << endl; 
     current_sites_fastest_rate_ = fastest_rate_;
 
 //    addEdges_(*sys.sites_,edges_weak,siteId,gv_largest_known);
     addEdges_(topology,edges_weak,siteId,gv_largest_known);
 
-   cout << "5 " << endl; 
     int exploration_count = 1;
 
     while(gv_largest_known.allEdgesExplored()==false){
       weak_ptr<Edge> next_edge = gv_largest_known.getNextEdge<Edge>();
 
-   cout << "6 " << endl; 
       auto next_vertex = gv_largest_known.chooseTerminalVertex(next_edge);
       //if(sys.sites_->exist(next_vertex)==false){
       if(topology.siteExist(next_vertex)==false){
@@ -70,7 +64,6 @@ namespace kmccoarsegrain {
         topology.features[next_vertex].feature(topology,next_vertex);
         
       }
-   cout << "7 " << endl; 
       gv_largest_known.exploreEdge(next_edge);
       auto edges_tmp = convertASitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getSiteRates(next_vertex), next_vertex);
       //auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, next_vertex);
@@ -78,7 +71,6 @@ namespace kmccoarsegrain {
       weak_edge_vec edges_weak_tmp(edges_tmp.begin(),edges_tmp.end());
       edges_store.insert(edges_tmp.begin(),edges_tmp.end());
 
-   cout << "8 " << endl; 
       //addEdges_(*sys.sites_,edges_weak_tmp,next_vertex,gv_largest_known);
       addEdges_(topology,edges_weak_tmp,next_vertex,gv_largest_known);
  
@@ -87,9 +79,7 @@ namespace kmccoarsegrain {
         vector<int> empty_vec;
         return empty_vec;
       }
-   cout << "9 " << endl; 
     }
-   cout << "10 " << endl; 
     return gv_largest_known.getExploredVertices();
 
   }

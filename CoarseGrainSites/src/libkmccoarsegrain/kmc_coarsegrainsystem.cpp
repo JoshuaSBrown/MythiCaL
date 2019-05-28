@@ -257,7 +257,7 @@ namespace kmccoarsegrain {
     ++iteration_;
     if(iteration_ > iteration_threshold_){
       if(iteration_threshold_min_!=constants::inf_iterations){
-        cout << "Creating Cluster siteToHopTo " << siteToHopToId << endl;
+       // cout << "Creating Cluster siteToHopTo " << siteToHopToId << endl;
         if(coarseGrain_(siteToHopToId)){
           iteration_threshold_ = iteration_threshold_min_;
         }else{
@@ -274,10 +274,10 @@ namespace kmccoarsegrain {
 
   bool KMC_CoarseGrainSystem::coarseGrain_(int siteId){
     BasinExplorer basin_explorer;
-    cout << "Basin explorer site id " << siteId << endl;
+   // cout << "Basin explorer site id " << siteId << endl;
 //    auto basin_site_ids = basin_explorer.findBasin(*sites_,*clusters_,*this,siteId);
     auto basin_site_ids = basin_explorer.findBasin(*topology_,siteId);
-    cout << "explored" << endl;
+   // cout << "explored" << endl;
     double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
 
     if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){

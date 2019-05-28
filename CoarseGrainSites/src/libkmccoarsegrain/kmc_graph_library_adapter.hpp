@@ -38,10 +38,7 @@ namespace kmccoarsegrain {
       const int & siteId)
   {
     T container; 
-    std::cout << "Getting rates " << std::endl;
-    std::cout << "got rate for site " << siteId << std::endl;
     for ( auto& neigh : neigh_and_rates ){
-      std::cout << "site id " << siteId << " neigh id " << neigh.first << std::endl;
       int neigh_id = neigh.first;
       const double rate = neigh.second;
     
@@ -59,11 +56,8 @@ namespace kmccoarsegrain {
       std::vector<int> siteIds)
   {
     T container;
-    std::cout << "2 Getting rates " << std::endl;
-    std::cout << "got rate " << std::endl;
     for(auto siteId : siteIds ){
       for ( auto& neigh : topology.getSiteRates(siteId)){
-      std::cout << "site id " << siteId << " neigh id " << neigh.first << std::endl;
         int neigh_id = neigh.first;
         const double  rate = neigh.second;
 
