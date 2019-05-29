@@ -436,12 +436,15 @@ int KMC_Cluster::pickClusterNeighbor_(const int & walker_id) {
   remaining_walker_dwell_times_.erase(walker_id);
 
   double number = random_distribution_(random_engine_);
-  for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
+  //cout << "pick neighbor " << endl;
+//  for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
 
-    if (number < pval.second) {
-			//cout << "Hopping to external site " << pval.first << endl;
-			return pval.first;
-		}
+  for(auto it = cumulitive_probabilityHopToNeighbor_.rbegin();
+      it!=cumulitive_probabilityHopToNeighbor_.rend();++it){
+    //cout << number << " pval: " << pval.second << " site " << pval.first << endl; 
+    //cout << number << " pval: " << it->second <<  " id "<< it->first << endl;
+    //if (number < pval.second) return pval.first;
+    if (number > it->second) return it->first;
   }
   assert("Cummulitive probability distribution is flawed or random "
       "number is greater than 1");
@@ -451,10 +454,16 @@ int KMC_Cluster::pickClusterNeighbor_(const int & walker_id) {
 int KMC_Cluster::pickInternalSite_() {
 
   double number = random_distribution_(random_engine_);
-  for (const pair<int,double> & pval : cumulitive_probabilityHopToInternalSite_) {
-    if (number < pval.second) {
-			//cout << "Hopping to internal site " << pval.first << endl;
-      return pval.first;
+  //cout << "pick internal " << endl;
+//  for (const pair<int,double> & pval : cumulitive_probabilityHopToInternalSite_) {
+//    cout << number << " pval: " << pval.second << " site " << pval.first << endl; 
+//    if (number < pval.second) {
+  for(auto it = cumulitive_probabilityHopToInternalSite_.rbegin();
+      it!=cumulitive_probabilityHopToInternalSite_.rend();++it){
+    //cout << number << " pval: " << it->second <<  " id "<< it->first << endl;
+    if(number>it->second){
+      //return pval.first;
+      return it->first;
     }
   }
   assert("cumulitive probability distribution of sites in the cluster "
@@ -595,8 +604,10 @@ void KMC_Cluster::calculateInternalTimeConstant_() {
 }
 void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
 
+  //cout << "Calculating Cummulitive probability to internal site" << endl;
   unordered_map<int, double> probabilityHopToInternalSite;
   double total = 0.0;
+  //cout << "Number of sites in the cluster " << probabilityOnSite_.size() << endl;
   for(const pair<int,double> & site_prob : probabilityOnSite_){
     probabilityHopToInternalSite[site_prob.first] = site_prob.second * sitesInCluster_[site_prob.first]->getTimeConstant();
 
@@ -616,20 +627,25 @@ void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
   sort(probabilityHopToInternalSite_.begin(),
       probabilityHopToInternalSite_.end(),
       [](const pair<int,double>& x,const pair<int,double>&y)->bool{
-        return x.second>y.second;
+        return x.second<y.second;
       });
 
   total = 0.0;
+  double value = 0.0;
   for(pair<int,double> site_and_prob : probabilityHopToInternalSite_){
     site_and_prob.second+=total;
     total = site_and_prob.second;
-    cumulitive_probabilityHopToInternalSite_.push_back(site_and_prob);
+    //cout << "site " << site_and_prob.first << " pval " << value << endl;
+    cumulitive_probabilityHopToInternalSite_.push_back(pair<int,double>(site_and_prob.first,value));
+    value = site_and_prob.second;
   }
+
 }
 
 // requires master equation convergence as it uses probabilityOnSite_
 void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
 
+  //cout << "Calculate Prob hop to Neighbors " << endl;
   probabilityHopToNeighbor_.clear();
   unordered_map<int, double> temp_probabilityHopToNeighbor;
 
@@ -668,14 +684,20 @@ void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
   sort(probabilityHopToNeighbor_.begin(),
       probabilityHopToNeighbor_.end(),
       [](const pair<int,double>& x,const pair<int,double>&y)->bool{
-        return x.second>y.second;
+        return x.second<y.second;
       });
 
   total = 0.0;
+  double value = 0.0;
   for(pair<int,double> site_and_prob : probabilityHopToNeighbor_){
+    //cout << "prob " << site_and_prob.second << endl;
     site_and_prob.second+=total;
     total = site_and_prob.second;
-    cumulitive_probabilityHopToNeighbor_.push_back(site_and_prob);
+//    cout << "site " << site_and_prob.first << " pval " << site_and_prob.second << endl; 
+    //cout << "site " << site_and_prob.first << " pval " << value << endl; 
+//    cumulitive_probabilityHopToNeighbor_.push_back(site_and_prob);
+    cumulitive_probabilityHopToNeighbor_.push_back(pair<int,double>(site_and_prob.first,value));
+    value = site_and_prob.second;
   }
 }
 

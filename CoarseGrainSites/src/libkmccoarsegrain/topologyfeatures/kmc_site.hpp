@@ -174,6 +174,8 @@ class KMC_Site : public KMC_TopologyFeature {
    * \brief Contains the probability of hopping to each neighbor
    **/
   std::vector<std::pair<int, double>> probabilityHopToNeighbor_;
+  std::vector<std::pair<int, double>> cumulitive_probabilityHopToNeighbor_;
+  
 
   /**
    * \brief Stores pointers to the rates to each of the neighboring sites
