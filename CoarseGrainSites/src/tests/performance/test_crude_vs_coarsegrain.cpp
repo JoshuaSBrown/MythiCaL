@@ -21,7 +21,7 @@ using namespace kmccoarsegrain;
 bool sortbysec(const pair<int,double> &a,
 		const pair<int,double> &b)
 {
-	return (a.second > b.second);
+	return (a.second < b.second);
 }
 
 /**
@@ -304,10 +304,13 @@ int main(int argc, char* argv[]){
 						sort(probability.begin(),probability.end(),sortbysec);              
 						vector<pair<int,double>> cummulitive_probability;                   
 						double pval = 0.0;                                                  
+						double value = 0.0;
 						for( pair<int,double> prob : probability ){                         
 							prob.second+=pval;                                                
 							pval = prob.second;                                               
-							cummulitive_probability.push_back(prob);                          
+//							cummulitive_probability.push_back(prob);                        
+							cummulitive_probability.push_back(pair<int,double>(prob.first,value));
+							value = prob.second;
 						}                                                                   
 						cummulitive_probability_to_neighbors[siteId] = cummulitive_probability;
 						assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
@@ -350,9 +353,14 @@ int main(int argc, char* argv[]){
         double random_number = distribution(random_number_generator);
         // Attempt to hop
         assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
-        for( const pair<int,double> & pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
-          if(random_number < pval_iterator.second){
-            int neighId = pval_iterator.first;
+        //for( const pair<int,double> & pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
+        for( auto it = cummulitive_probability_to_neighbors[siteId].rbegin(); 
+        it != cummulitive_probability_to_neighbors[siteId].rend();
+			  ++it	){
+          //if(random_number < pval_iterator.second){
+          if(random_number > it->second){
+            //int neighId = pval_iterator.first;
+            int neighId = it->first;
             if(siteOccupied.count(neighId)){
               // Update the sojourn time walker is unable to make the jump
               walker_global_times.begin()->second += sojourn_times[siteId]*log(distribution(random_number_generator))*-1.0;
