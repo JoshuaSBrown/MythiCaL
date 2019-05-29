@@ -78,12 +78,18 @@ int KMC_Site::pickNewSiteId(const int &) {
 
 int KMC_Site::pickNewSiteId() {
   double number = random_distribution_(random_engine_);
-  double threshold = 0.0;
-  for (pair<int,double> & pval : probabilityHopToNeighbor_) {
-    threshold += pval.second;
+//  double threshold = 0.0;
+//  for (pair<int,double> & pval : probabilityHopToNeighbor_) {
+  for(auto it = cumulitive_probabilityHopToNeighbor_.rbegin();
+      it!=cumulitive_probabilityHopToNeighbor_.rend();
+      ++it){
+/*  threshold += pval.second;
     if (number < threshold) {
 			return pval.first;
-		}
+		}*/
+    if(number > it->second){
+      return it->first;
+    }
   }
   assert("Error cummulitive probability distribution is flawed or "
       " the random number generator has calculated a value greater than 1, or"
@@ -147,7 +153,17 @@ void KMC_Site::calculateProbabilityHopToNeighbors_() {
   }
 
   probabilityHopToNeighbor_.clear();
+  cumulitive_probabilityHopToNeighbor_.clear();
 	copy(neigh_and_prob.begin(),neigh_and_prob.end(),back_inserter(probabilityHopToNeighbor_));
+
+  double total = 0.0;
+  double value = 0.0;
+  for(pair<int,double> site_and_prob : probabilityHopToNeighbor_){
+    site_and_prob.second+=total;
+    total = site_and_prob.second;
+    cumulitive_probabilityHopToNeighbor_.push_back(pair<int,double>(site_and_prob.first,value));
+    value = site_and_prob.second;
+  }
 }
 
 void KMC_Site::calculateDwellTimeConstant_() {
