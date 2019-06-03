@@ -385,8 +385,15 @@ int main(int argc, char* argv[]){
 
   }
 
-  cout << "Post correlation fwhm " << post_correlation_fwhm << endl;
+  cout << "Post correlation fwhm before scaling" << post_correlation_fwhm << endl;
 
+	{ // Scale energies so fwhm is the same
+		double scale = pre_correlation_fwhm/post_correlation_fwhm;
+		cout << "Scaling by " << scale << endl;
+		for( size_t ind=0;ind<energies.size();++ind){
+			energies.at(ind)*=scale;
+		}
+	}
 
   unordered_map<int,unordered_map<int,double>> rates;
   unordered_map<int,vector<int>> neighbors;

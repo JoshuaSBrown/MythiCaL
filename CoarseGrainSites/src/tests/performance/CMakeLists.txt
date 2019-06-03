@@ -22,7 +22,8 @@ foreach(PROG
   set_tests_properties(performance_${PROG} PROPERTIES LABELS "kmccoarsegrain")
 endforeach(PROG)
 
-foreach(PROG test_crude_vs_coarsegrain_tof)
+foreach(PROG test_crude_vs_coarsegrain_tof
+		test_crude_vs_coarsegrain_correlated_tof)
 	file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(performance_${PROG} ${${PROG}_SOURCES})
   target_link_libraries(performance_${PROG} kmccoarsegrain)
