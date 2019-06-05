@@ -142,8 +142,8 @@ int main(int argc, char* argv[]){
 			max_energy = energies.at(0);
 			for(int i=1;i<totalNumberSites;++i){
 				energies.push_back(distribution(random_number_generator));
-				if(min_energy< energies.at(i)) min_energy = energies.at(i);
-				if(max_energy>energies.at(i)) max_energy = energies.at(i);
+				if(min_energy> energies.at(i)) min_energy = energies.at(i);
+				if(max_energy<energies.at(i)) max_energy = energies.at(i);
 			}
 		}
 
@@ -234,6 +234,7 @@ int main(int argc, char* argv[]){
 
 			pre_correlation_fwhm = upper_intersect-lower_intersect;               
 			cout << "Pre correlation fwhm " << pre_correlation_fwhm << endl;  
+			assert(pre_correlation_fwhm > 0.0 && "FWHM must be a positive number");
 		} // Determine full width half max
 		
   }
@@ -391,7 +392,7 @@ int main(int argc, char* argv[]){
 
 		{ // Scaling energies
 			double scale = pre_correlation_fwhm/post_correlation_fwhm;
-			cout << "Scaling by " << scale;
+			cout << "Scaling by " << scale << endl;
 			for(size_t ind = 0; ind< energies.size();++ind){
 				energies.at(ind)*=scale;
 			}

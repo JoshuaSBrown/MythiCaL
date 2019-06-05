@@ -13,11 +13,6 @@ namespace kmccoarsegrain {
   typedef unordered_set<shared_ptr<Edge>> shared_edge_set;
   typedef vector<weak_ptr<Edge>> weak_edge_vec;
 
-/*  vector<int> BasinExplorer::findBasin(
-      KMC_Site_Container& ,
-      KMC_Cluster_Container& ,
-      KMC_CoarseGrainSystem & sys,
-      int siteId){*/
   vector<int> BasinExplorer::findBasin(
       KMC_Dynamic_Topology & topology, 
       int siteId){
@@ -28,15 +23,12 @@ namespace kmccoarsegrain {
     weak_edge_vec edges_weak(edges_store.begin(),edges_store.end());
 
     GraphVisitorLargestKnownValue gv_largest_known;
-		//cout << "Explorgin starting at site " << siteId << endl;
     gv_largest_known.setStartingVertex(siteId);
 
     // Create the site if it does not exist
     if(topology.siteExist(siteId)==false){
-      //sys.topology_features_func_[siteId].feature(&sys,siteId);
       topology.features[siteId].feature(topology,siteId);
     }
-    //fastest_rate_ = sys.sites_->getFastestRateOffSite(siteId);
     fastest_rate_ = topology.getFastestRateOffSite(siteId);
 
     if(topology.partOfCluster(siteId)){
@@ -47,7 +39,6 @@ namespace kmccoarsegrain {
     }
     current_sites_fastest_rate_ = fastest_rate_;
 
-//    addEdges_(*sys.sites_,edges_weak,siteId,gv_largest_known);
     addEdges_(topology,edges_weak,siteId,gv_largest_known);
 
     int exploration_count = 1;
@@ -56,29 +47,22 @@ namespace kmccoarsegrain {
       weak_ptr<Edge> next_edge = gv_largest_known.getNextEdge<Edge>();
 
       auto next_vertex = gv_largest_known.chooseTerminalVertex(next_edge);
-			//cout << "Exploring next vertex " << next_vertex << endl;
-      //if(sys.sites_->exist(next_vertex)==false){
       if(topology.siteExist(next_vertex)==false){
-//        sys.topology_features_func_[next_vertex].feature(&sys,next_vertex);
         topology.features[next_vertex].feature(topology,next_vertex);
         
       }
       gv_largest_known.exploreEdge(next_edge);
       auto edges_tmp = convertASitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getSiteRates(next_vertex), next_vertex);
-      //auto edges_tmp = convertSitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( *sys.sites_, next_vertex);
       
       weak_edge_vec edges_weak_tmp(edges_tmp.begin(),edges_tmp.end());
       edges_store.insert(edges_tmp.begin(),edges_tmp.end());
 
-      //addEdges_(*sys.sites_,edges_weak_tmp,next_vertex,gv_largest_known);
       addEdges_(topology,edges_weak_tmp,next_vertex,gv_largest_known);
  
       ++exploration_count; 
       if(gv_largest_known.countExploredVertices()>max_exploration_count_){
-				//cout << "Cannot add more vertices exiting find basin" << endl;
-        //vector<int> empty_vec;
-        //return empty_vec;
-				return gv_largest_known.getExploredVertices();
+        vector<int> empty_vec;
+        return empty_vec;
 
       }
     }

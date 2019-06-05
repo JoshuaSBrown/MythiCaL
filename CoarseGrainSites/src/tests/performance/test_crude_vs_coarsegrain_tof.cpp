@@ -195,37 +195,7 @@ int main(int argc, char* argv[]){
       }
     }
   }
-/*
-	cout << "Printing rates of interest" << endl;
-	{
-		int siteId_center = 917;
-		vector<int> pos = converter.to3D(siteId_center);
-		int diff = 2;
-		for(int i = -1*diff; i<=diff; ++i){
-			cout << endl;
-			cout << "x layer " << i << endl;
-			cout << ".........................." << endl;
-			int x = pos.at(0)+i;
-			for(int j = -1*diff; j<=diff; ++j){
-				int y = pos.at(1)+j;
-				for(int k = -1*diff; k<=diff; ++k){
-					int z = pos.at(2)+k;
-					cout << endl;
-					if( x< distance && y<distance && z < distance ){
-						int siteId = converter.to1D(x,y,z);
-						cout << "global id " << siteId << endl; 
-						cout << "relative position " << i << " " << j << " " << k << endl;
-						cout << "global position " << x << " " << y << " " << z << endl;
-						cout << "neighbores position followed by rate" << endl;
-						for( const pair<int,double>  & rate : rates[siteId]){
-							vector<int> neigh_pos = converter.to3D(rate.first);
-							cout << "id " << rate.first << " pos " << neigh_pos.at(0) <<   " "<< neigh_pos.at(1) << " " << neigh_pos.at(2) << " rate: " << rate.second << endl;
-						}
-					}
-				}
-			}
-		}
-	}*/
+
   // Place walkers randomly in the first plane of the system
   set<int> siteOccupied;
   unordered_map<int,vector<int>> walker_positions;
