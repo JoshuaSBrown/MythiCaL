@@ -171,12 +171,9 @@ int main(int argc, char* argv[]){
           int zlow = z;
           int zhigh = z;
 
-          if(xlow-1>0) --xlow;
-          if(xhigh+1<distance) ++xhigh;
-          if(ylow-1>0) --ylow;
-          if(yhigh+1<distance) ++yhigh;
-          if(zlow-1>0) --zlow;
-          if(zhigh+1<distance) ++zhigh;
+          if(xhigh+2<distance) ++xhigh;
+          if(yhigh+2<distance) ++yhigh;
+          if(zhigh+2<distance) ++zhigh;
 
           int siteId = converter.to1D(x,y,z); 
           for( int x2 = xlow; x2<=xhigh; ++x2){
@@ -199,6 +196,25 @@ int main(int argc, char* argv[]){
                   double deltaE = energies.at(neighId)-energies.at(siteId)-field_energy;
                   double exponent = -pow(reorganization_energy-deltaE,2.0)/(4.0*reorganization_energy*kBT);
                   rates[siteId][neighId] = coef*exp(exponent);
+                }
+
+								xdiff = static_cast<double>(x-x2);
+                // The negative is to ensure that there is a reduction in energy
+                // in the downfield direction
+                field_energy = -1.0*xdiff*field_nm;
+                assert(x>=0);
+                assert(x<distance);
+                assert(y>=0);
+                assert(y<distance);
+                assert(z>=0);
+                assert(z<distance);
+								int reverse_siteId;
+                neighId = siteId;
+                if(reverse_siteId!=neighId){
+                  neighbors[reverse_siteId].push_back(neighId);
+                  double deltaE = energies.at(neighId)-energies.at(reverse_siteId)-field_energy;
+                  double exponent = -pow(reorganization_energy-deltaE,2.0)/(4.0*reorganization_energy*kBT);
+                  rates[reverse_siteId][neighId] = coef*exp(exponent);
                 }
               }
             }
