@@ -60,7 +60,6 @@ namespace kmccoarsegrain {
       for ( auto& neigh : topology.getSiteRates(siteId)){
         int neigh_id = neigh.first;
         const double  rate = neigh.second;
-
         auto edge_ptr = std::shared_ptr<ugly::EdgeDirectedWeighted>(new ugly::EdgeDirectedWeighted(siteId,neigh_id,rate));
 
         container.insert(container.begin(),std::move(edge_ptr));

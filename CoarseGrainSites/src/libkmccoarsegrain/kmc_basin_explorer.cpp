@@ -16,7 +16,6 @@ namespace kmccoarsegrain {
   vector<int> BasinExplorer::findBasin(
       KMC_Dynamic_Topology & topology, 
       int siteId){
-   
     auto edges_store = 
       convertASitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getSiteRates(siteId), siteId);
 
