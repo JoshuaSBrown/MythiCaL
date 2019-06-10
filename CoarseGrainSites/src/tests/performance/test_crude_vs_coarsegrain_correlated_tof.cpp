@@ -420,23 +420,24 @@ int main(int argc, char* argv[]){
     double coef = 2*pi/hbar*pow(J,2.0)*1/pow(4*pi*kBT,1.0/2.0);
 
 
-    for(int x=0; x<distance; ++x){
-      for(int y=0;y<distance;++y){
-        for(int z=0;z<distance;++z){
+    for(int x=0; x<(distance-1); ++x){
+      for(int y=0;y<(distance-1);++y){
+        for(int z=0;z<(distance-1);++z){
           // Define neighbors
           int xlow = x;
-          int xhigh = x;
+          int xhigh = x+1;
 
           int ylow = y;
-          int yhigh = y;
+          int yhigh = y+1;
           
           int zlow = z;
-          int zhigh = z;
+          int zhigh = z+1;
 
-          if(xhigh+2<distance) ++xhigh;
+         /* if(xhigh+2<distance) ++xhigh;
           if(yhigh+2<distance) ++yhigh;
-          if(zhigh+2<distance) ++zhigh;
+          if(zhigh+2<distance) ++zhigh;*/
 
+					int reverse_siteId;// = neighId;
           int siteId = converter.to1D(x,y,z); 
           for( int x2 = xlow; x2<=xhigh; ++x2){
             for( int y2 = ylow; y2<=yhigh; ++y2){
@@ -465,7 +466,7 @@ int main(int argc, char* argv[]){
                 assert(y<distance);
                 assert(z>=0);
                 assert(z<distance);
-								int reverse_siteId = neighId;
+								reverse_siteId = neighId;
                 neighId = siteId;
                 if(reverse_siteId!=neighId){
                   neighbors[reverse_siteId].push_back(neighId);
@@ -478,6 +479,7 @@ int main(int argc, char* argv[]){
             }
           }
           assert(rates[siteId].size()!=0);          
+          assert(rates[reverse_siteId].size()!=0);          
         }
       }
     }
@@ -525,7 +527,7 @@ int main(int argc, char* argv[]){
         for(int y=0;y<distance;++y){
           for(int z=0;z<distance;++z){
             // Define neighbors
-            int xlow = x;
+/*            int xlow = x;
             int xhigh = x;
 
             int ylow = y;
@@ -540,19 +542,22 @@ int main(int argc, char* argv[]){
             if(yhigh+1<distance) ++yhigh;
             if(zlow-1>0) --zlow;
             if(zhigh+1<distance) ++zhigh;
-
+*/
             double sum_rate = 0.0;
             int siteId = converter.to1D(x,y,z); 
-            for( int x2 = xlow; x2<=xhigh; ++x2){
+						for( const pair<int,double> & neigh_and_rate : rates[siteId]){
+ /*           for( int x2 = xlow; x2<=xhigh; ++x2){
               for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    sum_rate +=rates[siteId][neighId];
-                  }
-                }
+                for( int z2 = zlow; z2<=zhigh; ++z2){*/
+							//int neighId = neigh_and_rate.first;
+               //   int neighId = converter.to1D(x2,y2,z2);
+                //  if(siteId!=neighId){
+                    sum_rate += neigh_and_rate.second;//rates[siteId][neighId];
+                 // }
+/*                }
               }
-            }
+            }*/
+						}
             sojourn_times[siteId] = 1.0/sum_rate;        
             sum_rates[siteId] = sum_rate;  
           }
@@ -563,49 +568,40 @@ int main(int argc, char* argv[]){
     unordered_map<int,vector<pair<int,double>>> cummulitive_probability_to_neighbors;
     // Calculate crude probability to neighbors
     {
-      for(int x=0; x<distance; ++x){
-        for(int y=0;y<distance;++y){
-          for(int z=0;z<distance;++z){
+      for(int x=0; x<(distance); ++x){
+        for(int y=0;y<(distance);++y){
+          for(int z=0;z<(distance);++z){
             // Define neighbors
-            int xlow = x;
-            int xhigh = x;
+/*            int xlow = x;
+            int xhigh = x+1;
 
             int ylow = y;
-            int yhigh = y;
+            int yhigh = y+1;
 
             int zlow = z;
-            int zhigh = z;
-
-            if(xlow-1>0) --xlow;
-            if(xhigh+1<distance) ++xhigh;
-            if(ylow-1>0) --ylow;
-            if(yhigh+1<distance) ++yhigh;
-            if(zlow-1>0) --zlow;
-            if(zhigh+1<distance) ++zhigh;
-
-            int siteId = converter.to1D(x,y,z); 
+            int zhigh = z+1;
+*/
+						int siteId = converter.to1D(x,y,z); 
             vector<pair<int,double>> probability;
-            for( int x2 = xlow; x2<=xhigh; ++x2){
+ /*           for( int x2 = xlow; x2<=xhigh; ++x2){
               for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    probability.push_back(pair<int,double>(neighId,rates[siteId][neighId]/sum_rates[siteId]));
+                for( int z2 = zlow; z2<=zhigh; ++z2){*/
+						for( const pair<int,double> & neigh_rate : rates[siteId]){
+                  int neighId = neigh_rate.first;//converter.to1D(x2,y2,z2);
+//                  if(siteId!=neighId){
+                    probability.push_back(pair<int,double>(neighId,neigh_rate.second/sum_rates[siteId]));
                   }
-                }
-              }
-            }
+               // }
+              //}
+           // }
 
 						sort(probability.begin(),probability.end(),sortbysec);
             vector<pair<int,double>> cummulitive_probability;
 						double pval = 0.0;
             double value = 0.0;
- //           cout << "Site Pval calculator" << endl;
 						for( pair<int,double> prob : probability ){
 							prob.second+=pval;
 							pval = prob.second;
-            	//cummulitive_probability.push_back(prob);
-//              cout << "Site " << prob.first << " pval " << value << endl;
             	cummulitive_probability.push_back(pair<int,double>(prob.first,value));
               value = prob.second;
 						}
@@ -645,19 +641,15 @@ int main(int argc, char* argv[]){
         int walkerId = walker_global_times.begin()->first;
         vector<int> walker_position = walker_positions[walkerId];
         int siteId = converter.to1D(walker_position);
-
         double random_number = distribution(random_number_generator);
         // Attempt to hop
         assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
-//        for( const pair<int,double> & pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
+				assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
         for(auto it = cummulitive_probability_to_neighbors[siteId].rbegin();
             it!=cummulitive_probability_to_neighbors[siteId].rend();
             ++it){
-//          cout << "Picking site " << random_number << " " << it->second << endl;
-        //if(random_number < pval_iterator.second){
         if(random_number > it->second){
 
-            //int neighId = pval_iterator.first;
             int neighId = it->first;
             if(siteOccupied.count(neighId)){
               // Update the sojourn time walker is unable to make the jump

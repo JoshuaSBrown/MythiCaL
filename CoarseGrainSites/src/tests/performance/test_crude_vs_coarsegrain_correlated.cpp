@@ -414,22 +414,18 @@ int main(int argc, char* argv[]){
     // Define marcus coefficient
     double coef = 2*pi/hbar*pow(J,2.0)*1/pow(4*pi*kBT,1.0/2.0);
 
-    for(int x=0; x<distance; ++x){
-      for(int y=0;y<distance;++y){
-        for(int z=0;z<distance;++z){
+    for(int x=0; x<(distance-1); ++x){
+      for(int y=0;y<(distance-1);++y){
+        for(int z=0;z<(distance-1);++z){
           // Define neighbors
           int xlow = x;
-          int xhigh = x;
+          int xhigh = x+1;
 
           int ylow = y;
-          int yhigh = y;
+          int yhigh = y+1;
           
           int zlow = z;
-          int zhigh = z;
-
-          if(xhigh+2<distance) ++xhigh;
-          if(yhigh+2<distance) ++yhigh;
-          if(zhigh+2<distance) ++zhigh;
+          int zhigh = z+1;
 
           int siteId = converter.to1D(x,y,z); 
           for( int x2 = xlow; x2<=xhigh; ++x2){
@@ -516,34 +512,12 @@ int main(int argc, char* argv[]){
         for(int y=0;y<distance;++y){
           for(int z=0;z<distance;++z){
             // Define neighbors
-            int xlow = x;
-            int xhigh = x;
-
-            int ylow = y;
-            int yhigh = y;
-
-            int zlow = z;
-            int zhigh = z;
-
-            if(xlow-1>0) --xlow;
-            if(xhigh+1<distance) ++xhigh;
-            if(ylow-1>0) --ylow;
-            if(yhigh+1<distance) ++yhigh;
-            if(zlow-1>0) --zlow;
-            if(zhigh+1<distance) ++zhigh;
-
             double sum_rate = 0.0;
-            int siteId = converter.to1D(x,y,z); 
-            for( int x2 = xlow; x2<=xhigh; ++x2){
-              for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    sum_rate +=rates[siteId][neighId];
-                  }
-                }
-              }
-            }
+
+						int siteId = converter.to1D(x,y,z); 
+						for( const pair<int,double> & neigh_and_rate : rates[siteId]){
+								sum_rate += neigh_and_rate.second;//rates[siteId][neighId];
+							}
             sojourn_times[siteId] = 1/sum_rate;        
             sum_rates[siteId] = sum_rate;  
           }
@@ -554,38 +528,15 @@ int main(int argc, char* argv[]){
     unordered_map<int,vector<pair<int,double>>> cummulitive_probability_to_neighbors;
     // Calculate crude probability to neighbors
     {
-      for(int x=0; x<distance; ++x){
-        for(int y=0;y<distance;++y){
-          for(int z=0;z<distance;++z){
-            // Define neighbors
-            int xlow = x;
-            int xhigh = x;
-
-            int ylow = y;
-            int yhigh = y;
-
-            int zlow = z;
-            int zhigh = z;
-
-            if(xlow-1>0) --xlow;
-            if(xhigh+1<distance) ++xhigh;
-            if(ylow-1>0) --ylow;
-            if(yhigh+1<distance) ++yhigh;
-            if(zlow-1>0) --zlow;
-            if(zhigh+1<distance) ++zhigh;
-
-            vector<pair<int,double>> probability;
+      for(int x=0; x<(distance); ++x){
+        for(int y=0;y<(distance);++y){
+          for(int z=0;z<(distance);++z){
+						vector<pair<int,double>> probability;
             int siteId = converter.to1D(x,y,z); 
-            for( int x2 = xlow; x2<=xhigh; ++x2){
-              for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    probability.push_back(pair<int,double>(neighId,rates[siteId][neighId]/sum_rates[siteId]));
-                  }
-                }
-              }
-            }
+						for(const pair<int,double> & rate_neigh : rates[siteId] ){
+							int neighId = rate_neigh.first; //converter.to1D(x2,y2,z2);
+								probability.push_back(pair<int,double>(neighId,rate_neigh.second/sum_rates[siteId]));
+						}
 
 						sort(probability.begin(),probability.end(),sortbysec);              
 						vector<pair<int,double>> cummulitive_probability;                   
@@ -675,16 +626,6 @@ int main(int argc, char* argv[]){
   cout << "Running coarse grained Monte Carlo" << endl;
   high_resolution_clock::time_point coarse_time_start = high_resolution_clock::now();
   {
-    /*// greating map with pointer to rates
-    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
-    {
-      for(auto site_rates : rates){
-        unordered_map< int ,double *> rates_to;
-        for( auto neigh_rate : site_rates.second){
-          rates_to_neighbors[site_rates.first][neigh_rate.first] = &(rates[site_rates.first][neigh_rate.first]);
-        }
-      }
-    }*/
 
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class
