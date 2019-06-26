@@ -321,7 +321,6 @@ int main(int argc, char* argv[]){
       while(!walker_global_times.empty()){
         int walkerId = walker_global_times.begin()->first;
         vector<int> walker_position = walker_positions[walkerId];
-				cout << "walker id " << walkerId << " walker pos: " << walker_position.at(0) << " " << walker_position.at(1) << " " << walker_position.at(2) << endl;
         int siteId = converter.to1D(walker_position);
         double random_number = distribution(random_number_generator);
         assert(cummulitive_probability_to_neighbors[siteId].size()!=0);

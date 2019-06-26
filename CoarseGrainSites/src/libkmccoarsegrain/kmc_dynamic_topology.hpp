@@ -31,6 +31,7 @@ class KMC_Dynamic_Topology {
   public:
     KMC_Dynamic_Topology() : seed_set_(false), seed_(0) {};
 
+		void reserveSites(size_t num_buckets) { sites_.reserve(num_buckets);}
     void setRates(std::unordered_map<int,std::unordered_map<int,double>> & rates);
 
     void setRandomSeed(const unsigned long seed);

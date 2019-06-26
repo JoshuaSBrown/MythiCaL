@@ -20,10 +20,11 @@ namespace kmccoarsegrain {
  * neighbors. It is an internal class meaning it is not meant to be used by
  * the public. 
  **/
-class KMC_TopologyFeature : public virtual Identity {
+class KMC_TopologyFeature { //: public virtual Identity {
 
   protected:
 
+		int id_ = -1;
   /**
    * \brief Keeps track of the total number of time the feature has been
    * visited by a particle
@@ -87,6 +88,8 @@ class KMC_TopologyFeature : public virtual Identity {
  public:
   KMC_TopologyFeature();
 
+	void setId(const int id){ id_ = id;}
+	int getId() const noexcept { return id_;}
   virtual ~KMC_TopologyFeature() {};
   /**
    * \brief Set the seed for the random number generator

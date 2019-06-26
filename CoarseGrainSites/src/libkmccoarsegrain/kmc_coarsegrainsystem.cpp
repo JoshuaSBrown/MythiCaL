@@ -90,6 +90,9 @@ namespace kmccoarsegrain {
     }
 
     topology_->setRates(ratesOfAllSites);
+
+		double num_buckets = cbrt(ratesOfAllSites.size());
+		topology_->reserveSites(static_cast<size_t>(num_buckets));
 	}
 
   int KMC_CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){

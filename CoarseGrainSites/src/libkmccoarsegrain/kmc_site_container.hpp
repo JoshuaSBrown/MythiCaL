@@ -18,6 +18,7 @@ class KMC_Site_Container {
     KMC_Site_Container() {};
 		KMC_Site & createKMC_Site(const int & siteId);
 
+		void reserve(size_t num_buckets) { sites_.reserve(num_buckets);}
     void addKMC_Site(KMC_Site& site);
     void addKMC_Sites(std::vector<KMC_Site>& sites);
 

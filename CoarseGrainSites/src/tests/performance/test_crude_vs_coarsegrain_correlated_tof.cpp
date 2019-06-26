@@ -56,26 +56,28 @@ bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> &
 
 int main(int argc, char* argv[]){
 
-  if(argc!=8){
+  if(argc!=9){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
     cerr << endl;
-    cerr << "sigma      - defines the width of the density of states it" << endl;
-    cerr << "             must be a double. " << endl;
-    cerr << "distance   - integer defines the width, length and height" << endl;
-    cerr << "             of the simulation box in terms of the number" << endl;
-    cerr << "             of sites. Distance between sites is set to 1" << endl;
-		cerr << "             nm." << endl;
-    cerr << "seed       - integer value defines the random number seed" << endl;
-    cerr << "walkers    - integer value defines number of walkers." << endl;
-    cerr << "threshold  - integer value defines minimum threshold of " << endl;
-    cerr << "             how often the simulation will try to coarse " << endl;
-    cerr << "             grain." << endl;
-    cerr << "sample     - a double defining how often metrics will be" << endl;
-    cerr << "rate         measured." << endl;
-		cerr << "field      - a double defining the electric field across" << endl;
-		cerr << "             the x dimension of the system, in units of " << endl;
-		cerr << "             V/nm" << endl;
+    cerr << "sigma        - defines the width of the density of states it" << endl;
+    cerr << "               must be a double. " << endl;
+    cerr << "distance     - integer defines the width, length and height" << endl;
+    cerr << "               of the simulation box in terms of the number" << endl;
+    cerr << "               of sites. Distance between sites is set to 1" << endl;
+		cerr << "               nm." << endl;
+    cerr << "seed         - integer value defines the random number seed" << endl;
+    cerr << "walkers      - integer value defines number of walkers." << endl;
+    cerr << "threshold    - integer value defines minimum threshold of " << endl;
+    cerr << "               how often the simulation will try to coarse " << endl;
+    cerr << "               grain." << endl;
+    cerr << "sample       - a double defining how often metrics will be" << endl;
+    cerr << "rate           measured." << endl;
+		cerr << "field        - a double defining the electric field across" << endl;
+		cerr << "               the x dimension of the system, in units of " << endl;
+		cerr << "               V/nm" << endl;
+		cerr << "correlation  - The characteristic strength of the correlation" << endl;
+	  cerr << "radius" << endl;
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
@@ -91,10 +93,12 @@ int main(int argc, char* argv[]){
   int threshold = stoi(string(argv[5]));
   double sample_rate = stod(string(argv[6]));
 	double electric_field = stod(string(argv[7]));
-
+	double correlation_radius = stod(string(argv[8]));
 	// Corilation specific parameters
 	double percentage_coorilation_seeds = 0.001;
-	double correlation_radius = 3.0;
+
+	// The default was 3.0
+	//double correlation_radius = 3.0;
 	double max_correlation = correlation_radius*1.5;
 	int inverse_percentage = static_cast<int>(1.0/percentage_coorilation_seeds);
 	int num_seeds = distance*distance*distance/inverse_percentage; 
@@ -109,7 +113,8 @@ int main(int argc, char* argv[]){
   cout << "threshold:                   " << threshold << endl;
   cout << "sample rate:                 " << sample_rate << endl;
   cout << "electric_field:              " << electric_field << endl;
-	cout << "number of coorilation seeds: " << num_seeds << endl;
+	cout << "coorelation radius:          " << correlation_radius << endl;
+	cout << "number of coorelation seeds: " << num_seeds << endl;
   cout << endl;
 
   /// Create Energies and place them in a vector
@@ -243,7 +248,7 @@ int main(int argc, char* argv[]){
 	{ // Correlate Energies
 
 		mt19937 random_number_generator;                                            
-		random_number_generator.seed(7);                                            
+		random_number_generator.seed(seed+7);                                            
 		uniform_int_distribution<int> distribution(0,distance*distance*distance-1); 
 
 		vector<int> seeds;                                                          
@@ -251,6 +256,7 @@ int main(int argc, char* argv[]){
 			seeds.push_back(distribution(random_number_generator));                   
 		}                                                                           
 
+		unordered_map<int,double> sites_distance_to_seed;
 		double distance_double = static_cast<double>(distance);
 		for( auto seed : seeds ){
 			energies.at(seed) = 0.0;
@@ -274,8 +280,17 @@ int main(int argc, char* argv[]){
 									int z_n = static_cast<int>(z_neigh);
 									int neighId = converter.to1D(x_n,y_n,z_n);
 									assert(neighId<distance*distance*distance);
-									double energyDiff = energies.at(seed)-energies.at(neighId);
-									energies.at(neighId) = energies.at(neighId)+energyDiff*exp(-neigh_radius/correlation_radius);
+									// Site has no recorded neighbors
+									if(sites_distance_to_seed.count(neighId)==0){
+										double energyDiff = energies.at(seed)-energies.at(neighId);
+										energies.at(neighId) = energies.at(neighId)+energyDiff*exp(-neigh_radius/correlation_radius);
+										sites_distance_to_seed[neighId] = neigh_radius;
+									}else if(sites_distance_to_seed[neighId]>neigh_radius){
+										// sites current closest seed is futher away 
+										double energyDiff = energies.at(seed)-energies.at(neighId);
+										energies.at(neighId) = energies.at(neighId)+energyDiff*exp(-neigh_radius/correlation_radius);
+										sites_distance_to_seed[neighId] = neigh_radius;
+									}
 								}
 							}
 						}
