@@ -34,7 +34,53 @@ int main(void){
     double rate_fast = 100;
     double rate_slow = 1;
 
-    vector<pair<int,double>> rates;
+    unordered_map<int,unordered_map<int,double>> rates;
+    rates[1][2] = rate_slow;
+    rates[1][5] = rate_slow;
+
+    rates[2][1] = rate_slow;
+    rates[2][3] = rate_slow;
+    rates[2][6] = rate_fast;
+
+    rates[3][2] = rate_slow;
+    rates[3][4] = rate_slow;
+    rates[3][7] = rate_fast;
+
+    rates[4][3] = rate_slow;
+    rates[4][8] = rate_slow;
+
+    rates[5][1] = rate_slow;
+    rates[5][6] = rate_fast;
+    rates[5][9] = rate_slow;
+
+    rates[6][2] = rate_slow;
+    rates[6][5] = rate_slow;
+    rates[6][7] = rate_fast;
+    rates[6][10] = rate_slow;
+
+    rates[7][3] = rate_slow;
+    rates[7][6] = rate_fast;
+    rates[7][8] = rate_slow;
+    rates[7][11] = rate_slow;
+
+    rates[8][4] = rate_slow;
+    rates[8][7] = rate_fast;
+    rates[8][12] = rate_slow;
+
+    rates[9][5] = rate_slow;
+    rates[9][10] = rate_slow;
+
+    rates[10][6] = rate_fast;
+    rates[10][9] = rate_slow;
+    rates[10][11] = rate_slow;
+
+    rates[11][7] = rate_fast;
+    rates[11][10] = rate_slow;
+    rates[11][12] = rate_slow;
+
+    rates[12][8] = rate_slow;
+    rates[12][11] = rate_slow;
+/*    vector<pair<int,double>> rates;
     rates.push_back(pair<int,double>(2,rate_slow)); // site1->site2
     rates.push_back(pair<int,double>(5,rate_slow)); // site1->site5
 
@@ -79,9 +125,9 @@ int main(void){
     rates.push_back(pair<int,double>(12,rate_slow)); // site11->site12
 
     rates.push_back(pair<int,double>(8,rate_slow)); // site12->site8
-    rates.push_back(pair<int,double>(11,rate_slow)); // site12->site11
+    rates.push_back(pair<int,double>(11,rate_slow)); // site12->site11*/
 
-    // Ids of each of the sites
+  /*  // Ids of each of the sites
     vector<int> idsOfEachSite = { 
       1,  2,  3,  4,
       5,  6,  7,  8,
@@ -91,7 +137,7 @@ int main(void){
     vector<int> numberOfNeighbors = {
       2, 3, 3, 2,
       3, 4, 4, 3,
-      2, 3, 3, 2};
+      2, 3, 3, 2};*/
 
     // Each connection between two sites is composed of a rate going to and
     // from the site e.g.
@@ -111,7 +157,7 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    unordered_map< int,unordered_map< int,double>> ratesToNeighbors;
+    /*unordered_map< int,unordered_map< int,double>> ratesToNeighbors;
 
     int global_index = 0;
 
@@ -129,11 +175,11 @@ int main(void){
         ++global_index;        
       }
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
-    }
+    }*/
 
     KMC_CoarseGrainSystem CGsystem;
     CGsystem.setTimeResolution(10.0);
-    CGsystem.initializeSystem(ratesToNeighbors);
+    CGsystem.initializeSystem(rates);
   }
 
   cout << "Testing: hop" << endl;
@@ -153,7 +199,54 @@ int main(void){
     double rate_slow = 1;
     double rate_very_slow = 0.001;
 
-    vector<pair<int,double>> rates;
+    unordered_map<int,unordered_map<int,double>> rates;
+    rates[1][2] = rate_slow;
+    rates[1][5] = rate_slow;
+
+    rates[2][1] = rate_slow;
+    rates[2][3] = rate_slow;
+    rates[2][6] = rate_slow;
+
+    rates[3][2] = rate_slow;
+    rates[3][4] = rate_slow;
+    rates[3][7] = rate_slow;
+
+    rates[4][3] = rate_slow;
+    rates[4][8] = rate_slow;
+
+    rates[5][1] = rate_slow;
+    rates[5][6] = rate_slow;
+    rates[5][9] = rate_slow;
+
+    rates[6][2] = rate_very_slow;
+    rates[6][5] = rate_very_slow;
+    rates[6][7] = rate_fast;
+    rates[6][10] = rate_very_slow;
+
+    rates[7][3] = rate_very_slow;
+    rates[7][6] = rate_fast;
+    rates[7][8] = rate_very_slow;
+    rates[7][11] = rate_very_slow;
+
+    rates[8][4] = rate_slow;
+    rates[8][7] = rate_slow;
+    rates[8][12] = rate_slow;
+
+    rates[9][5] = rate_slow;
+    rates[9][10] = rate_slow;
+
+    rates[10][6] = rate_slow;
+    rates[10][9] = rate_slow;
+    rates[10][11] = rate_slow;
+
+    rates[11][7] = rate_slow;
+    rates[11][10] = rate_slow;
+    rates[11][12] = rate_slow;
+
+    rates[12][8] = rate_slow;
+    rates[12][11] = rate_slow;
+
+/*    vector<pair<int,double>> rates;
     rates.push_back(pair<int,double>(2,rate_slow)); // site1->site2
     rates.push_back(pair<int,double>(5,rate_slow)); // site1->site5
 
@@ -198,10 +291,10 @@ int main(void){
     rates.push_back(pair<int,double>(12,rate_slow)); // site11->site12
 
     rates.push_back(pair<int,double>(8,rate_slow)); // site12->site8
-    rates.push_back(pair<int,double>(11,rate_slow)); // site12->site11
+    rates.push_back(pair<int,double>(11,rate_slow)); // site12->site11*/
 
     // Ids of each of the sites
-    vector<int> idsOfEachSite = { 
+    /*vector<int> idsOfEachSite = { 
       1,  2,  3,  4,
       5,  6,  7,  8,
       9, 10, 11, 12};
@@ -210,7 +303,7 @@ int main(void){
     vector<int> numberOfNeighbors = {
       2, 3, 3, 2,
       3, 4, 4, 3,
-      2, 3, 3, 2};
+      2, 3, 3, 2};*/
 
     // Each connection between two sites is composed of a rate going to and
     // from the site e.g.
@@ -230,7 +323,7 @@ int main(void){
     // be stored in any container or multiple objects. 
     
     // Now we are going to store pointers to the doubles in maps  
-    unordered_map< int,unordered_map< int,double>> ratesToNeighbors;
+/*    unordered_map< int,unordered_map< int,double>> ratesToNeighbors;
 
     int global_index = 0;
 
@@ -248,7 +341,7 @@ int main(void){
         ++global_index;        
       }
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
-    }
+    }*/
 
     double time_limit = 10000;
     cout << "Running without cluster" << endl;
@@ -259,7 +352,8 @@ int main(void){
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);
       CGsystem.setMinCoarseGrainIterationThreshold(constants::inf_iterations);
-      CGsystem.initializeSystem(ratesToNeighbors);
+      //CGsystem.initializeSystem(ratesToNeighbors);
+      CGsystem.initializeSystem(rates);
 
       class Electron : public KMC_Walker {};
 
@@ -316,7 +410,7 @@ int main(void){
       CGsystem.setTimeResolution(time_resolution);
       CGsystem.setPerformanceRatio(1.0);
       CGsystem.setMinCoarseGrainIterationThreshold(1000);
-      CGsystem.initializeSystem(ratesToNeighbors);
+      CGsystem.initializeSystem(rates);
 
       class Electron : public KMC_Walker {};
 
@@ -491,7 +585,7 @@ int main(void){
    
     // Number of electrons used for both the following crude and coarse grained
     // simulation runs
-    int NumberElectrons = 8000;
+    int NumberElectrons = 40000;
     int number_of_sites = 14;
     // Will be compared with Coarse grained version
     vector<double> probabilityOnNeighCrude; 
@@ -662,7 +756,7 @@ int main(void){
       double time_resolution = time_limit/10.0;
       CGsystem.setTimeResolution(time_resolution);
       CGsystem.initializeSystem(ratesToNeighbors);
-      int cycles = 1;
+      int cycles = 2;
       for(int cycle = 0; cycle < cycles ;++cycle ){
         class Electron : public KMC_Walker {};
 
@@ -698,7 +792,7 @@ int main(void){
       for(int site_id = 1; site_id <= number_of_sites; ++site_id){
         int visits = CGsystem.getVisitFrequencyOfSite(site_id);
         hops_to_sites.at(site_id-1) = static_cast<double>(visits)/static_cast<double>(cycles); 
-        cout << "id: " << site_id << " visits " << static_cast<double>(visits)/static_cast<double>(cycles) << endl;
+        cout << "id: " << site_id << " visits " << static_cast<double>(visits)/static_cast<double>(cycles) << " no cluster " << hops_to_sites_no_cluster.at(site_id-1) << " percent diff " << hops_to_sites.at(site_id-1)/hops_to_sites_no_cluster.at(site_id-1) << endl;
       }
 
       assert(hops_to_sites.at(0)<hops_to_sites_no_cluster.at(0)*1.2);

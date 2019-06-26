@@ -16,10 +16,8 @@ class Graph;
 
 namespace kmccoarsegrain {
 
-class KMC_Site_Container;
-class KMC_Cluster_Container;
+class KMC_Dynamic_Topology;
 class KMC_TopologyFeature;
-
 class KMC_Walker;
 
 /**
@@ -219,13 +217,14 @@ class KMC_CoarseGrainSystem {
  private:
   /// Performance ratio
   double performance_ratio_;
-
+/*
+//  std::unordered_map<int,std::unordered_map<int,double>> * rates_;
   /// Depicts whether a random seed has been set, to yield reproducable data
   bool seed_set_;
 
   /// The random seed
   unsigned long seed_;
-
+*/
   bool time_resolution_set_;
   /// The resolution of the clusters. Essentially how many hops will a walker
   /// move within the cluster before it is likely to leave, the point of this
@@ -249,12 +248,25 @@ class KMC_CoarseGrainSystem {
   /// The iteration threshold is reset to the min value if a cluster is found
   int iteration_threshold_min_;
 
-  std::unordered_map<int, KMC_TopologyFeature *> topology_features_;
+  /// Must be a pointer so that we do not have to include private header
+  std::unique_ptr<KMC_Dynamic_Topology> topology_;
+/*  friend class BasinExplorer;
+	typedef KMC_TopologyFeature * (*top_feature)(KMC_CoarseGrainSystem * sys, int siteId);
+
+	friend KMC_TopologyFeature * returnSite(KMC_CoarseGrainSystem * sys,int siteId);
+	friend KMC_TopologyFeature * returnCluster(KMC_CoarseGrainSystem * sys,int siteId);
+	friend KMC_TopologyFeature * createSiteSwitchFunctionPointer(KMC_CoarseGrainSystem * sys,int siteId);
+	struct DefaultFunc {
+		top_feature feature = &createSiteSwitchFunctionPointer;	
+	};
+
+	std::unordered_map<int,DefaultFunc> topology_features_func_;
+  std::unordered_map<int,KMC_TopologyFeature *> topology_features_;
   /// Stores smart pointers to all the sites
   std::unique_ptr<KMC_Site_Container> sites_;
 
   /// Stores smart pointers to all the clusters
-  std::unique_ptr<KMC_Cluster_Container> clusters_;
+  std::unique_ptr<KMC_Cluster_Container> clusters_;*/
 
   void coarseGrainSiteIfNeeded_(KMC_Walker& walker);
 

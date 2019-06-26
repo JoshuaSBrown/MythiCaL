@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "kmc_topology_feature.hpp"
+#include "../../../include/kmccoarsegrain/kmc_constants.hpp"   
 
 namespace kmccoarsegrain {
 
@@ -23,7 +24,9 @@ namespace kmccoarsegrain {
 class KMC_Site : public KMC_TopologyFeature {
  public:
   KMC_Site();
-
+	KMC_Site(const int & siteId) : cluster_id_(constants::unassignedId) {
+		setId(siteId);
+	}
   ~KMC_Site();
   /**
    * \brief Sets the rates to sites neighboring this site
@@ -35,7 +38,7 @@ class KMC_Site : public KMC_TopologyFeature {
    * \param[in] neighRates Stores the site id of the neighbor with a pointer
    * to the rate going to the neighboring site.
    **/
-  void setRatesToNeighbors(std::unordered_map<int, double>& neighRates);
+  void setRatesToNeighbors(std::unordered_map<int, double> * neighRates);
 
   /**
    * \brief Add a rate to a neighboring site
@@ -47,7 +50,7 @@ class KMC_Site : public KMC_TopologyFeature {
    * \param[in] neighborRate The first int is the site id of neighboring
    * site, this is followed by a pointer to actual rate.
    **/
-  void addNeighRate(const std::pair<int, double*> neighRate);
+  //void addNeighRate(const std::pair<int, double*> neighRate);
 
   /**
    * \brief Reset the rate to a neighboring site
@@ -70,7 +73,7 @@ class KMC_Site : public KMC_TopologyFeature {
    * \return True if it is a neighbor and False if it is not
    **/
   bool isNeighbor(const int neighSiteId) const {
-    return neighRates_.count(neighSiteId);
+    return neighRates_->count(neighSiteId);
   }
 
   /**
@@ -98,7 +101,7 @@ class KMC_Site : public KMC_TopologyFeature {
    * \return The rate from the site to the neighbor
    **/
   double getRateToNeighbor(const int & neighSiteId) const;
-  double getFastestRate();
+  double getFastestRate() const;
 
   /**
    * \brief Get the ids of all the neighboring sites
@@ -148,8 +151,8 @@ class KMC_Site : public KMC_TopologyFeature {
    **/
   double getProbabilityOfHoppingToNeighboringSite(const int & neighSiteId);
 
-  std::unordered_map<int,double *> getNeighborsAndRates();
-  const std::unordered_map<int,double *>& getNeighborsAndRatesConst() const;
+  std::unordered_map<int,double> & getNeighborsAndRates() const;
+  const std::unordered_map<int,double>& getNeighborsAndRatesConst() const;
 
   /**
    * \brief Gets the ids and the probabilities of hopping to neighbors
@@ -171,11 +174,13 @@ class KMC_Site : public KMC_TopologyFeature {
    * \brief Contains the probability of hopping to each neighbor
    **/
   std::vector<std::pair<int, double>> probabilityHopToNeighbor_;
+  std::vector<std::pair<int, double>> cumulitive_probabilityHopToNeighbor_;
+  
 
   /**
    * \brief Stores pointers to the rates to each of the neighboring sites
    **/
-  std::unordered_map<int, double*> neighRates_;
+  std::unordered_map<int,double>* neighRates_;
 
   /**
    * \brief Stores the id of the cluster the site is a part of

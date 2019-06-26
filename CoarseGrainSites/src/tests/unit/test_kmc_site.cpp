@@ -50,7 +50,7 @@ int main(void){
     neighRates[4]=rate4;
     
     KMC_Site site;
-    site.setRatesToNeighbors(neighRates);
+    site.setRatesToNeighbors(&neighRates);
   }
 
   cout << "Testing: getRateToNeighbor" << endl;
@@ -66,13 +66,13 @@ int main(void){
     neighRates[4]=rate4;
     
     KMC_Site site;
-    site.setRatesToNeighbors(neighRates);
+    site.setRatesToNeighbors(&neighRates);
     assert(static_cast<int>(site.getRateToNeighbor(1))==400);
     assert(static_cast<int>(site.getRateToNeighbor(2))==200);
     assert(static_cast<int>(site.getRateToNeighbor(3))==10);
     assert(static_cast<int>(site.getRateToNeighbor(4))==1);
   }
-  
+ /* 
   cout << "Testing: addNeighRate" << endl;
   {
     double rate1 = 400;
@@ -92,16 +92,10 @@ int main(void){
     assert(static_cast<int>(site.getRateToNeighbor(3))==10);
     assert(static_cast<int>(site.getRateToNeighbor(4))==1);
 
-/*    bool fail = false;
-    try{
-      site.addNeighRate(pair< int,double * >(4,&rate4));
-    }catch(...){
-      fail = true;
-    }
-    assert(fail);*/
-  }
 
-  cout << "Testing: resetNeighRate" << endl;
+  }*/
+
+/*  cout << "Testing: resetNeighRate" << endl;
   {
     double rate1 = 400;
     double rate2 = 200;
@@ -137,7 +131,7 @@ int main(void){
     assert(value==10);
     value =static_cast<int>(site.getRateToNeighbor(1));
     assert(value==1);
-  }
+  }*/
 
   cout << "Testing: isNeighbor" << endl;
   {
@@ -145,14 +139,22 @@ int main(void){
     double rate2 = 200;
     double rate3 = 10;
     double rate4 = 1;
-    
-    KMC_Site site;
+   
+    int id = 0; 
+    KMC_Site site(id);
 
-    site.addNeighRate(pair< int,double * >(1,&rate1));
+    unordered_map<int,double> rates;
+    rates[1] = rate1;
+    rates[2] = rate2;
+    rates[3] = rate3;
+    rates[4] = rate4;
+
+    site.setRatesToNeighbors(&rates);
+/*    site.addNeighRate(pair< int,double * >(1,&rate1));
     site.addNeighRate(pair< int,double * >(2,&rate2));
     site.addNeighRate(pair< int,double * >(3,&rate3));
     site.addNeighRate(pair< int,double * >(4,&rate4));
-
+*/
     assert(site.isNeighbor(0)==false);
     assert(site.isNeighbor(1)==true);
     assert(site.isNeighbor(2)==true);
@@ -193,7 +195,7 @@ int main(void){
     neighRates[4]=rate4;
     
     KMC_Site site;
-    site.setRatesToNeighbors(neighRates);
+    site.setRatesToNeighbors(&neighRates);
 
 /*    bool fail = false;
     try {
@@ -222,7 +224,7 @@ int main(void){
     neighRates[4]=rate4;
     
     KMC_Site site;
-    site.setRatesToNeighbors(neighRates);
+    site.setRatesToNeighbors(&neighRates);
     
     auto neighborIds = site.getNeighborSiteIds();
 
@@ -258,7 +260,7 @@ int main(void){
     
     KMC_Site site;
     site.setId(0);
-    site.setRatesToNeighbors(neighRates);
+    site.setRatesToNeighbors(&neighRates);
     cout << site << endl;
 
   }

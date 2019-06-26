@@ -7,54 +7,58 @@
 using namespace std;
 
 namespace kmccoarsegrain {
-
+/*
   void KMC_Rate_Container::addRate(int siteId, int neighId, double * rate){
     if(rates_.count(siteId)){
-      if(rates_[siteId].count(neighId)){
+      if(rates_[siteId]->count(neighId)){
         throw invalid_argument("Error the rate has already been added.");
       }
     }
-    rates_[siteId][neighId]=rate;
-  }
+    (*rates_[siteId])[neighId]=rate;
+  }*/
 
   void KMC_Rate_Container::addRates(Rate_Map rates){
     if(rates_.size()==0){
       rates_ = rates;
     }else{
-      for( auto site : rates ){
-        for ( auto neigh : site.second ){
-          addRate(site.first,neigh.first,neigh.second); 
-        }
+      for( auto & site : rates ){
+					rates_[site.first] = site.second;
+        //for ( auto & neigh : site.second ){
+         // addRate(site.first,neigh.first,neigh.second); 
+        //}
       }
     }
 
   }
 
-  double * KMC_Rate_Container::getRate(int siteId, int neighId) {
+  double KMC_Rate_Container::getRate(int siteId, int neighId) {
     if(rates_.count(siteId)==0){
-      if(rates_[siteId].count(neighId)==0){
-        throw invalid_argument("Cannot retrieve rate as it has not been added.");
-      }
-    }
-    return rates_[siteId][neighId];
+      throw invalid_argument("Cannot retrieve rate as it has not been added.");
+		}else if(rates_[siteId]->count(neighId)==0){
+			throw invalid_argument("Cannot retrieve rate as it has not been added.");
+		}
+    return rates_[siteId]->at(neighId);
   }
 
-  size_t KMC_Rate_Container::incomingRateCount(int siteId) {
+  size_t KMC_Rate_Container::incomingRateCount(int siteId) const {
     size_t count = 0;
-    for( auto site : rates_ ) if(site.second.count(siteId)) ++count;
+    for( auto & site : rates_ ) if(site.second->count(siteId)) ++count;
     return count;
   }
 
-  size_t KMC_Rate_Container::outgoingRateCount(int siteId) {
-    return rates_[siteId].size();
+  size_t KMC_Rate_Container::outgoingRateCount(int siteId) const {
+		if(rates_.count(siteId)==0){
+			return 0;
+		}
+    return rates_.at(siteId)->size();
   }
-
+/*
   Rate_Map KMC_Rate_Container::getIncomingRates(int siteId) {
     Rate_Map rates; 
-    for( auto site : rates_ ){
-      for ( auto neigh : site.second ){
+    for( auto & site : rates_ ){
+      for ( auto & neigh : *(site.second) ){
         if( neigh.first == siteId ){
-          rates[site.first][neigh.first] = neigh.second;
+          rates[site.first]->at(neigh.first) = neigh.second;
         }
       }
     }
@@ -68,7 +72,7 @@ namespace kmccoarsegrain {
     }
     return rates;
   }
-
+*/
   vector<int> KMC_Rate_Container::getSourceSiteIds() {
     auto site_ids_outgoing = getSiteIdsWithOutgoingRates_();
     auto site_ids_incoming = getSiteIdsWithIncomingRates_();
@@ -104,7 +108,7 @@ namespace kmccoarsegrain {
   unordered_set<int> KMC_Rate_Container::getSiteIdsWithIncomingRates_(){
     unordered_set<int> siteIds;
     for( auto site : rates_ ) {
-      for( auto neigh : site.second ){
+      for( auto & neigh : *site.second ){
         siteIds.insert(neigh.first);
       }
     }

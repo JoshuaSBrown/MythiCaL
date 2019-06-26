@@ -17,6 +17,12 @@ using namespace std;
 using namespace std::chrono;
 using namespace kmccoarsegrain;
 
+bool sortbysec(const pair<int,double> &a,                                       
+		const pair<int,double> &b)                                        
+{                                                                               
+	return (a.second < b.second);                                               
+} 
+
 /**
  * \brief class for converting 1d array to 3d and vice versa
  **/
@@ -379,8 +385,15 @@ int main(int argc, char* argv[]){
 
   }
 
-  cout << "Post correlation fwhm " << post_correlation_fwhm << endl;
+  cout << "Post correlation fwhm before scaling" << post_correlation_fwhm << endl;
 
+	{ // Scale energies so fwhm is the same
+		double scale = pre_correlation_fwhm/post_correlation_fwhm;
+		cout << "Scaling by " << scale << endl;
+		for( size_t ind=0;ind<energies.size();++ind){
+			energies.at(ind)*=scale;
+		}
+	}
 
   unordered_map<int,unordered_map<int,double>> rates;
   unordered_map<int,vector<int>> neighbors;
@@ -401,25 +414,18 @@ int main(int argc, char* argv[]){
     // Define marcus coefficient
     double coef = 2*pi/hbar*pow(J,2.0)*1/pow(4*pi*kBT,1.0/2.0);
 
-    for(int x=0; x<distance; ++x){
-      for(int y=0;y<distance;++y){
-        for(int z=0;z<distance;++z){
+    for(int x=0; x<(distance-1); ++x){
+      for(int y=0;y<(distance-1);++y){
+        for(int z=0;z<(distance-1);++z){
           // Define neighbors
           int xlow = x;
-          int xhigh = x;
+          int xhigh = x+1;
 
           int ylow = y;
-          int yhigh = y;
+          int yhigh = y+1;
           
           int zlow = z;
-          int zhigh = z;
-
-          if(xlow-1>0) --xlow;
-          if(xhigh+1<distance) ++xhigh;
-          if(ylow-1>0) --ylow;
-          if(yhigh+1<distance) ++yhigh;
-          if(zlow-1>0) --zlow;
-          if(zhigh+1<distance) ++zhigh;
+          int zhigh = z+1;
 
           int siteId = converter.to1D(x,y,z); 
           for( int x2 = xlow; x2<=xhigh; ++x2){
@@ -439,6 +445,22 @@ int main(int argc, char* argv[]){
                   double exponent = -pow(reorganization_energy-deltaE,2.0)/(4.0*reorganization_energy*kBT);
                   rates[siteId][neighId] = coef*exp(exponent);
                 }
+
+                assert(x>=0);
+                assert(x<distance);
+                assert(y>=0);
+                assert(y<distance);
+                assert(z>=0);
+                assert(z<distance);
+								int reverse_siteId = neighId;
+                neighId = siteId; 
+                if(reverse_siteId!=neighId){
+                  neighbors[reverse_siteId].push_back(neighId);
+                  double deltaE = energies.at(neighId)-energies.at(reverse_siteId);
+                  double exponent = -pow(reorganization_energy-deltaE,2.0)/(4.0*reorganization_energy*kBT);
+                  rates[reverse_siteId][neighId] = coef*exp(exponent);
+                }
+
               }
             }
           }
@@ -490,34 +512,12 @@ int main(int argc, char* argv[]){
         for(int y=0;y<distance;++y){
           for(int z=0;z<distance;++z){
             // Define neighbors
-            int xlow = x;
-            int xhigh = x;
-
-            int ylow = y;
-            int yhigh = y;
-
-            int zlow = z;
-            int zhigh = z;
-
-            if(xlow-1>0) --xlow;
-            if(xhigh+1<distance) ++xhigh;
-            if(ylow-1>0) --ylow;
-            if(yhigh+1<distance) ++yhigh;
-            if(zlow-1>0) --zlow;
-            if(zhigh+1<distance) ++zhigh;
-
             double sum_rate = 0.0;
-            int siteId = converter.to1D(x,y,z); 
-            for( int x2 = xlow; x2<=xhigh; ++x2){
-              for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    sum_rate +=rates[siteId][neighId];
-                  }
-                }
-              }
-            }
+
+						int siteId = converter.to1D(x,y,z); 
+						for( const pair<int,double> & neigh_and_rate : rates[siteId]){
+								sum_rate += neigh_and_rate.second;//rates[siteId][neighId];
+							}
             sojourn_times[siteId] = 1/sum_rate;        
             sum_rates[siteId] = sum_rate;  
           }
@@ -525,47 +525,30 @@ int main(int argc, char* argv[]){
       }
     }// Calculate sojourn times & sum_rates
 
-    unordered_map<int,unordered_map<int,double>> cummulitive_probability_to_neighbors;
+    unordered_map<int,vector<pair<int,double>>> cummulitive_probability_to_neighbors;
     // Calculate crude probability to neighbors
     {
-      for(int x=0; x<distance; ++x){
-        for(int y=0;y<distance;++y){
-          for(int z=0;z<distance;++z){
-            // Define neighbors
-            int xlow = x;
-            int xhigh = x;
-
-            int ylow = y;
-            int yhigh = y;
-
-            int zlow = z;
-            int zhigh = z;
-
-            if(xlow-1>0) --xlow;
-            if(xhigh+1<distance) ++xhigh;
-            if(ylow-1>0) --ylow;
-            if(yhigh+1<distance) ++yhigh;
-            if(zlow-1>0) --zlow;
-            if(zhigh+1<distance) ++zhigh;
-
-            unordered_map<int,double> cummulitive_probability;
-            double pval = 0.0;
+      for(int x=0; x<(distance); ++x){
+        for(int y=0;y<(distance);++y){
+          for(int z=0;z<(distance);++z){
+						vector<pair<int,double>> probability;
             int siteId = converter.to1D(x,y,z); 
-            for( int x2 = xlow; x2<=xhigh; ++x2){
-              for( int y2 = ylow; y2<=yhigh; ++y2){
-                for( int z2 = zlow; z2<=zhigh; ++z2){
-                  int neighId = converter.to1D(x2,y2,z2);
-                  if(siteId!=neighId){
-                    cummulitive_probability[neighId]=rates[siteId][neighId]/sum_rates[siteId];
-                    cummulitive_probability[neighId]+=pval;
-                    pval+=rates[siteId][neighId]/sum_rates[siteId];
-                  }
-                }
-              }
-            }
-            assert(cummulitive_probability.size()!=0);
-            cummulitive_probability_to_neighbors[siteId] = cummulitive_probability; 
-            assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
+						for(const pair<int,double> & rate_neigh : rates[siteId] ){
+							int neighId = rate_neigh.first; //converter.to1D(x2,y2,z2);
+								probability.push_back(pair<int,double>(neighId,rate_neigh.second/sum_rates[siteId]));
+						}
+
+						sort(probability.begin(),probability.end(),sortbysec);              
+						vector<pair<int,double>> cummulitive_probability;                   
+						double pval = 0.0;                                                  
+						double value = 0.0;	
+						for( pair<int,double> prob : probability ){                         
+							prob.second+=pval;                                                
+							pval = prob.second;                                               
+							cummulitive_probability.push_back(pair<int,double>(prob.first,value));                          value = prob.second;
+						}                                                                   
+						cummulitive_probability_to_neighbors[siteId] = cummulitive_probability;
+						assert(cummulitive_probability_to_neighbors[siteId].size()!=0);   
           }
         }
       }
@@ -605,9 +588,14 @@ int main(int argc, char* argv[]){
         double random_number = distribution(random_number_generator);
         // Attempt to hop
         assert(cummulitive_probability_to_neighbors[siteId].size()!=0);
-        for( auto pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
-          if(random_number < pval_iterator.second){
-            int neighId = pval_iterator.first;
+        //for( auto pval_iterator : cummulitive_probability_to_neighbors[siteId] ){
+				for(auto it = cummulitive_probability_to_neighbors[siteId].rbegin();
+						it != cummulitive_probability_to_neighbors[siteId].rend();
+						++it){
+          //if(random_number < pval_iterator.second){
+          if(random_number > it->second){
+            //int neighId = pval_iterator.first;
+            int neighId = it->first;
             if(siteOccupied.count(neighId)){
               // Update the sojourn time walker is unable to make the jump
               walker_global_times.begin()->second += sojourn_times[siteId]*log(distribution(random_number_generator))*-1.0;
@@ -638,16 +626,6 @@ int main(int argc, char* argv[]){
   cout << "Running coarse grained Monte Carlo" << endl;
   high_resolution_clock::time_point coarse_time_start = high_resolution_clock::now();
   {
-    /*// greating map with pointer to rates
-    unordered_map< int, unordered_map< int, double *>> rates_to_neighbors;
-    {
-      for(auto site_rates : rates){
-        unordered_map< int ,double *> rates_to;
-        for( auto neigh_rate : site_rates.second){
-          rates_to_neighbors[site_rates.first][neigh_rate.first] = &(rates[site_rates.first][neigh_rate.first]);
-        }
-      }
-    }*/
 
     class Electron : public KMC_Walker {};
     // Create the electrons using the KMC_Walker class

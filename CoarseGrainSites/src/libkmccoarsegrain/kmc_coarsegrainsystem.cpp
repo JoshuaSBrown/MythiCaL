@@ -19,6 +19,7 @@
 #include "kmc_graph_library_adapter.hpp"
 #include "kmc_site_container.hpp"
 #include "kmc_cluster_container.hpp"
+#include "kmc_dynamic_topology.hpp"
 
 #include "../../../UGLY/include/ugly/pair_hash.hpp"
 #include "../../../UGLY/include/ugly/edge_directed_weighted.hpp"
@@ -51,16 +52,13 @@ namespace kmccoarsegrain {
    ****************************************************************************/
 
   KMC_CoarseGrainSystem::KMC_CoarseGrainSystem() :
-    performance_ratio_(1.00),
-    seed_set_(false),
-    seed_(0),
+    performance_ratio_(1.40),
     time_resolution_set_(false),
     minimum_coarse_graining_resolution_(2),
     iteration_(0),
     iteration_threshold_(1000),
     iteration_threshold_min_(1000){
-      sites_ = unique_ptr<KMC_Site_Container>( new KMC_Site_Container );
-      clusters_ = unique_ptr<KMC_Cluster_Container>( new KMC_Cluster_Container );
+      topology_ = unique_ptr<KMC_Dynamic_Topology>(new KMC_Dynamic_Topology);
     }
 
   KMC_CoarseGrainSystem::~KMC_CoarseGrainSystem(){
@@ -91,60 +89,19 @@ namespace kmccoarsegrain {
           "before you can initialize the system.");
     }
 
-    for (auto it = ratesOfAllSites.begin(); it != ratesOfAllSites.end(); ++it) {
-      KMC_Site site;
-      site.setId(it->first);
+    topology_->setRates(ratesOfAllSites);
 
-      site.setRatesToNeighbors(it->second);
-      if (seed_set_) {
-        site.setRandomSeed(seed_);
-        ++seed_;
-      }
-      sites_->addKMC_Site(site);
-      topology_features_[it->first] = &(sites_->getKMC_Site(it->first));
-    }
-
-    // Address sites that will act as drains with no rates off of them
-    unordered_set<int> drain_sites;
-    for (pair<const int,unordered_map<int,double>> & sites_and_rates : ratesOfAllSites){
-      for(const pair<int,double> & site_and_rate : sites_and_rates.second ){
-        if(ratesOfAllSites.count(site_and_rate.first)==0){
-          drain_sites.insert(site_and_rate.first);
-        }
-      }
-    }
-
-    for( const int & drain_site_id : drain_sites ){
-      KMC_Site site;
-      site.setId(drain_site_id);
-      sites_->addKMC_Site(site);
-      topology_features_[drain_site_id] = &(sites_->getKMC_Site(drain_site_id));
-    }
-  }
+		double num_buckets = cbrt(ratesOfAllSites.size());
+		topology_->reserveSites(static_cast<size_t>(num_buckets));
+	}
 
   int KMC_CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){
-    if(sites_->exist(siteId)==false){
-      throw invalid_argument("Site is not stored in the coarse grained system you"
-          " cannot retrieve it's visit frequency.");
-    }
-
-    int visits = sites_->getKMC_Site(siteId).getVisitFrequency();
-    if(sites_->partOfCluster(siteId)){
-      int cluster_id = sites_->getClusterIdOfSite(siteId);
-      visits += clusters_->getKMC_Cluster(cluster_id).getVisitFrequency(siteId);
-    }
-    return visits;
+    return topology_->getVisitFrequencyOfSite(siteId);
   }
 
   void KMC_CoarseGrainSystem::initializeWalkers(vector<pair<int,KMC_Walker>>& walkers) {
 
     LOG("Initializeing walkers", 1);
-
-    if (topology_features_.size() == 0) {
-      throw runtime_error(
-          "You must first initialize the system before you "
-          "can initialize the walkers");
-    }
 
     for ( size_t index = 0; index<walkers.size(); ++index){
       int siteId = walkers.at(index).second.getIdOfSiteCurrentlyOccupying();
@@ -153,10 +110,11 @@ namespace kmccoarsegrain {
             "You must first place the walker on a known site"
             " before the walker can be initialized.");
       }
-      topology_features_[siteId]->occupy();
+      topology_->features[siteId].feature(*topology_,siteId);
+      topology_->features[siteId].feature(*topology_,siteId)->occupy();
 
-      auto hopTime = topology_features_[siteId]->getDwellTime(walkers.at(index).first);
-      int newId = topology_features_[siteId]->pickNewSiteId(walkers.at(index).first);
+      auto hopTime = topology_->features[siteId].feature(*topology_,siteId)->getDwellTime(walkers.at(index).first);
+      int newId = topology_->features[siteId].feature(*topology_,siteId)->pickNewSiteId(walkers.at(index).first);
       walkers.at(index).second.setDwellTime(hopTime);
       walkers.at(index).second.setPotentialSite(newId);
     }
@@ -169,13 +127,7 @@ namespace kmccoarsegrain {
   }
 
   void KMC_CoarseGrainSystem::setRandomSeed(const unsigned long seed) {
-    if (topology_features_.size() != 0) {
-      throw runtime_error(
-          "For the random seed to have an affect, it must be "
-          "set before initializeSystem is called");
-    }
-    seed_ = seed;
-    seed_set_ = true;
+    topology_->setRandomSeed(seed);
   }
 
   void KMC_CoarseGrainSystem::removeWalkerFromSystem(pair<int,KMC_Walker>& walker) {
@@ -185,11 +137,11 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::removeWalkerFromSystem(int & walker_id, KMC_Walker& walker) {
     LOG("Walker is being removed from system", 1);
     auto siteId = walker.getIdOfSiteCurrentlyOccupying();
-    topology_features_[siteId]->removeWalker(walker_id,siteId);
+    topology_->features[siteId].feature(*topology_,siteId)->removeWalker(walker_id,siteId);
   }
 
   int KMC_CoarseGrainSystem::getClusterIdOfSite(int siteId) {
-    return sites_->getClusterIdOfSite(siteId);
+    return topology_->getClusterIdOfSite(siteId);
   }
 
   void KMC_CoarseGrainSystem::hop(pair<const int,KMC_Walker>& walker) {
@@ -198,9 +150,9 @@ namespace kmccoarsegrain {
 
   void KMC_CoarseGrainSystem::hop(const int & walker_id, KMC_Walker & walker) {
     const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
-    const int & siteToHopToId = walker.getPotentialSite();
-    KMC_TopologyFeature * feature = topology_features_[siteId];
-    KMC_TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
+		const int & siteToHopToId = walker.getPotentialSite();
+		KMC_TopologyFeature * feature = topology_->features[siteId].feature(*topology_,siteId);
+    KMC_TopologyFeature * feature_to_hop_to = topology_->features[siteToHopToId].feature(*topology_,siteToHopToId);
 
     if(!feature_to_hop_to->isOccupied(siteToHopToId)){
       feature->vacate(siteId);
@@ -220,6 +172,7 @@ namespace kmccoarsegrain {
     ++iteration_;
     if(iteration_ > iteration_threshold_){
       if(iteration_threshold_min_!=constants::inf_iterations){
+
         if(coarseGrain_(siteToHopToId)){
           iteration_threshold_ = iteration_threshold_min_;
         }else{
@@ -235,27 +188,31 @@ namespace kmccoarsegrain {
    ****************************************************************************/
 
   bool KMC_CoarseGrainSystem::coarseGrain_(int siteId){
+
     BasinExplorer basin_explorer;
-    auto basin_site_ids = basin_explorer.findBasin(*sites_,*clusters_,siteId);
+		vector<int> basin_site_ids = basin_explorer.findBasin(*topology_,siteId);
 
-    double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
+		if(basin_site_ids.size()>1){
 
-    if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
-      auto sites_and_clusters = getClustersOfSites(basin_site_ids);
-      auto number_clusters = countUniqueClusters(sites_and_clusters);
+			double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
 
-      if(number_clusters==1 &&
-          sites_and_clusters.begin()->second==constants::unassignedId)
-      {
-        createCluster_(basin_site_ids,internal_time_limit);
-        return true;
-      }else if(number_clusters!=1){
-        // Joint clusters and sites to an existing cluster
-        int favored_clusterId = getFavoredClusterId(sites_and_clusters);
-        mergeSitesAndClusters_(sites_and_clusters,favored_clusterId);
-        return true;
-      }
-    }
+			if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
+				auto sites_and_clusters = getClustersOfSites(basin_site_ids);
+				auto number_clusters = countUniqueClusters(sites_and_clusters);
+
+				if(number_clusters==1 &&
+						sites_and_clusters.begin()->second==constants::unassignedId)
+				{
+					createCluster_(basin_site_ids,internal_time_limit);
+					return true;
+				}else if(number_clusters!=1){
+					// Joint clusters and sites to an existing cluster
+					int favored_clusterId = getFavoredClusterId(sites_and_clusters);
+					mergeSitesAndClusters_(sites_and_clusters,favored_clusterId);
+					return true;
+				}
+			}
+		}
     return false;
   }
 
@@ -282,15 +239,7 @@ namespace kmccoarsegrain {
 
   // The first int is the site id the second int is the cluster id 
   unordered_map<int,int> KMC_CoarseGrainSystem::getClustersOfSites(const vector<int> & siteIds){
-    unordered_map<int,int> sites_and_clusters;
-    for(auto siteId : siteIds){
-      if(sites_->partOfCluster(siteId)){
-        sites_and_clusters[siteId]= sites_->getClusterIdOfSite(siteId);
-      }else{
-        sites_and_clusters[siteId]= constants::unassignedId;
-      }
-    }
-    return sites_and_clusters;
+    return topology_->getClustersOfSites(siteIds); 
   }
 
   int KMC_CoarseGrainSystem::createCluster_(vector<int> siteIds, double internal_time_limit) {
@@ -299,9 +248,17 @@ namespace kmccoarsegrain {
     KMC_Cluster cluster;
     cluster.setConvergenceMethod(KMC_Cluster::Method::converge_by_tolerance);
     cluster.setConvergenceTolerance(0.001);
-    vector<KMC_Site> sites;
-    for (auto siteId : siteIds){
-      sites.push_back(sites_->getKMC_Site(siteId));
+    vector<KMC_Site *> sites;
+    for (const int & siteId : siteIds){
+      //if(sites_->exist(siteId)){
+      if(topology_->siteExist(siteId)){
+        sites.push_back(&topology_->getKMC_Site(siteId));
+        //sites.push_back(sites_->getKMC_Site(siteId));
+      } else {
+        topology_->features[siteId].feature(*topology_,siteId);
+        //sites.push_back(sites_->getKMC_Site(siteId));
+        sites.push_back(&topology_->getKMC_Site(siteId));
+      }
     }
     cluster.addSites(sites);
     cluster.updateProbabilitiesAndTimeConstant();
@@ -318,18 +275,19 @@ namespace kmccoarsegrain {
     if(chosen_resolution<2.0) chosen_resolution=2.0;
    
     cluster.setResolution(chosen_resolution);
-    if (seed_set_) {
+/*    if (seed_set_) {
       cluster.setRandomSeed(seed_);
       ++seed_;
-    }
-    clusters_->addKMC_Cluster(cluster);
-
+    }*/
+    topology_->addKMC_Cluster(cluster);
+/*
     for(auto siteId : siteIds){
       sites_->setClusterId(siteId,cluster.getId());  
-      topology_features_[siteId] = &(clusters_->getKMC_Cluster(cluster.getId()));
-    }
+      //topology_features_func_[siteId].feature = returnCluster;
+      topology_.features[siteId].feature = returnCluster;
 
-    auto sitesFoundInCluster = cluster.getSiteIdsInCluster();
+    }
+*/
 
     return cluster.getId();
   }
@@ -337,25 +295,29 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::mergeSitesAndClusters_( unordered_map<int,int> sites_and_clusters,int favoredClusterId) {
 
     LOG("Merging sites to cluster", 1);
-    vector<KMC_Site> isolated_sites;
+    vector<KMC_Site *> isolated_sites;
     unordered_set<int> cluster_ids;
 
-    for (auto site_and_cluster : sites_and_clusters) { 
+    for (const pair<int,int> & site_and_cluster : sites_and_clusters) { 
       if(site_and_cluster.second != favoredClusterId){ 
         if (site_and_cluster.second == constants::unassignedId) {
-          isolated_sites.push_back(sites_->getKMC_Site(site_and_cluster.first));
+          isolated_sites.push_back(&topology_->getKMC_Site(site_and_cluster.first));
+          //isolated_sites.push_back(sites_->getKMC_Site(site_and_cluster.first));
         } else {
           cluster_ids.insert(site_and_cluster.second);
         }
-        topology_features_[site_and_cluster.first] = &(clusters_->getKMC_Cluster(favoredClusterId));
-        sites_->setClusterId(site_and_cluster.first,favoredClusterId);
+        //topology_features_[site_and_cluster.first] = &(clusters_->getKMC_Cluster(favoredClusterId));
+        topology_->features[site_and_cluster.first].feature = returnCluster; 
+        topology_->setSitesClusterId(site_and_cluster.first,favoredClusterId);
+        //sites_->setClusterId(site_and_cluster.first,favoredClusterId);
       }
     }
-    clusters_->getKMC_Cluster(favoredClusterId).addSites(isolated_sites);
-    clusters_->getKMC_Cluster(favoredClusterId).updateProbabilitiesAndTimeConstant();
+    topology_->getKMC_Cluster(favoredClusterId).addSites(isolated_sites);
+    topology_->getKMC_Cluster(favoredClusterId).updateProbabilitiesAndTimeConstant();
     for(auto clusterId : cluster_ids ){
-      clusters_->getKMC_Cluster(favoredClusterId).migrateSitesFrom(clusters_->getKMC_Cluster(clusterId));
-      clusters_->erase(clusterId);
+      topology_->mergeClusters(favoredClusterId,clusterId);
+//      clusters_->getKMC_Cluster(favoredClusterId).migrateSitesFrom(clusters_->getKMC_Cluster(clusterId));
+//      clusters_->erase(clusterId);
     }
 
   }
@@ -369,12 +331,12 @@ namespace kmccoarsegrain {
 
     double max_rate_off = 0; 
     for(const int & site_id : siteIds){
-      KMC_Site & site = sites_->getKMC_Site(site_id);
-      const unordered_map<int,double *> neigh_and_rates = site.getNeighborsAndRatesConst();
-      for( const pair<int,double *> & neigh_and_rate : neigh_and_rates){
+      KMC_Site & site = topology_->getKMC_Site(site_id);
+      const unordered_map<int,double> & neigh_and_rates = site.getNeighborsAndRatesConst();
+      for( const pair<int,double> & neigh_and_rate : neigh_and_rates){
         if(internal_sites.count(neigh_and_rate.first)==0){
-          if(*(neigh_and_rate.second) > max_rate_off){
-            max_rate_off = *(neigh_and_rate.second);
+          if((neigh_and_rate.second) > max_rate_off){
+            max_rate_off = (neigh_and_rate.second);
           }
         }
       }
@@ -386,21 +348,18 @@ double KMC_CoarseGrainSystem::getInternalTimeLimit_(vector<int> siteIds ){
   LOG("Getting the internal time limit of a cluster", 1);
 
   auto nodes = convertSitesToEmptySharedNodes(siteIds);
-
   unordered_map<int, weak_ptr<GraphNode<string>>> nodes_weak;
   for (auto node_iter : nodes) nodes_weak[node_iter.first] = node_iter.second;
-
   auto edges = convertSitesOutgoingRatesToTimeSharedWeightedEdges<vector<shared_ptr<Edge>>>(
-      *sites_,
+      *topology_,
       siteIds);
 
   list<weak_ptr<Edge>> edges_weak(edges.begin(), edges.end());
 
-  auto graph_ptr =
-      shared_ptr<Graph<string>>(new Graph<string>(edges_weak, nodes_weak));
+  auto graph_ptr = Graph<string>(edges_weak, nodes_weak);
 
   unordered_map<pair<int, int>, double,hash_functions::hash> verticesAndtimes =
-      maxMinimumDistanceBetweenEveryVertex<string>(*graph_ptr);
+      maxMinimumDistanceBetweenEveryVertex<string>(graph_ptr);
 
   double maxtime = 0.0;
   for (auto verticesAndTime : verticesAndtimes) {
@@ -428,50 +387,23 @@ bool KMC_CoarseGrainSystem::sitesSatisfyEquilibriumCondition_(
 double KMC_CoarseGrainSystem::getTimeConstantFromSitesToNeighbors_(
    const vector<int> & siteIds) const {
 
-  LOG("Get the minimum time constant", 1);
-  set<int> internalSiteIds(siteIds.begin(), siteIds.end());
-
-  double sumRates = 0.0;
-  for (const int & siteId : siteIds) {
-    vector<int> neighborSiteIds = sites_->getSiteIdsOfNeighbors(siteId);
-    for (const int & neighId : neighborSiteIds) {
-      if (!internalSiteIds.count(neighId)) {
-        sumRates+= sites_->getRateToNeighborOfSite(siteId,neighId);
-      }
-    }
-  }
-  if (sumRates == 0.0){
-    return 0.0;
-  }
-  return 1.0/sumRates;
+  return topology_->getTimeConstantFromSitesToNeighbors(siteIds);
 }
 
 unordered_map<int,vector<int>> KMC_CoarseGrainSystem::getClusters(){
-  return clusters_->getSiteIdsOfClusters();
+  return topology_->getClusters();
 }
 
 unordered_map<int,double> KMC_CoarseGrainSystem::getResolutionOfClusters(){
-  return clusters_->getResolutionOfClusters();
+  return topology_->getResolutionOfClusters();
 }
 
 unordered_map<int,double> KMC_CoarseGrainSystem::getTimeIncrementOfClusters(){
-  return clusters_->getTimeIncrementOfClusters();
+  return topology_->getTimeIncrementOfClusters();
 }
 
 int KMC_CoarseGrainSystem::getFavoredClusterId_(vector<int> siteIds) {
-
-  LOG("Getting the favored cluster Id", 1);
-  int favoredClusterId = constants::unassignedId;
-  for (auto siteId : siteIds) {
-    int clusterId = sites_->getClusterIdOfSite(siteId);
-    if (favoredClusterId == constants::unassignedId) {
-      favoredClusterId = clusterId;
-    } else if (clusterId != constants::unassignedId &&
-               clusterId < favoredClusterId) {
-      favoredClusterId = clusterId;
-    }
-  }
-  return favoredClusterId;
+  return topology_->getFavoredClusterId(siteIds);
 }
 
 

@@ -77,7 +77,7 @@ int main(void){
     }
     assert(throw_error);
   }
-
+/*
   cout << "Testing: getKMC_Sites" << endl;
   {
     KMC_Site site;
@@ -133,7 +133,7 @@ int main(void){
 
     assert(found1);
     assert(found2);
-  }
+  }*/
 
   cout << "Testing: size" << endl;
   {
@@ -231,8 +231,12 @@ int main(void){
     double rate1_2 = 1.0;
     double rate2_1 = 2.0;
 
-    site.addNeighRate(pair<int,double *>(2,&rate1_2));
-    site2.addNeighRate(pair<int,double *>(1,&rate2_1));
+    unordered_map<int,double> rates;
+    rates[2] = rate1_2;
+    site.setRatesToNeighbors(&rates);
+    unordered_map<int,double> rates2;
+    rates2[1] = rate2_1;
+    site2.setRatesToNeighbors(&rates2);
 
     KMC_Site_Container site_container;
     site_container.addKMC_Site(site);

@@ -31,7 +31,7 @@ int main(void){
     }
     assert(throw_error);
   }
-
+/*
   cout << "Testing: addKMC_Clusters" << endl;
   {
     KMC_Cluster cluster;
@@ -54,7 +54,7 @@ int main(void){
       throw_error = true;
     }
     assert(throw_error);
-  }
+  }*/
 
   cout << "Testing: getKMC_Cluster" << endl;
   {

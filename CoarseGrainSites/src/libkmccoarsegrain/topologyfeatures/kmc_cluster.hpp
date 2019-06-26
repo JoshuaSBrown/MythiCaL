@@ -97,7 +97,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
    * \param[in] site a shared pointer to a site
    **/
   void addSite(KMC_Site& site);
-  void addSites(std::vector<KMC_Site>& sites);
+  void addSites(std::vector<KMC_Site *> sites);
 
   /**
    * \brief will update the probabilities and time constant stored in the
@@ -128,7 +128,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
    *
    * \return A vector of shared pointers to the sites
    **/
-  std::vector<KMC_Site> getSitesInCluster() const;
+  std::vector<KMC_Site *> getSitesInCluster() const;
 
   std::vector<int> getSiteIdsInCluster() const;
   std::vector<int> getSiteIdsNeighboringCluster() const;
@@ -259,7 +259,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
   double getDwellTime(const int & walker_id);
   //double getDwellTime();
 
-  double getFastestRateOffCluster();
+  double getFastestRateOffCluster() const;
 
   void setVisitFrequency(int frequency,const int & siteId);
   int getVisitFrequency(const int & siteId);
@@ -342,7 +342,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
   /**
    * \brief Stores the pointers to sites that are in the cluster
    **/
-  std::unordered_map<int, KMC_Site> sitesInCluster_;
+  std::unordered_map<int, KMC_Site *> sitesInCluster_;
 
   std::unordered_map<int,double> probabilityHopOffInternalSite_;
   std::unordered_map<int,double> probabilityHopBetweenInternalSite_;
@@ -428,10 +428,10 @@ class KMC_Cluster : public KMC_TopologyFeature {
     // pair - first int is the id of the site neighboring the cluster
     // double is the rate
     std::unordered_map<int, std::unordered_map<int, double>>
-        getRatesToNeighborsOfCluster_();
+        getRatesToNeighborsOfCluster_() const;
 
     std::unordered_map<int, std::unordered_map<int, double>>
-        getRatesBetweenInternalSites_();
+        getRatesBetweenInternalSites_() const;
 
     void iterate_();
 
@@ -469,7 +469,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
 
     friend void occupyCluster_(KMC_TopologyFeature*,const int&);
     friend void vacateCluster_(KMC_TopologyFeature*,const int&);
-    friend bool isOccupiedCluster_(KMC_TopologyFeature*,const int&);
+    friend bool isOccupiedCluster_(const KMC_TopologyFeature*,const int&);
     friend void removeWalkerCluster_(KMC_TopologyFeature *,const int&);
   };
 

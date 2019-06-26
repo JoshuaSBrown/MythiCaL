@@ -26,21 +26,21 @@ static int clusterIdCounter = 0;
 void occupyCluster_(KMC_TopologyFeature* feature, const int& siteId){
   KMC_Cluster * cluster = static_cast<KMC_Cluster *>(feature);
   
-  KMC_Site & site = cluster->sitesInCluster_[siteId];
+  KMC_Site * site = cluster->sitesInCluster_[siteId];
   assert(cluster->site_visits_.count(siteId));
   ++cluster->total_visit_freq_; 
-  site.setToOccupiedStatus(); 
+  site->setToOccupiedStatus(); 
 }
 
-bool isOccupiedCluster_(KMC_TopologyFeature* feature,const int& siteId){
-  auto cluster = static_cast<KMC_Cluster *>(feature);
+bool isOccupiedCluster_(const KMC_TopologyFeature* feature,const int& siteId) {
+  const KMC_Cluster * cluster = static_cast<const KMC_Cluster *>(feature);
   assert(cluster->sitesInCluster_.count(siteId));
-  return cluster->sitesInCluster_[siteId].isOccupied();
+  return cluster->sitesInCluster_.at(siteId)->isOccupied();
 }
 
 void vacateCluster_(KMC_TopologyFeature* feature,const int& siteId){
   auto cluster = static_cast<KMC_Cluster *>(feature);
-  cluster->sitesInCluster_[siteId].vacate();
+  cluster->sitesInCluster_[siteId]->vacate();
   cluster->vacate();
 }
 
@@ -69,16 +69,16 @@ void KMC_Cluster::addSite(KMC_Site& newSite) {
   assert(sitesInCluster_.count(newSite.getId())==0 && "Site has already been "
       "added to the cluster");
   newSite.setClusterId(this->getId());
-  sitesInCluster_[newSite.getId()] = newSite;
+  sitesInCluster_[newSite.getId()] = &newSite;
 
 }
 
-void KMC_Cluster::addSites(vector<KMC_Site>& newSites) {
-    for (KMC_Site & site : newSites) {
-    assert(sitesInCluster_.count(site.getId())==0 && "Site has already been "
+void KMC_Cluster::addSites(vector<KMC_Site *> newSites) {
+    for (KMC_Site * site : newSites) {
+    assert(sitesInCluster_.count(site->getId())==0 && "Site has already been "
         "added to the cluster");
-    site.setClusterId(this->getId());
-    sitesInCluster_[site.getId()] = site;
+    site->setClusterId(this->getId());
+    sitesInCluster_[site->getId()] = site;
   }
 }
 
@@ -95,7 +95,7 @@ void KMC_Cluster::updateProbabilitiesAndTimeConstant() {
   calculateInternalTimeConstant_();
 
   site_visits_.clear();
-  for( auto site : sitesInCluster_ ){
+  for( const pair<int,KMC_Site *> & site : sitesInCluster_ ){
     site_visits_[site.first] = 0.0;
     if(temporary_visit_frequencies.count(site.first)){
       setVisitFrequency(temporary_visit_frequencies[site.first],site.first);
@@ -108,21 +108,21 @@ void KMC_Cluster::updateProbabilitiesAndTimeConstant() {
 unordered_map<int,int> KMC_Cluster::getVisitFrequencies_(){
   unordered_map<int,int> frequencies;
 
-  for(auto site :site_visits_){
+  for(const pair<int,int> & site :site_visits_){
     frequencies[site.first] = getVisitFrequency(site.first);    
   }
   return frequencies;
 }
 
-vector<KMC_Site> KMC_Cluster::getSitesInCluster() const {
-  vector<KMC_Site> sites;
-  for (auto site : sitesInCluster_) sites.push_back(site.second);
+vector<KMC_Site *> KMC_Cluster::getSitesInCluster() const {
+  vector<KMC_Site *> sites;
+  for (pair<int,KMC_Site *> site : sitesInCluster_) sites.push_back(site.second);
   return sites;
 }
 
 vector<int> KMC_Cluster::getSiteIdsInCluster() const {
   vector<int> siteIds;
-  for (auto site : sitesInCluster_) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
     siteIds.push_back(site.first);
   }
   return siteIds;
@@ -130,7 +130,7 @@ vector<int> KMC_Cluster::getSiteIdsInCluster() const {
 
 vector<int> KMC_Cluster::getSiteIdsNeighboringCluster() const {
   vector<int> neighborIds;
-  for(auto neigh_it : probabilityHopToNeighbor_) neighborIds.push_back(neigh_it.first);
+  for(const pair<int,double> & neigh_it : probabilityHopToNeighbor_) neighborIds.push_back(neigh_it.first);
   return neighborIds;
 }
 
@@ -142,8 +142,8 @@ double KMC_Cluster::getProbabilityOfOccupyingInternalSite(const int siteId) {
 void KMC_Cluster::migrateSitesFrom(KMC_Cluster& cluster) {
 
   unordered_map<int,int> visits;
-  for (auto& site : cluster.sitesInCluster_) {
-    site.second.setClusterId(getId());
+  for (pair<int,KMC_Site *> site : cluster.sitesInCluster_) {
+    site.second->setClusterId(getId());
     visits[site.first] = cluster.getVisitFrequency(site.first);
   }
 
@@ -166,7 +166,7 @@ void KMC_Cluster::migrateSitesFrom(KMC_Cluster& cluster) {
   // Do not need to update the cluster because the sites have been removed
   
   // Add the visits back in
-  for( auto site : visits){
+  for( const pair<int,int> & site : visits){
     setVisitFrequency(site.second,site.first);
   }
 }
@@ -242,8 +242,8 @@ int KMC_Cluster::getVisitFrequency(const int & siteId){
 
   if(total_visit_freq_!=prev_total_visit_freq_){
     double difference = total_visit_freq_ - prev_total_visit_freq_; 
-    for(auto site_visit : site_visits_){
-      double visits = static_cast<double>(difference)*probabilityOnSite_[site_visit.first]*sitesInCluster_.at(site_visit.first).getTimeConstant();
+    for(const pair<int,int> & site_visit : site_visits_){
+      double visits = static_cast<double>(difference)*probabilityOnSite_[site_visit.first]*sitesInCluster_.at(site_visit.first)->getTimeConstant();
       visits = visits/internal_dwell_time_.at(site_visit.first);
       visits = escape_time_constant_*visits;
       visits = visits/resolution_;
@@ -265,17 +265,18 @@ std::ostream& operator<<(std::ostream& os,
   os << endl;
 
   os << "Sites in cluster: " << endl;
-  for (auto site : cluster.sitesInCluster_) {
-    os << (site.second) << endl;
+  for (const pair<int,KMC_Site *> site : cluster.sitesInCluster_) {
+    os << *(site.second) << endl;
   }
   return os;
 }
 
-double KMC_Cluster::getFastestRateOffCluster(){
-  auto rates_to_neighbors = getRatesToNeighborsOfCluster_();
+double KMC_Cluster::getFastestRateOffCluster() const {
+  unordered_map<int,unordered_map<int,double>> rates_to_neighbors = 
+    getRatesToNeighborsOfCluster_();
   double fastest_rate = 0.0;
-  for( auto site_pr : rates_to_neighbors){
-    for( auto rate : site_pr.second ) {
+  for( const pair<int,unordered_map<int,double>> & site : rates_to_neighbors){
+    for( const pair<int,double> & rate : site.second ) {
       if(rate.second>fastest_rate){
         fastest_rate = rate.second;
       }
@@ -291,15 +292,15 @@ double KMC_Cluster::getFastestRateOffCluster(){
 // The firsts int is the id of site within cluster
 // second int is the id of the neighbor of site outside of cluster
 unordered_map<int, unordered_map<int, double>>
-    KMC_Cluster::getRatesToNeighborsOfCluster_() {
+    KMC_Cluster::getRatesToNeighborsOfCluster_() const {
 
   unordered_map<int, unordered_map<int, double>> externalRates;
 
-  for (auto site : sitesInCluster_) {
-    for (auto neighId : site.second.getNeighborSiteIds()) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+    for (const int & neighId : site.second->getNeighborSiteIds()) {
       if (!siteIsInCluster(neighId)) {
         externalRates[site.first][neighId] =
-            site.second.getRateToNeighbor(neighId);
+            site.second->getRateToNeighbor(neighId);
       }
     }
   }
@@ -307,15 +308,15 @@ unordered_map<int, unordered_map<int, double>>
 }
 
 unordered_map<int, unordered_map<int,double>>
-KMC_Cluster::getRatesBetweenInternalSites_() {
+KMC_Cluster::getRatesBetweenInternalSites_() const {
 
   unordered_map<int, unordered_map<int,double>> internal_rates;
 
-  for (auto site : sitesInCluster_ ){
-    for( auto neighId : site.second.getNeighborSiteIds()){
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_ ){
+    for( const int & neighId : site.second->getNeighborSiteIds()){
       if(siteIsInCluster(neighId)){
         internal_rates[site.first][neighId] = 
-          site.second.getRateToNeighbor(neighId);
+          site.second->getRateToNeighbor(neighId);
       }
     }
   }
@@ -323,7 +324,7 @@ KMC_Cluster::getRatesBetweenInternalSites_() {
 }
 
 void KMC_Cluster::initializeProbabilityOnSites_() {
-  for (auto site : sitesInCluster_) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
     probabilityOnSite_[site.first] =
         1.0 / (static_cast<double>(sitesInCluster_.size()));
   }
@@ -334,20 +335,20 @@ void KMC_Cluster::iterate_() {
 
   unordered_map<int, double> temp_probabilityOnSite;
   // Initialize temporary probabilities
-  for(auto site : sitesInCluster_){
+  for(const pair<int,KMC_Site *> & site : sitesInCluster_){
     temp_probabilityOnSite[site.first] = probabilityOnSite_[site.first];
   }
   
   double total = 0.0;
-  for (auto site : sitesInCluster_) {
-    for (auto neighsite : site.second.getNeighborSiteIds()) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+    for (const int & neighsite : site.second->getNeighborSiteIds()) {
       if (siteIsInCluster(neighsite)) {
         temp_probabilityOnSite[site.first] +=
-          sitesInCluster_[neighsite].getProbabilityOfHoppingToNeighboringSite(site.first) *
+          sitesInCluster_[neighsite]->getProbabilityOfHoppingToNeighboringSite(site.first) *
           probabilityOnSite_[neighsite];
       }
       temp_probabilityOnSite[site.first] -=
-        sitesInCluster_[site.first].getProbabilityOfHoppingToNeighboringSite(neighsite) *
+        sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neighsite) *
         probabilityOnSite_[site.first];
     }
     total += temp_probabilityOnSite[site.first];
@@ -356,7 +357,7 @@ void KMC_Cluster::iterate_() {
   // Combine the former probability with the presently calculated probability
   double total2 = 0.0;
   double inverse_total = 1.0/total;
-  for (auto site : sitesInCluster_) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
     probabilityOnSite_[site.first] =
         (temp_probabilityOnSite[site.first]*inverse_total +
          probabilityOnSite_[site.first]) * 0.5;;
@@ -366,7 +367,7 @@ void KMC_Cluster::iterate_() {
 
   // Normalize the probability
   double inverse_total2 = 1.0/total2;
-  for (auto site : sitesInCluster_) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
     probabilityOnSite_[site.first] = probabilityOnSite_[site.first]*inverse_total2;
   }
 }
@@ -391,10 +392,10 @@ void KMC_Cluster::solveMasterEquation_() {
     double error = convergenceTolerance_ * 1.1;
 
     while (error > convergenceTolerance_) {
-      auto oldSiteProbs = probabilityOnSite_;
+      unordered_map<int,double> oldSiteProbs = probabilityOnSite_;
       iterate_();
       error = 0.0;
-      for (auto site : oldSiteProbs) {
+      for (const pair<int,double> & site : oldSiteProbs) {
         auto diff = oldSiteProbs[site.first] - probabilityOnSite_[site.first];
         error += pow(diff, 2.0);
       }
@@ -412,10 +413,10 @@ unordered_map<int, vector<pair<int, double>>>
 
   unordered_map<int, vector<pair<int, double>>> internalRates;
 
-  for (auto site : sitesInCluster_) {
-    for (auto neighId : site.second.getNeighborSiteIds()) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+    for (const int & neighId : site.second->getNeighborSiteIds()) {
       if (siteIsInCluster(neighId)) {
-        auto rateToNeigh = site.second.getRateToNeighbor(neighId);
+        auto rateToNeigh = site.second->getRateToNeighbor(neighId);
         pair<int, double> rateToSite(site.first, rateToNeigh);
         internalRates[neighId].push_back(rateToSite);
       }
@@ -435,8 +436,15 @@ int KMC_Cluster::pickClusterNeighbor_(const int & walker_id) {
   remaining_walker_dwell_times_.erase(walker_id);
 
   double number = random_distribution_(random_engine_);
-  for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
-    if (number < pval.second) return pval.first;
+  //cout << "pick neighbor " << endl;
+//  for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
+
+  for(auto it = cumulitive_probabilityHopToNeighbor_.rbegin();
+      it!=cumulitive_probabilityHopToNeighbor_.rend();++it){
+    //cout << number << " pval: " << pval.second << " site " << pval.first << endl; 
+    //cout << number << " pval: " << it->second <<  " id "<< it->first << endl;
+    //if (number < pval.second) return pval.first;
+    if (number > it->second) return it->first;
   }
   assert("Cummulitive probability distribution is flawed or random "
       "number is greater than 1");
@@ -446,9 +454,16 @@ int KMC_Cluster::pickClusterNeighbor_(const int & walker_id) {
 int KMC_Cluster::pickInternalSite_() {
 
   double number = random_distribution_(random_engine_);
-  for (const pair<int,double> & pval : cumulitive_probabilityHopToInternalSite_) {
-    if (number < pval.second) {
-      return pval.first;
+  //cout << "pick internal " << endl;
+//  for (const pair<int,double> & pval : cumulitive_probabilityHopToInternalSite_) {
+//    cout << number << " pval: " << pval.second << " site " << pval.first << endl; 
+//    if (number < pval.second) {
+  for(auto it = cumulitive_probabilityHopToInternalSite_.rbegin();
+      it!=cumulitive_probabilityHopToInternalSite_.rend();++it){
+    //cout << number << " pval: " << it->second <<  " id "<< it->first << endl;
+    if(number>it->second){
+      //return pval.first;
+      return it->first;
     }
   }
   assert("cumulitive probability distribution of sites in the cluster "
@@ -461,25 +476,26 @@ void KMC_Cluster::calculateProbabilityHopOffInternalSite_() {
   probabilityHopOffInternalSite_.clear();
   assert(sitesInCluster_.size()>1 && "Cannot create a cluster from a single site");
 
-  auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
+  unordered_map<int,unordered_map<int,double>> ratesToNeighbors = 
+    getRatesToNeighborsOfCluster_();
   auto sum_rates_off = 0.0;
-  for(auto site_to_neigh : ratesToNeighbors){
-    for(auto rate : site_to_neigh.second ){
+  for(const pair<int,unordered_map<int,double>> & site_to_neigh : ratesToNeighbors){
+    for(const pair<int,double> & rate : site_to_neigh.second ){
       sum_rates_off+=rate.second;
     }
   }
   auto sum_time_constants = 0.0;
-  for(auto site_prob : probabilityOnSite_) {
-    sum_time_constants+=sitesInCluster_[site_prob.first].getTimeConstant();
+  for(const pair<int,double> & site_prob : probabilityOnSite_) {
+    sum_time_constants+=sitesInCluster_[site_prob.first]->getTimeConstant();
   }
   double total2 = 0.0;
-  for(auto site_prob : probabilityOnSite_ ){
-    probabilityHopOffInternalSite_[site_prob.first] = site_prob.second*sumOfEscapeRateFromSiteToNeighbor_[site_prob.first]/sum_rates_off*sitesInCluster_[site_prob.first].getTimeConstant()/sum_time_constants;
+  for(const pair<int,double> & site_prob : probabilityOnSite_ ){
+    probabilityHopOffInternalSite_[site_prob.first] = site_prob.second*sumOfEscapeRateFromSiteToNeighbor_[site_prob.first]/sum_rates_off*sitesInCluster_[site_prob.first]->getTimeConstant()/sum_time_constants;
     total2+=probabilityHopOffInternalSite_[site_prob.first];
 
   }
 
-  for(auto hop_off : probabilityHopOffInternalSite_){
+  for(const pair<int,double> & hop_off : probabilityHopOffInternalSite_){
     probabilityHopOffInternalSite_[hop_off.first] = hop_off.second/total2;
   }
 }
@@ -490,26 +506,27 @@ void KMC_Cluster::calculateProbabilityHopBetweenInternalSite_() {
   probabilityHopBetweenInternalSite_.clear();
   assert(sitesInCluster_.size()>1 && "Cannot create a cluster from a single site");
 
-  auto ratesBetweenSites = getRatesBetweenInternalSites_();
+  unordered_map<int,unordered_map<int,double>> ratesBetweenSites = 
+    getRatesBetweenInternalSites_();
 
   unordered_map<int,double> sum_sites_prob_to_hop;
   double sum_internal = 0.0;
 
   // rate_1 to 2 / sum( rate_1 to j) is the same as rate_1 to 2 * dwell_1
-  for(auto site_to_site : ratesBetweenSites){
+  for(const pair<int,unordered_map<int,double>> & site_to_site : ratesBetweenSites){
     int site_id = site_to_site.first;
     double sum_internal_rates = 0.0;
 
-    for(auto internal_neigh : site_to_site.second){
+    for(const pair<int,double> & internal_neigh : site_to_site.second){
       sum_internal_rates+=internal_neigh.second;
     }
-    sum_sites_prob_to_hop[site_id] = sum_internal_rates*sitesInCluster_[site_id].getTimeConstant();
+    sum_sites_prob_to_hop[site_id] = sum_internal_rates*sitesInCluster_[site_id]->getTimeConstant();
     probabilityHopBetweenInternalSite_[site_id] = sum_sites_prob_to_hop[site_id]*probabilityOnSite_[site_id];
     sum_internal+=probabilityHopBetweenInternalSite_[site_id]; 
   }
 
   // Normalize
-  for(auto site : probabilityHopBetweenInternalSite_){
+  for(const pair<int,double> & site : probabilityHopBetweenInternalSite_){
     probabilityHopOffInternalSite_[site.first]/=sum_internal;
   }
   
@@ -519,13 +536,14 @@ void KMC_Cluster::calculateProbabilityHopBetweenInternalSite_() {
 // sites external to the cluster
 void KMC_Cluster::calculateSumOfEscapeRatesFromSitesToTheirNeighbors_() {
 
-  auto ratesToNeighbors = getRatesToNeighborsOfCluster_();
+  unordered_map<int,unordered_map<int,double>> ratesToNeighbors = 
+    getRatesToNeighborsOfCluster_();
 
   unordered_map<int, double> temp;
 
-  for (auto site : ratesToNeighbors) {
+  for (const pair<int,unordered_map<int,double>> & site : ratesToNeighbors) {
     auto site_id_source = site.first;
-    for (auto neigh_terminate_rate : site.second) {
+    for (const pair<int,double> & neigh_terminate_rate : site.second) {
       if (temp.count(site_id_source)==0) {
         temp[site_id_source] = neigh_terminate_rate.second;
       } else {
@@ -540,27 +558,29 @@ void KMC_Cluster::calculateSumOfEscapeRatesFromSitesToTheirNeighbors_() {
 // sites internal to the cluster
 void KMC_Cluster::calculateSumOfEscapeRatesFromSitesToInternalSites_() {
 
-  auto ratesToInternalSites = getRatesBetweenInternalSites_();
+  unordered_map<int,unordered_map<int,double>> ratesToInternalSites = 
+    getRatesBetweenInternalSites_();
 
   unordered_map<int, double> temp;
-  for (auto site : ratesToInternalSites) {
+  for (const pair<int,unordered_map<int,double>> & site : ratesToInternalSites) {
     auto site_id_source = site.first;
     double sum_rates = 0.0;
-    for (auto site_terminate_rate : site.second) {
+    for (const pair<int,double> & site_terminate_rate : site.second) {
       sum_rates+=site_terminate_rate.second;
     }
     temp[site_id_source] += sum_rates;
   }
   sumOfEscapeRateFromSiteToInternalSite_ = temp;
 }
+
 // Requires that calculateProbabilityHopOffInternalSites has first been called
 void KMC_Cluster::calculateEscapeTimeConstant_() {
   escape_time_constant_ = 0.0;
   if(getRatesToNeighborsOfCluster_().size()==0){
     escape_time_constant_ = constants::unassigned_value;
   }else{
-    for( auto site_prob : probabilityHopOffInternalSite_ ){
-      auto rate_off = sumOfEscapeRateFromSiteToNeighbor_[site_prob.first];
+    for( const pair<int,double> & site_prob : probabilityHopOffInternalSite_ ){
+      double rate_off = sumOfEscapeRateFromSiteToNeighbor_[site_prob.first];
       if(rate_off>0){
         escape_time_constant_ += 1.0/rate_off *site_prob.second ;
       }
@@ -568,12 +588,13 @@ void KMC_Cluster::calculateEscapeTimeConstant_() {
   }
   time_increment_ = KMC_TopologyFeature::escape_time_constant_/resolution_;
 }
+
 void KMC_Cluster::calculateInternalTimeConstant_() {
   internal_time_constant_ = 0.0;
   if(getRatesBetweenInternalSites_().size()==0){
     internal_time_constant_ = constants::unassigned_value;
   }else{
-    for( auto site_prob : probabilityHopBetweenInternalSite_  ){
+    for( const pair<int,double> & site_prob : probabilityHopBetweenInternalSite_  ){
       auto rate_off = sumOfEscapeRateFromSiteToInternalSite_[site_prob.first];
       if(rate_off>0){
         internal_time_constant_ += 1.0/rate_off *site_prob.second;
@@ -583,16 +604,18 @@ void KMC_Cluster::calculateInternalTimeConstant_() {
 }
 void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
 
+  //cout << "Calculating Cummulitive probability to internal site" << endl;
   unordered_map<int, double> probabilityHopToInternalSite;
   double total = 0.0;
-  for(auto site_prob : probabilityOnSite_){
-    probabilityHopToInternalSite[site_prob.first] = site_prob.second * sitesInCluster_[site_prob.first].getTimeConstant();
+  //cout << "Number of sites in the cluster " << probabilityOnSite_.size() << endl;
+  for(const pair<int,double> & site_prob : probabilityOnSite_){
+    probabilityHopToInternalSite[site_prob.first] = site_prob.second * sitesInCluster_[site_prob.first]->getTimeConstant();
 
     total+=probabilityHopToInternalSite[site_prob.first];
   }
 
   // Normalize
-  for(auto site_prob_per_time : probabilityHopToInternalSite){
+  for(const pair<int,double> & site_prob_per_time : probabilityHopToInternalSite){
     probabilityHopToInternalSite[site_prob_per_time.first]/=total;
   }
 
@@ -604,33 +627,38 @@ void KMC_Cluster::calculateProbabilityHopToInternalSite_() {
   sort(probabilityHopToInternalSite_.begin(),
       probabilityHopToInternalSite_.end(),
       [](const pair<int,double>& x,const pair<int,double>&y)->bool{
-        return x.second>y.second;
+        return x.second<y.second;
       });
 
   total = 0.0;
+  double value = 0.0;
   for(pair<int,double> site_and_prob : probabilityHopToInternalSite_){
     site_and_prob.second+=total;
     total = site_and_prob.second;
-    cumulitive_probabilityHopToInternalSite_.push_back(site_and_prob);
+    //cout << "site " << site_and_prob.first << " pval " << value << endl;
+    cumulitive_probabilityHopToInternalSite_.push_back(pair<int,double>(site_and_prob.first,value));
+    value = site_and_prob.second;
   }
+
 }
 
 // requires master equation convergence as it uses probabilityOnSite_
 void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
 
+  //cout << "Calculate Prob hop to Neighbors " << endl;
   probabilityHopToNeighbor_.clear();
   unordered_map<int, double> temp_probabilityHopToNeighbor;
 
-  for (auto site : sitesInCluster_) {
-    for (auto neighsite : site.second.getNeighborSiteIds()) {
+  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+    for (const int & neighsite : site.second->getNeighborSiteIds()) {
       if (!siteIsInCluster(neighsite)) {
         if(temp_probabilityHopToNeighbor.count(neighsite)){
           temp_probabilityHopToNeighbor[neighsite] +=
-            sitesInCluster_[site.first].getProbabilityOfHoppingToNeighboringSite(neighsite) *
+            sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neighsite) *
             probabilityOnSite_[site.first];
         }else{
           temp_probabilityHopToNeighbor[neighsite] =
-            sitesInCluster_[site.first].getProbabilityOfHoppingToNeighboringSite(neighsite) *
+            sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neighsite) *
             probabilityOnSite_[site.first];
         }
       }
@@ -638,14 +666,14 @@ void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
   }
 
   double total = 0.0;
-  for(auto prob : temp_probabilityHopToNeighbor){
+  for(const pair<int,double> & prob : temp_probabilityHopToNeighbor){
     total += prob.second;
   }
 
   // Normalize the probability
   double inverse_total = 1.0/total;
   unordered_map<int, double> probabilityHopToNeighbor;
-  for (auto prob : temp_probabilityHopToNeighbor) {
+  for (const pair<int,double> & prob : temp_probabilityHopToNeighbor) {
     probabilityHopToNeighbor[prob.first] = prob.second*inverse_total;
   }
 
@@ -656,23 +684,29 @@ void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
   sort(probabilityHopToNeighbor_.begin(),
       probabilityHopToNeighbor_.end(),
       [](const pair<int,double>& x,const pair<int,double>&y)->bool{
-        return x.second>y.second;
+        return x.second<y.second;
       });
 
   total = 0.0;
-  for(pair<int,double>  site_and_prob : probabilityHopToNeighbor_){
+  double value = 0.0;
+  for(pair<int,double> site_and_prob : probabilityHopToNeighbor_){
+    //cout << "prob " << site_and_prob.second << endl;
     site_and_prob.second+=total;
     total = site_and_prob.second;
-    cumulitive_probabilityHopToNeighbor_.push_back(site_and_prob);
+//    cout << "site " << site_and_prob.first << " pval " << site_and_prob.second << endl; 
+    //cout << "site " << site_and_prob.first << " pval " << value << endl; 
+//    cumulitive_probabilityHopToNeighbor_.push_back(site_and_prob);
+    cumulitive_probabilityHopToNeighbor_.push_back(pair<int,double>(site_and_prob.first,value));
+    value = site_and_prob.second;
   }
 }
 
 void KMC_Cluster::calculateInternalDwellTimes_(){
-  auto internal_rates = getRatesBetweenInternalSites_();
+  const auto & internal_rates = getRatesBetweenInternalSites_();
 
-  for (auto rate_to_neigh : internal_rates) {
+  for (const auto & rate_to_neigh : internal_rates) {
     double sum_internal_site_rates = 0.0;
-    for (auto rate : rate_to_neigh.second) {
+    for (const pair<int,double> & rate : rate_to_neigh.second) {
       sum_internal_site_rates += rate.second;
     }
     internal_dwell_time_[rate_to_neigh.first] = 1.0/sum_internal_site_rates;
