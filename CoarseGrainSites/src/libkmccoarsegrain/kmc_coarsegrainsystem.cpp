@@ -91,8 +91,9 @@ namespace kmccoarsegrain {
 
     topology_->setRates(ratesOfAllSites);
 
-		double num_buckets = cbrt(ratesOfAllSites.size());
-		topology_->reserveSites(static_cast<size_t>(num_buckets));
+		crude_.initializeSystem(ratesOfAllSites);
+		//double num_buckets = cbrt(ratesOfAllSites.size());
+		//topology_->reserveSites(static_cast<size_t>(num_buckets));
 	}
 
   int KMC_CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){
@@ -103,13 +104,14 @@ namespace kmccoarsegrain {
 
     LOG("Initializeing walkers", 1);
 
-    for ( size_t index = 0; index<walkers.size(); ++index){
+/*    for ( size_t index = 0; index<walkers.size(); ++index){
       int siteId = walkers.at(index).second.getIdOfSiteCurrentlyOccupying();
       if (siteId == constants::unassignedId) {
         throw runtime_error(
             "You must first place the walker on a known site"
             " before the walker can be initialized.");
       }
+
       topology_->features[siteId].feature(*topology_,siteId);
       topology_->features[siteId].feature(*topology_,siteId)->occupy();
 
@@ -117,7 +119,9 @@ namespace kmccoarsegrain {
       int newId = topology_->features[siteId].feature(*topology_,siteId)->pickNewSiteId(walkers.at(index).first);
       walkers.at(index).second.setDwellTime(hopTime);
       walkers.at(index).second.setPotentialSite(newId);
-    }
+    }*/
+
+		crude_.initializeWalkers(walkers);
   }
 
   void KMC_CoarseGrainSystem::setMinCoarseGrainIterationThreshold(int threshold_min) {
@@ -128,28 +132,55 @@ namespace kmccoarsegrain {
 
   void KMC_CoarseGrainSystem::setRandomSeed(const unsigned long seed) {
     topology_->setRandomSeed(seed);
+		crude_.setRandomSeed(seed);
   }
 
   void KMC_CoarseGrainSystem::removeWalkerFromSystem(pair<int,KMC_Walker>& walker) {
-    removeWalkerFromSystem(walker.first,walker.second);
+    removeWalkerFromSystem(walker.second);
   }
 
-  void KMC_CoarseGrainSystem::removeWalkerFromSystem(int & walker_id, KMC_Walker& walker) {
+  void KMC_CoarseGrainSystem::removeWalkerFromSystem(KMC_Walker& walker) {
     LOG("Walker is being removed from system", 1);
-    auto siteId = walker.getIdOfSiteCurrentlyOccupying();
-    topology_->features[siteId].feature(*topology_,siteId)->removeWalker(walker_id,siteId);
+    //auto siteId = walker.getIdOfSiteCurrentlyOccupying();
+    //topology_->features[siteId].feature(*topology_,siteId)->removeWalker(walker_id,siteId);
+		crude_.removeWalkerFromSystem(walker);
   }
 
   int KMC_CoarseGrainSystem::getClusterIdOfSite(int siteId) {
     return topology_->getClusterIdOfSite(siteId);
   }
 
-  void KMC_CoarseGrainSystem::hop(pair<const int,KMC_Walker>& walker) {
-    hop(walker.first,walker.second);
-  }
+ // void KMC_CoarseGrainSystem::hop(pair<const int,KMC_Walker>& walker) {
+ //   hop(walker.first, walker.second);
+  //}
 
-  void KMC_CoarseGrainSystem::hop(const int & walker_id, KMC_Walker & walker) {
-    const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
+	void runCrude(KMC_CoarseGrainSystem & CGSystem, int ,KMC_Walker & walker){
+		CGSystem.crude_.hop(walker);	
+	}
+
+	void runCoarse(KMC_CoarseGrainSystem & CGSystem, int walker_id,KMC_Walker & walker){
+		const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
+		const int & siteToHopToId = walker.getPotentialSite();
+		KMC_TopologyFeature * feature = CGSystem.topology_->features[siteId].feature(*CGSystem.topology_,siteId);
+		KMC_TopologyFeature * feature_to_hop_to = CGSystem.topology_->features[siteToHopToId].feature(*CGSystem.topology_,siteToHopToId);
+    if(!feature_to_hop_to->isOccupied(siteToHopToId)){
+      feature->vacate(siteId);
+      feature_to_hop_to->occupy(siteToHopToId);
+
+      walker.occupySite(siteToHopToId);
+      walker.setDwellTime(feature_to_hop_to->getDwellTime(walker_id));
+      walker.setPotentialSite(feature_to_hop_to->pickNewSiteId(walker_id));
+    }else{
+      feature->vacate(siteId);
+      feature->occupy(siteId);
+
+      walker.setDwellTime(feature->getDwellTime(walker_id));
+      walker.setPotentialSite(feature->pickNewSiteId(walker_id));
+    }
+
+	}
+//  void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
+/*    const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
 		const int & siteToHopToId = walker.getPotentialSite();
 		KMC_TopologyFeature * feature = topology_->features[siteId].feature(*topology_,siteId);
     KMC_TopologyFeature * feature_to_hop_to = topology_->features[siteToHopToId].feature(*topology_,siteToHopToId);
@@ -167,8 +198,12 @@ namespace kmccoarsegrain {
 
       walker.setDwellTime(feature->getDwellTime(walker_id));
       walker.setPotentialSite(feature->pickNewSiteId(walker_id));
-    }
-
+    }*/
+ void KMC_CoarseGrainSystem::hop(int walker_id,KMC_Walker& walker) {
+    const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
+		const int & siteToHopToId = walker.getPotentialSite();
+		//crude_.hop(walker.second);
+		site_funct_[siteId].run(*this,walker_id,walker);
     ++iteration_;
     if(iteration_ > iteration_threshold_){
       if(iteration_threshold_min_!=constants::inf_iterations){
@@ -259,7 +294,8 @@ namespace kmccoarsegrain {
         //sites.push_back(sites_->getKMC_Site(siteId));
         sites.push_back(&topology_->getKMC_Site(siteId));
       }
-    }
+			site_funct_[siteId].run = runCoarse;
+		}
     cluster.addSites(sites);
     cluster.updateProbabilitiesAndTimeConstant();
 
@@ -311,6 +347,8 @@ namespace kmccoarsegrain {
         topology_->setSitesClusterId(site_and_cluster.first,favoredClusterId);
         //sites_->setClusterId(site_and_cluster.first,favoredClusterId);
       }
+
+			site_funct_[site_and_cluster.first].run = runCoarse;
     }
     topology_->getKMC_Cluster(favoredClusterId).addSites(isolated_sites);
     topology_->getKMC_Cluster(favoredClusterId).updateProbabilitiesAndTimeConstant();

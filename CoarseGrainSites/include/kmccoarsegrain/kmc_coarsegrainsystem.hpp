@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "kmc_constants.hpp"
+#include "kmc_crude.hpp"
 
 namespace ugly {
 template <typename... Ts>
@@ -16,10 +17,14 @@ class Graph;
 
 namespace kmccoarsegrain {
 
+class KMC_CoarseGrainSystem; 
 class KMC_Dynamic_Topology;
 class KMC_TopologyFeature;
 class KMC_Walker;
 
+
+	void runCrude(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
+	void runCoarse(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
 /**
  * \brief Coarse Grain System allows abstraction of renormalization of sites
  *
@@ -131,14 +136,14 @@ class KMC_CoarseGrainSystem {
    * \param[in] walker
    **/
   void hop(std::pair<const int, KMC_Walker>& walker);
-  void hop(const int & walker_id, KMC_Walker& walker);
+  void hop(int walker_id, KMC_Walker& walker);
   //void hop(KMC_Walker& walker);
 
   /**
    * \brief Remove the walker from the system
    **/
   void removeWalkerFromSystem(std::pair<int,KMC_Walker>& walker);
-  void removeWalkerFromSystem(int & walker_id,KMC_Walker& walker);
+  void removeWalkerFromSystem(KMC_Walker& walker);
 
   /**
    * \brief Determine if the site is part of a cluster
@@ -215,6 +220,8 @@ class KMC_CoarseGrainSystem {
     performance_ratio_ = performance_ratio;
   }
  private:
+
+	KMC_Crude crude_;
   /// Performance ratio
   double performance_ratio_;
 /*
@@ -311,6 +318,16 @@ class KMC_CoarseGrainSystem {
    * returns constant::unassignedId
    **/
   int getFavoredClusterId_(std::vector<int> siteIds);
+
+
+	struct DefaultSiteFunction {
+		void (*run)(KMC_CoarseGrainSystem & CGSystem, int walker_id,KMC_Walker & walker) = runCrude;
+	};
+
+	friend void runCrude(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
+	friend void runCoarse(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
+	std::unordered_map<int,DefaultSiteFunction> site_funct_;
+
 
   bool coarseGrain_(int siteId);
   std::unordered_map<int,int> getClustersOfSites(const std::vector<int> & siteIds);

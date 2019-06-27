@@ -12,6 +12,7 @@
 #include <algorithm>
 
 #include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
+#include "../../../include/kmccoarsegrain/kmc_crude.hpp"
 #include "../../../include/kmccoarsegrain/kmc_walker.hpp"
 
 using namespace std;
@@ -365,6 +366,8 @@ int main(int argc, char* argv[]){
   } // Crude Mone Carlo
   high_resolution_clock::time_point crude_time_end = high_resolution_clock::now();
 
+  auto duraction_crude = duration_cast<milliseconds>(setup_time_end-setup_time_start+crude_time_end-crude_time_start).count();
+  cout << "Crude Monte Carlo Run Time: " << duraction_crude << " ms " << endl;
 	// Reset walker positions
 	// Place walkers randomly in the first plane of the system
   siteOccupied.clear();
@@ -393,6 +396,80 @@ int main(int argc, char* argv[]){
       }
     }
   } // Place walkers randomly in the first plane of the system 
+
+	// Running Crude 2
+	cout << "Running crude 2" << endl;
+  high_resolution_clock::time_point crude_time_start2 = high_resolution_clock::now();
+	{ 
+
+    class Electron : public KMC_Walker {};
+    // Create the electrons using the KMC_Walker class
+    vector<pair<int,KMC_Walker>> electrons;        
+    {
+      for(int walker_index = 0; walker_index<walkers; ++walker_index){
+        Electron electron;
+        int siteId = converter.to1D(walker_positions[walker_index]);
+        electron.occupySite(siteId);
+        electrons.push_back(pair<int,KMC_Walker>(walker_index,electron));
+      }
+    }
+		KMC_Crude CMCSystem;
+		CMCSystem.initializeSystem(rates);
+		CMCSystem.setRandomSeed(seed);
+    list<pair<int,double>> walker_global_times = CMCSystem.initializeWalkers(electrons);
+		// Calculate walker dwell times and sort
+		while(!walker_global_times.empty()){
+        auto walker_index = walker_global_times.begin()->first;
+        KMC_Walker& electron = electrons.at(walker_index).second; 
+        CMCSystem.hop(electron);
+        // Update the dwell time
+        walker_global_times.begin()->second += electron.getDwellTime();
+			
+        int current_site = electron.getIdOfSiteCurrentlyOccupying();
+				auto position = converter.to3D(current_site);
+
+        if(position.at(0)==distance-1){
+					CMCSystem.removeWalkerFromSystem(electron);
+					walker_global_times.pop_front();
+				}
+
+        // reorder the walkers based on which one will move next
+        walker_global_times.sort(compareSecondItemOfPair);
+      }
+	}
+  high_resolution_clock::time_point crude_time_end2 = high_resolution_clock::now();
+  auto duration_crude2 = duration_cast<milliseconds>(setup_time_end-setup_time_start+crude_time_end2-crude_time_start2).count();
+  cout << "Crude Monte Carlo2 Run Time: " << duration_crude2 << " ms " << endl;
+
+	// Reset walker positions
+	// Place walkers randomly in the first plane of the system
+  siteOccupied.clear();
+  walker_positions.clear();
+  {
+    mt19937 random_number_generator;
+    random_number_generator.seed(seed+1);
+    uniform_int_distribution<int> distribution(0,distance-1);
+    int walker_index = 0;
+    while(walker_index<walkers){
+      int x = 0;
+      int y = distribution(random_number_generator);
+      int z = distribution(random_number_generator);
+      assert(x<distance);
+      assert(y<distance);
+      assert(z<distance);
+      assert(x>=0);
+      assert(y>=0);
+      assert(z>=0);
+      int siteId = converter.to1D(x,y,z);
+      if(siteOccupied.count(siteId)==0){
+        vector<int> position = { x, y, z};
+        walker_positions[walker_index] = position;
+        ++walker_index;
+        siteOccupied.insert(siteId);
+      }
+    }
+  } // Place walkers randomly in the first plane of the system 
+
 
   // Run coarse grained Monte Carlo
   cout << "Running coarse grained Monte Carlo" << endl;
@@ -437,6 +514,7 @@ int main(int argc, char* argv[]){
         auto walker_index = walker_global_times.begin()->first;
         KMC_Walker& electron = electrons.at(walker_index).second; 
         int electron_id = electrons.at(walker_index).first; 
+        //CGsystem.hop(electron_id,electron);
         CGsystem.hop(electron_id,electron);
         // Update the dwell time
         walker_global_times.begin()->second += electron.getDwellTime();
@@ -445,7 +523,8 @@ int main(int argc, char* argv[]){
 				auto position = converter.to3D(current_site);
 
         if(position.at(0)==distance-1){
-					CGsystem.removeWalkerFromSystem(electron_id,electron);
+					//CGsystem.removeWalkerFromSystem(electron_id,electron);
+					CGsystem.removeWalkerFromSystem(electron);
 					walker_global_times.pop_front();
 				}
 
@@ -462,10 +541,8 @@ int main(int argc, char* argv[]){
   } // End of coarse grain Monte Carlo
   high_resolution_clock::time_point coarse_time_end = high_resolution_clock::now();
 
-  auto duraction_crude = duration_cast<milliseconds>(setup_time_end-setup_time_start+crude_time_end-crude_time_start).count();
   auto duraction_coarse = duration_cast<milliseconds>(setup_time_end-setup_time_start+coarse_time_end-coarse_time_start).count();
 
-  cout << "Crude Monte Carlo Run Time: " << duraction_crude << " ms " << endl;
   cout << "Coarse Monte Carlo Run Time: " << duraction_coarse << " ms " << endl;
   return 0;
 }
