@@ -6,7 +6,6 @@
 #include <cassert>
 
 #include "kmc_cluster.hpp"
-#include "kmc_site.hpp"
 #include "../log.hpp"
 
 using namespace std;
@@ -23,62 +22,44 @@ static int clusterIdCounter = 0;
 /****************************************************************************
  * Public Facing Functions
  ****************************************************************************/
-void occupyCluster_(KMC_TopologyFeature* feature, const int& siteId){
-  KMC_Cluster * cluster = static_cast<KMC_Cluster *>(feature);
-  
-  KMC_Site * site = cluster->sitesInCluster_[siteId];
-  assert(cluster->site_visits_.count(siteId));
-  ++cluster->total_visit_freq_; 
-  site->setToOccupiedStatus(); 
+void KMC_Cluster::occupy(const int& siteId){
+  Site & site = sitesInCluster_[siteId];
+  assert(site_visits_.count(siteId));
+  ++total_visit_freq_; 
+  site->occupied.insert(site.id);//setToOccupiedStatus(); 
 }
 
-bool isOccupiedCluster_(const KMC_TopologyFeature* feature,const int& siteId) {
-  const KMC_Cluster * cluster = static_cast<const KMC_Cluster *>(feature);
-  assert(cluster->sitesInCluster_.count(siteId));
-  return cluster->sitesInCluster_.at(siteId)->isOccupied();
+bool KMC_Cluster::isOccupied(const int& siteId) {
+  assert(sitesInCluster_.count(siteId));
+  return sitesInCluster_.at(siteId)->occupied.count(siteId);
 }
 
-void vacateCluster_(KMC_TopologyFeature* feature,const int& siteId){
-  auto cluster = static_cast<KMC_Cluster *>(feature);
-  cluster->sitesInCluster_[siteId]->vacate();
-  cluster->vacate();
+void KMC_Cluster::vacate(const int& siteId){
+  sitesInCluster_[siteId]->occupied->erase(siteId);
+  vacate();
 }
 
-void removeWalkerCluster_(KMC_TopologyFeature * feature,const int & walker_id){
-  auto cluster = static_cast<KMC_Cluster *>(feature);
-  cluster->remaining_walker_dwell_times_.erase(walker_id);
+void KMC_Cluster::removeWalker(const int & walker_id){
+  remaining_walker_dwell_times_.erase(walker_id);
 }
 
-KMC_Cluster::KMC_Cluster() : KMC_TopologyFeature() {
-  setId(clusterIdCounter);
+KMC_Cluster::KMC_Cluster() {
+  id_ = clusterIdCounter;
   clusterIdCounter++;
-  iterations_ = 3;
-  resolution_ = 20.0;
-  total_visit_freq_ = 0;
-  prev_total_visit_freq_ = 0;
-  convergenceTolerance_ = 0.01;
   convergence_method_ = converge_by_iterations_per_site;
-
-  occupy_siteId_ptr_ = occupyCluster_;
-  vacate_siteId_ptr_ = vacateCluster_;
-  isOccupied_siteId_ptr_ = isOccupiedCluster_;
-
 }
 
-void KMC_Cluster::addSite(KMC_Site& newSite) {
-  assert(sitesInCluster_.count(newSite.getId())==0 && "Site has already been "
+void KMC_Cluster::addSite(Site& newSite) {
+  assert(sitesInCluster_.count(newSite.id)==0 && "Site has already been "
       "added to the cluster");
-  newSite.setClusterId(this->getId());
-  sitesInCluster_[newSite.getId()] = &newSite;
-
+  sitesInCluster_[newSite.id] = newSite;
 }
 
-void KMC_Cluster::addSites(vector<KMC_Site *> newSites) {
-    for (KMC_Site * site : newSites) {
-    assert(sitesInCluster_.count(site->getId())==0 && "Site has already been "
+void KMC_Cluster::addSites(vector<Site> newSites) {
+    for (Site & site : newSites) {
+    assert(sitesInCluster_.count(site.id)==0 && "Site has already been "
         "added to the cluster");
-    site->setClusterId(this->getId());
-    sitesInCluster_[site->getId()] = site;
+    sitesInCluster_[site.id] = site;
   }
 }
 
@@ -95,7 +76,7 @@ void KMC_Cluster::updateProbabilitiesAndTimeConstant() {
   calculateInternalTimeConstant_();
 
   site_visits_.clear();
-  for( const pair<int,KMC_Site *> & site : sitesInCluster_ ){
+  for( const pair<int,Site> & site : sitesInCluster_ ){
     site_visits_[site.first] = 0.0;
     if(temporary_visit_frequencies.count(site.first)){
       setVisitFrequency(temporary_visit_frequencies[site.first],site.first);
@@ -114,15 +95,15 @@ unordered_map<int,int> KMC_Cluster::getVisitFrequencies_(){
   return frequencies;
 }
 
-vector<KMC_Site *> KMC_Cluster::getSitesInCluster() const {
-  vector<KMC_Site *> sites;
-  for (pair<int,KMC_Site *> site : sitesInCluster_) sites.push_back(site.second);
+vector<Site> KMC_Cluster::getSitesInCluster() const {
+  vector<Site> sites;
+  for (pair<int,Site> site : sitesInCluster_) sites.push_back(site.second);
   return sites;
 }
 
 vector<int> KMC_Cluster::getSiteIdsInCluster() const {
   vector<int> siteIds;
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+  for (const pair<int,Site> & site : sitesInCluster_) {
     siteIds.push_back(site.first);
   }
   return siteIds;
@@ -142,8 +123,8 @@ double KMC_Cluster::getProbabilityOfOccupyingInternalSite(const int siteId) {
 void KMC_Cluster::migrateSitesFrom(KMC_Cluster& cluster) {
 
   unordered_map<int,int> visits;
-  for (pair<int,KMC_Site *> site : cluster.sitesInCluster_) {
-    site.second->setClusterId(getId());
+  for (pair<int,Site> site : cluster.sitesInCluster_) {
+    //site.second->setClusterId(getId());
     visits[site.first] = cluster.getVisitFrequency(site.first);
   }
 
@@ -173,8 +154,10 @@ void KMC_Cluster::migrateSitesFrom(KMC_Cluster& cluster) {
 
 int KMC_Cluster::pickNewSiteId(const int & walker_id) {
   if (hopWithinCluster_(walker_id)) {
+		//cout << "Hopping within cluster " << endl;
     return pickInternalSite_();
   }
+		//cout << "Hopping off cluster " << endl;
   return pickClusterNeighbor_(walker_id);
 }
 
@@ -265,9 +248,9 @@ std::ostream& operator<<(std::ostream& os,
   os << endl;
 
   os << "Sites in cluster: " << endl;
-  for (const pair<int,KMC_Site *> site : cluster.sitesInCluster_) {
+/*  for (const pair<int,Site> site : cluster.sitesInCluster_) {
     os << *(site.second) << endl;
-  }
+  }*/
   return os;
 }
 
@@ -296,11 +279,10 @@ unordered_map<int, unordered_map<int, double>>
 
   unordered_map<int, unordered_map<int, double>> externalRates;
 
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
-    for (const int & neighId : site.second->getNeighborSiteIds()) {
-      if (!siteIsInCluster(neighId)) {
-        externalRates[site.first][neighId] =
-            site.second->getRateToNeighbor(neighId);
+  for (const pair<int,Site> & site : sitesInCluster_) {
+    for ( pair<int,double> neigh_rate : *(site.neigh_rates)) {
+      if (!siteIsInCluster(neigh_rate.first)) {
+        externalRates[site.first][neigh_rate.first] = neigh_rate.second;
       }
     }
   }
@@ -312,11 +294,10 @@ KMC_Cluster::getRatesBetweenInternalSites_() const {
 
   unordered_map<int, unordered_map<int,double>> internal_rates;
 
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_ ){
-    for( const int & neighId : site.second->getNeighborSiteIds()){
-      if(siteIsInCluster(neighId)){
-        internal_rates[site.first][neighId] = 
-          site.second->getRateToNeighbor(neighId);
+  for (const pair<int,Site> & site : sitesInCluster_ ){
+    for( pair<int,double> & neigh_rate : *(site.neigh_rates)){
+      if(siteIsInCluster(neigh.first)){
+        internal_rates[site.first][neigh.first] = neigh_rate.second;
       }
     }
   }
@@ -324,7 +305,7 @@ KMC_Cluster::getRatesBetweenInternalSites_() const {
 }
 
 void KMC_Cluster::initializeProbabilityOnSites_() {
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+  for (const pair<int,Site> & site : sitesInCluster_) {
     probabilityOnSite_[site.first] =
         1.0 / (static_cast<double>(sitesInCluster_.size()));
   }
@@ -335,20 +316,20 @@ void KMC_Cluster::iterate_() {
 
   unordered_map<int, double> temp_probabilityOnSite;
   // Initialize temporary probabilities
-  for(const pair<int,KMC_Site *> & site : sitesInCluster_){
+  for(const pair<int,Site> & site : sitesInCluster_){
     temp_probabilityOnSite[site.first] = probabilityOnSite_[site.first];
   }
   
   double total = 0.0;
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
-    for (const int & neighsite : site.second->getNeighborSiteIds()) {
-      if (siteIsInCluster(neighsite)) {
+  for (const pair<int,Site> & site : sitesInCluster_) {
+    for (pair<int,double> & neigh_rate : *(site.neigh_rates)) {
+      if (siteIsInCluster(neigh_rate.first)) {
         temp_probabilityOnSite[site.first] +=
-          sitesInCluster_[neighsite]->getProbabilityOfHoppingToNeighboringSite(site.first) *
-          probabilityOnSite_[neighsite];
+          sitesInCluster_[neigh_rate.first]->getProbabilityOfHoppingToNeighboringSite(site.first) *
+          probabilityOnSite_[neigh_rate.first];
       }
       temp_probabilityOnSite[site.first] -=
-        sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neighsite) *
+        sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neigh_rate.first) *
         probabilityOnSite_[site.first];
     }
     total += temp_probabilityOnSite[site.first];
@@ -357,7 +338,7 @@ void KMC_Cluster::iterate_() {
   // Combine the former probability with the presently calculated probability
   double total2 = 0.0;
   double inverse_total = 1.0/total;
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+  for (const pair<int,Site> & site : sitesInCluster_) {
     probabilityOnSite_[site.first] =
         (temp_probabilityOnSite[site.first]*inverse_total +
          probabilityOnSite_[site.first]) * 0.5;;
@@ -367,7 +348,7 @@ void KMC_Cluster::iterate_() {
 
   // Normalize the probability
   double inverse_total2 = 1.0/total2;
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
+  for (const pair<int,Site> & site : sitesInCluster_) {
     probabilityOnSite_[site.first] = probabilityOnSite_[site.first]*inverse_total2;
   }
 }
@@ -413,12 +394,12 @@ unordered_map<int, vector<pair<int, double>>>
 
   unordered_map<int, vector<pair<int, double>>> internalRates;
 
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
-    for (const int & neighId : site.second->getNeighborSiteIds()) {
-      if (siteIsInCluster(neighId)) {
-        auto rateToNeigh = site.second->getRateToNeighbor(neighId);
-        pair<int, double> rateToSite(site.first, rateToNeigh);
-        internalRates[neighId].push_back(rateToSite);
+  for (const pair<int,Site> & site : sitesInCluster_) {
+    for (pair<int,double> & neigh_rate : site.neigh_rates) {
+      if (siteIsInCluster(neigh_rate.first)) {
+        //auto rateToNeigh = site.second->getRateToNeighbor(neigh_rate.first);
+        pair<int, double> rateToSite(site.first, neigh_rate.second);
+        internalRates[neigh_rate.first].push_back(rateToSite);
       }
     }
   }
@@ -429,6 +410,7 @@ bool KMC_Cluster::hopWithinCluster_(const int & walker_id) const {
   assert(remaining_walker_dwell_times_.count(walker_id) && "Walker is not "
       "found within the cluster and does not have a dwell time, error in "
       "hopWithinCluster function call. Make sure you call getDwellTime first.");
+	//cout << "Remaining walker dwell time " << remaining_walker_dwell_times_.at(walker_id)<< endl;
   return remaining_walker_dwell_times_.at(walker_id)>0;
 }
 
@@ -439,12 +421,20 @@ int KMC_Cluster::pickClusterNeighbor_(const int & walker_id) {
   //cout << "pick neighbor " << endl;
 //  for (const pair<int,double> & pval : cumulitive_probabilityHopToNeighbor_) {
 
+	//cout << "Options" << endl;
+  /*for(auto it = cumulitive_probabilityHopToNeighbor_.rbegin();
+      it!=cumulitive_probabilityHopToNeighbor_.rend();++it){
+    cout << number << " pval: " << it->second <<  " id "<< it->first << endl;
+	}*/
+	//cout << "Picking " << endl;
   for(auto it = cumulitive_probabilityHopToNeighbor_.rbegin();
       it!=cumulitive_probabilityHopToNeighbor_.rend();++it){
-    //cout << number << " pval: " << pval.second << " site " << pval.first << endl; 
     //cout << number << " pval: " << it->second <<  " id "<< it->first << endl;
     //if (number < pval.second) return pval.first;
-    if (number > it->second) return it->first;
+    if (number > it->second) {
+			//cout << "Hopping externally to " << it->first << endl;
+			return it->first;
+		}
   }
   assert("Cummulitive probability distribution is flawed or random "
       "number is greater than 1");
@@ -463,6 +453,7 @@ int KMC_Cluster::pickInternalSite_() {
     //cout << number << " pval: " << it->second <<  " id "<< it->first << endl;
     if(number>it->second){
       //return pval.first;
+			//cout << "hopping internally to " << it->first << endl;
       return it->first;
     }
   }
@@ -495,8 +486,17 @@ void KMC_Cluster::calculateProbabilityHopOffInternalSite_() {
 
   }
 
+	//cout << "Prob off " << endl;
+//	int count = 0;
   for(const pair<int,double> & hop_off : probabilityHopOffInternalSite_){
+		
     probabilityHopOffInternalSite_[hop_off.first] = hop_off.second/total2;
+		//cout << probabilityHopOffInternalSite_[hop_off.first] << endl;
+/*		if(probabilityHopOffInternalSite_[hop_off.first]<1e-3 && count == 1){
+			throw runtime_error("should optimize");	
+		}*/
+//		++count;
+		//assert(probabilityHopOffInternalSite_[hop_off.first]>1e-3);// Should optimize otherwise
   }
 }
 
@@ -649,16 +649,16 @@ void KMC_Cluster::calculateProbabilityHopToNeighbors_() {
   probabilityHopToNeighbor_.clear();
   unordered_map<int, double> temp_probabilityHopToNeighbor;
 
-  for (const pair<int,KMC_Site *> & site : sitesInCluster_) {
-    for (const int & neighsite : site.second->getNeighborSiteIds()) {
-      if (!siteIsInCluster(neighsite)) {
-        if(temp_probabilityHopToNeighbor.count(neighsite)){
-          temp_probabilityHopToNeighbor[neighsite] +=
-            sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neighsite) *
+  for (const pair<int,Site> & site : sitesInCluster_) {
+    for (pair<int,double> & neigh_rate : *site.neigh_rates) {
+      if (!siteIsInCluster(neigh_rate.first)) {
+        if(temp_probabilityHopToNeighbor.count(neigh_rate.first)){
+          temp_probabilityHopToNeighbor[neigh_rate.first] +=
+            sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neigh_rate.first) *
             probabilityOnSite_[site.first];
         }else{
-          temp_probabilityHopToNeighbor[neighsite] =
-            sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neighsite) *
+          temp_probabilityHopToNeighbor[neigh_rate.first] =
+            sitesInCluster_[site.first]->getProbabilityOfHoppingToNeighboringSite(neigh_rate.first) *
             probabilityOnSite_[site.first];
         }
       }

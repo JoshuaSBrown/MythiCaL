@@ -159,11 +159,20 @@ namespace kmccoarsegrain {
 	}
 
 	void runCoarse(KMC_CoarseGrainSystem & CGSystem, int walker_id,KMC_Walker & walker){
+		cout << "CGSystem hop" << endl;
 		const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
 		const int & siteToHopToId = walker.getPotentialSite();
 		KMC_TopologyFeature * feature = CGSystem.topology_->features[siteId].feature(*CGSystem.topology_,siteId);
+		cout << "Potential site " << endl;
+
+		if(!CGSystem.topology_->siteExist(siteToHopToId)){
+			cout << "Creating site does not exist" << endl;
+			CGSystem.topology_->features[siteToHopToId].feature(*CGSystem.topology_,siteToHopToId);
+		}
 		KMC_TopologyFeature * feature_to_hop_to = CGSystem.topology_->features[siteToHopToId].feature(*CGSystem.topology_,siteToHopToId);
+		cout << "Potential site done" << endl;
     if(!feature_to_hop_to->isOccupied(siteToHopToId)){
+			cout << "1" << endl;
       feature->vacate(siteId);
       feature_to_hop_to->occupy(siteToHopToId);
 
@@ -171,6 +180,7 @@ namespace kmccoarsegrain {
       walker.setDwellTime(feature_to_hop_to->getDwellTime(walker_id));
       walker.setPotentialSite(feature_to_hop_to->pickNewSiteId(walker_id));
     }else{
+			cout << "2" << endl;
       feature->vacate(siteId);
       feature->occupy(siteId);
 
@@ -178,6 +188,7 @@ namespace kmccoarsegrain {
       walker.setPotentialSite(feature->pickNewSiteId(walker_id));
     }
 
+		cout << "CGSystem hop done" << endl;
 	}
 //  void KMC_CoarseGrainSystem::hop(KMC_Walker & walker) {
 /*    const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
@@ -206,13 +217,15 @@ namespace kmccoarsegrain {
 		site_funct_[siteId].run(*this,walker_id,walker);
     ++iteration_;
     if(iteration_ > iteration_threshold_){
+			//cout << "iteration above threshold " << iteration_ << endl;
       if(iteration_threshold_min_!=constants::inf_iterations){
-
         if(coarseGrain_(siteToHopToId)){
+					//cout << "Coarse Graining" << endl;
           iteration_threshold_ = iteration_threshold_min_;
         }else{
           iteration_threshold_*=2;
         }
+				cout << "coarse grain done" << endl;
       }
       iteration_ = 0;
     }
@@ -224,30 +237,107 @@ namespace kmccoarsegrain {
 
   bool KMC_CoarseGrainSystem::coarseGrain_(int siteId){
 
-    BasinExplorer basin_explorer;
-		vector<int> basin_site_ids = basin_explorer.findBasin(*topology_,siteId);
+		cout << "Calling coarse grain method" << endl;
+		vector<int> basin_site_ids;
+		bool explore_basin = true;
+		size_t basin_id_count = 0;
+		size_t old_basin_id_count = 0;
+		while(explore_basin){
+			explore_basin = false;
+			BasinExplorer basin_explorer;
+			basin_site_ids = basin_explorer.findBasin(*topology_,siteId);
+			basin_id_count = basin_site_ids.size();	
+			if(basin_site_ids.size()>1 && basin_site_ids.size()<6){
 
+				unordered_map<int,unordered_map<int,double>> external_rates = topology_->getExternallyConnectedRates(basin_site_ids);	
+				unordered_map<int,unordered_map<int,double>>::iterator  iter = external_rates.begin();
+				pair<int,double> fastest_rate{iter->second.begin()->first, (iter->second.begin()->second)};
+				pair<int,double> second_fastest_rate = fastest_rate;
+
+				for(;iter!=external_rates.end();++iter){
+					for( pair<int,double> neigh_rates : iter->second){
+						//cout << "Rates " << iter->first << " and " << neigh_rates.first << " " <<  (neigh_rates.second) << endl;
+						if(neigh_rates.second > fastest_rate.second){
+							second_fastest_rate = fastest_rate;
+							fastest_rate.first = neigh_rates.first;
+							fastest_rate.second = neigh_rates.second;
+						}else if(fastest_rate==second_fastest_rate){
+							second_fastest_rate.first = neigh_rates.first;
+							second_fastest_rate.second = neigh_rates.second;
+						}
+					}
+				}
+
+				//cout << "Fastest rate " << fastest_rate.second << endl;
+				//cout << "Second Fastest rate " << second_fastest_rate.second << endl;
+				// Determine if fastest rate is 3 orders of magnitude faster than second fastest rate
+				if(fastest_rate.second/second_fastest_rate.second>1E4){
+					//cout << "Ratio " << fastest_rate.second/second_fastest_rate.second << endl;
+					// In turn check to see if the fastest rate off the site is back onto the cluster
+					//cout << "Get rates to neighbors of site " << endl;
+					if(!topology_->siteExist(fastest_rate.first)){
+						topology_->features[fastest_rate.first].feature(*topology_,fastest_rate.first);
+					}
+					unordered_map<int,double> rates_from_potential_neighbor = topology_->getRates(fastest_rate.first);		
+					//cout << "iter2 made " << endl;
+					unordered_map<int,double>::iterator iter2 = rates_from_potential_neighbor.begin(); 
+					pair<int,double> fastest_rate2(iter2->first,iter2->second);
+					pair<int,double> second_fastest_rate2 = fastest_rate2;
+					//cout << "initialized secondary rates " << fastest_rate2.second << endl;
+					for(;iter2!=rates_from_potential_neighbor.end();++iter2){
+						if(iter2->second > fastest_rate2.second){
+							second_fastest_rate2 = fastest_rate2;
+							fastest_rate2.first = iter2->first;
+							fastest_rate2.second = iter2->second;
+						}else if(fastest_rate2==second_fastest_rate2){
+							second_fastest_rate2.first = iter2->first;
+							second_fastest_rate2.second = iter2->second;
+						}
+					}
+
+					//cout << "fastest_rate2 " << fastest_rate2.second << endl;
+					//cout << "second_fastest_rate2 " << second_fastest_rate2.second << endl;
+					if(fastest_rate2.second/second_fastest_rate2.second>1E4){
+						if(find(basin_site_ids.begin(),basin_site_ids.end(),fastest_rate2.first)!=basin_site_ids.end()){
+							//throw runtime_error("Consider expanding basin");
+							if(old_basin_id_count!=basin_id_count){
+								old_basin_id_count = basin_id_count;
+								explore_basin = true;
+								siteId = fastest_rate2.first;
+								cout << "Explore true" << endl;
+							}
+						}
+					}
+				}
+			}
+		}
+		cout << "Done with loop" << endl;
 		if(basin_site_ids.size()>1){
-
 			double internal_time_limit = getInternalTimeLimit_(basin_site_ids);
 
+			cout << "Sites satisfy " << endl;
 			if( sitesSatisfyEquilibriumCondition_(basin_site_ids, internal_time_limit) ){
 				auto sites_and_clusters = getClustersOfSites(basin_site_ids);
 				auto number_clusters = countUniqueClusters(sites_and_clusters);
 
+			cout << "1" << endl;
 				if(number_clusters==1 &&
 						sites_and_clusters.begin()->second==constants::unassignedId)
 				{
+			cout << "2" << endl;
 					createCluster_(basin_site_ids,internal_time_limit);
 					return true;
 				}else if(number_clusters!=1){
 					// Joint clusters and sites to an existing cluster
+			cout << "3" << endl;
 					int favored_clusterId = getFavoredClusterId(sites_and_clusters);
 					mergeSitesAndClusters_(sites_and_clusters,favored_clusterId);
+					cout << "4" << endl;
 					return true;
 				}
 			}
 		}
+		cout << "Done with coarse grain" << endl;
     return false;
   }
 
@@ -335,7 +425,9 @@ namespace kmccoarsegrain {
     unordered_set<int> cluster_ids;
 
     for (const pair<int,int> & site_and_cluster : sites_and_clusters) { 
+				cout << "T0" << endl;
       if(site_and_cluster.second != favoredClusterId){ 
+				cout << "T01" << endl;
         if (site_and_cluster.second == constants::unassignedId) {
           isolated_sites.push_back(&topology_->getKMC_Site(site_and_cluster.first));
           //isolated_sites.push_back(sites_->getKMC_Site(site_and_cluster.first));
@@ -344,16 +436,24 @@ namespace kmccoarsegrain {
         }
         //topology_features_[site_and_cluster.first] = &(clusters_->getKMC_Cluster(favoredClusterId));
         topology_->features[site_and_cluster.first].feature = returnCluster; 
-        topology_->setSitesClusterId(site_and_cluster.first,favoredClusterId);
+				cout << "T1" << endl;
+				topology_->setSitesClusterId(site_and_cluster.first,favoredClusterId);
+				cout << "T2" << endl;
         //sites_->setClusterId(site_and_cluster.first,favoredClusterId);
       }
 
+				cout << "T3" << endl;
 			site_funct_[site_and_cluster.first].run = runCoarse;
+				cout << "T4" << endl;
     }
+				cout << "T5" << endl;
     topology_->getKMC_Cluster(favoredClusterId).addSites(isolated_sites);
     topology_->getKMC_Cluster(favoredClusterId).updateProbabilitiesAndTimeConstant();
+				cout << "T6" << endl;
     for(auto clusterId : cluster_ids ){
+				cout << "T7" << endl;
       topology_->mergeClusters(favoredClusterId,clusterId);
+				cout << "T8" << endl;
 //      clusters_->getKMC_Cluster(favoredClusterId).migrateSitesFrom(clusters_->getKMC_Cluster(clusterId));
 //      clusters_->erase(clusterId);
     }

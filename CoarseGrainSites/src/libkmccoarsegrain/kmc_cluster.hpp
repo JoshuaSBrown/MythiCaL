@@ -7,12 +7,20 @@
 #include <random>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
-#include "kmc_topology_feature.hpp"
-#include "kmc_site.hpp"
+//#include "kmc_topology_feature.hpp"
 
 namespace kmccoarsegrain {
 
+	struct Site {
+		int id = -1;
+		int * visit_freq =nullptr;
+		double * sojourn_time = nullptr;	
+		std::unordered_set<int> * occupied = nullptr;
+		std::vector<std::pair<int,double>> * cpd_neighbors = nullptr;
+		std::unordered_map<int,double> * neigh_rates = nullptr;
+	};
 /**
  * \brief Coarse graining of sites is handled by the Cluster class
  *
@@ -24,7 +32,7 @@ namespace kmccoarsegrain {
  * probability of hopping to sites surrounding the cluster can also be
  * calculated. As well as the dwell time. etc...
  **/
-class KMC_Cluster : public KMC_TopologyFeature {
+class KMC_Cluster {
 
   public:
   /**
@@ -96,8 +104,8 @@ class KMC_Cluster : public KMC_TopologyFeature {
    *
    * \param[in] site a shared pointer to a site
    **/
-  void addSite(KMC_Site& site);
-  void addSites(std::vector<KMC_Site *> sites);
+  void addSite(Site site);
+  void addSites(std::vector<Site> sites);
 
   /**
    * \brief will update the probabilities and time constant stored in the
@@ -128,7 +136,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
    *
    * \return A vector of shared pointers to the sites
    **/
-  std::vector<KMC_Site *> getSitesInCluster() const;
+  std::vector<Site> getSitesInCluster() const;
 
   std::vector<int> getSiteIdsInCluster() const;
   std::vector<int> getSiteIdsNeighboringCluster() const;
@@ -270,7 +278,26 @@ class KMC_Cluster : public KMC_TopologyFeature {
   friend std::ostream& operator<<(std::ostream& os,
                                   const kmccoarsegrain::KMC_Cluster& cluster);
 
+	void setId(const int id) { id_ = id; }
+	int getId() const noexcept { return id_; }
+
+
+	void occupy(int siteId);                                                           
+
+	void vacate(const int& siteId);
+
+	bool isOccupied();                 
+
+	bool isOccupied(const int& siteId);      
  private:
+
+	int id_ = -1;
+	int total_visit_freq_ = 0;
+	int occupied_ = 0;
+	double escape_time_constant_ = 0.0;
+	std::mt19937 random_engine_;
+	std::uniform_real_distribution<double> random_distribution_;
+
   /************************************************************************
    * Local Cluster Variables
    ************************************************************************/
@@ -278,13 +305,13 @@ class KMC_Cluster : public KMC_TopologyFeature {
   int prev_total_visit_freq_;
 
   /// Relates to how coarse grained the dwell time will be
-  double resolution_;
+  double resolution_ = 20.0;
 
   /// Number of iterations used to solve the master equation
-  long iterations_;
+  long iterations_ = 3;
 
   /// Tolerance used to determine when the master equation has been solved
-  double convergenceTolerance_;
+  double convergenceTolerance_ = 0.01;
 
   /// Type of convergence used to solve the master equation
   Method convergence_method_;
@@ -342,7 +369,7 @@ class KMC_Cluster : public KMC_TopologyFeature {
   /**
    * \brief Stores the pointers to sites that are in the cluster
    **/
-  std::unordered_map<int, KMC_Site *> sitesInCluster_;
+  std::unordered_map<int, Site> sitesInCluster_;
 
   std::unordered_map<int,double> probabilityHopOffInternalSite_;
   std::unordered_map<int,double> probabilityHopBetweenInternalSite_;
@@ -467,10 +494,10 @@ class KMC_Cluster : public KMC_TopologyFeature {
     std::unordered_map<int, std::vector<std::pair<int, double>>>
         getInternalRatesFromNeighborsComingToSite_();
 
-    friend void occupyCluster_(KMC_TopologyFeature*,const int&);
+/*    friend void occupyCluster_(KMC_TopologyFeature*,const int&);
     friend void vacateCluster_(KMC_TopologyFeature*,const int&);
     friend bool isOccupiedCluster_(const KMC_TopologyFeature*,const int&);
-    friend void removeWalkerCluster_(KMC_TopologyFeature *,const int&);
+    friend void removeWalkerCluster_(KMC_TopologyFeature *,const int&);*/
   };
 
 

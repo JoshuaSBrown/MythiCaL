@@ -65,6 +65,7 @@ namespace kmccoarsegrain {
 
       }
     }
+
     return gv_largest_known.getExploredVertices();
 
   }

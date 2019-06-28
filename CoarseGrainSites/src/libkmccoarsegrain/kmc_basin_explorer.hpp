@@ -17,7 +17,6 @@ class BasinExplorer{
     BasinExplorer() : threshold_(0.95), max_exploration_count_(5) {};
     void setThreshold(double threshold);
     void setMaxExplorationCount(int count);
-    //std::vector<int> findBasin(KMC_Site_Container& sites,KMC_Cluster_Container& clusters, KMC_CoarseGrainSystem & sys, int siteId);
     std::vector<int> findBasin(KMC_Dynamic_Topology & topology, int siteId);
   private:
     double threshold_;

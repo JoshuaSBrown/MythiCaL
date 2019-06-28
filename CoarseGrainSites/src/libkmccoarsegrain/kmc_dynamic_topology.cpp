@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <set>
 
 #include "kmc_dynamic_topology.hpp" 
@@ -15,6 +16,23 @@ namespace kmccoarsegrain {
     seed_ = seed;
     seed_set_ = true;
   }
+
+	unordered_map<int,unordered_map<int,double>> 
+		KMC_Dynamic_Topology::getExternallyConnectedRates(vector<int> site_ids){
+
+			sort(site_ids.begin(),site_ids.end());
+			unordered_map<int,unordered_map<int,double>> external_rates;
+			for( const int & siteId : site_ids){
+				for( const pair<int,double> & neigh_rate : rates_->at(siteId)){
+					if(binary_search(site_ids.begin(),site_ids.end(),neigh_rate.first)){
+						continue;
+					}
+					//cout << "Adding external rate from " << siteId << " to " << neigh_rate.first << " value " << neigh_rate.second << endl;
+					external_rates[siteId][neigh_rate.first] = neigh_rate.second;
+				}
+			}
+			return external_rates;
+		}
 
   void KMC_Dynamic_Topology::setRates(unordered_map<int,unordered_map<int,double>> & rates){
     rates_ = &rates;
@@ -38,7 +56,12 @@ namespace kmccoarsegrain {
 
   void KMC_Dynamic_Topology::mergeClusters(const int clusterId1, const int clusterId2){
     clusters_.getKMC_Cluster(clusterId1).migrateSitesFrom(clusters_.getKMC_Cluster(clusterId2));
+		vector<int> siteIds = clusters_.getKMC_Cluster(clusterId2).getSiteIdsInCluster();
+		for(const int & siteId : siteIds){
+			features_[siteId] = &clusters_.getKMC_Cluster(clusterId1);
+		}
     clusters_.erase(clusterId2);   
+
   }
 
   unordered_map<int,double> & KMC_Dynamic_Topology::getSiteRates(const int siteId){
@@ -48,6 +71,9 @@ namespace kmccoarsegrain {
     return (*rates_)[siteId1][siteId2];
   }
 
+	unordered_map<int,double> KMC_Dynamic_Topology::getRates(const int siteId){
+		return sites_.getNeighborsAndRates(siteId);	
+	}
   double KMC_Dynamic_Topology::getFastestRateOffCluster(const int clusterId){
     return clusters_.getFastestRateOffCluster(clusterId);
   }
@@ -59,7 +85,10 @@ namespace kmccoarsegrain {
   double KMC_Dynamic_Topology::getFastestRateOffSite(const int siteId){
     return sites_.getFastestRateOffSite(siteId);
   }
-
+  
+/*	pair<int,double> KMC_Dynamic_Topology::getFastestRateAndSiteIdOffSite(const int siteId){
+    return sites_.getFastestRateAndSiteIdOffSite(siteId);
+  }*/
   int KMC_Dynamic_Topology::getClusterIdOfSite(int siteId){
     assert(sites_.exist(siteId) && "Site with provided id does not exist within the topology, perhaps it has not yet been created.");
     return sites_.getClusterIdOfSite(siteId); 
@@ -89,6 +118,7 @@ namespace kmccoarsegrain {
     for( int & siteId : siteIds) {
       sites_.setClusterId(siteId,cluster.getId());
       features[siteId].feature = returnCluster;
+			features_[siteId] = &(clusters_.getKMC_Cluster(cluster.getId()));
     }
   }
   unordered_map<int,int> KMC_Dynamic_Topology::getClustersOfSites(const vector<int> & siteIds){
@@ -102,21 +132,25 @@ namespace kmccoarsegrain {
     }                                                                           
     return sites_and_clusters;                                                  
   }
-
+/*
   KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId){ 
     //cout << "Getting site instead of creating one " << endl;
     return &(dyn_top.sites_.getKMC_Site(siteId));
-  }
+  }*/
 
   KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId){  
     //cout << "Getting cluster" << endl;                                          
     //cout << "Getting cluster " << dyn_top.sites_.getKMC_Site(siteId).getClusterId() << endl;
-    return &(dyn_top.clusters_.getKMC_Cluster(dyn_top.sites_.getKMC_Site(siteId).getClusterId()));  
+   // return &(dyn_top.clusters_.getKMC_Cluster(dyn_top.sites_.getKMC_Site(siteId).getClusterId()));  
+	 	//cout << "Getting siteId " << siteId << endl;
+		return (dyn_top.features_[siteId]);
   }
 
   KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId){
     KMC_Site & site = dyn_top.sites_.createKMC_Site(siteId);                    
-    dyn_top.features[siteId].feature = &returnSite;               
+    //dyn_top.features[siteId].feature = &returnSite;               
+		dyn_top.features_[siteId] = &dyn_top.sites_.getKMC_Site(siteId);
+		dyn_top.features[siteId].feature = &returnCluster;
     site.setRatesToNeighbors(&((*dyn_top.rates_)[siteId]));                        
     if (dyn_top.seed_set_) {                                                       
       site.setRandomSeed(dyn_top.seed_);                                           

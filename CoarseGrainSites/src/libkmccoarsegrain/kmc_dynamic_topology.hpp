@@ -15,7 +15,7 @@ namespace kmccoarsegrain {
 class KMC_Dynamic_Topology;
 class KMC_Cluster;
 
-KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
+//KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
 KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
 KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
 /**
@@ -53,8 +53,14 @@ class KMC_Dynamic_Topology {
 
     void mergeClusters(int clusterId1, int clusterId2);
 
+		std::unordered_map<int,double> getRates(const int siteId);
+//		std::pair<int,double> getFastestRateAndSiteIdOffSite(const int siteId);
     double getFastestRateOffSite(const int siteId);
     double getFastestRateOffCluster(const int clusterId);
+
+		// Get the rates off the sites but that are not connected between them
+		std::unordered_map<int,std::unordered_map<int,double>>
+			getExternallyConnectedRates(std::vector<int> site_ids);
 
     std::unordered_map<int,double> getResolutionOfClusters();    
 
@@ -83,10 +89,11 @@ class KMC_Dynamic_Topology {
     std::unordered_map<int,std::unordered_map<int,double>> * rates_;
     //friend class BasinExplorer;
 
-    friend KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
+//    friend KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
     friend KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
     friend KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
 
+		std::unordered_map<int,KMC_TopologyFeature *> features_;
     /// Stores smart pointers to all the sites
     KMC_Site_Container sites_;
 

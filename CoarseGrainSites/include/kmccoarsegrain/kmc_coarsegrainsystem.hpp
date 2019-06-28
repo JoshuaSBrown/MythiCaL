@@ -257,25 +257,8 @@ class KMC_CoarseGrainSystem {
 
   /// Must be a pointer so that we do not have to include private header
   std::unique_ptr<KMC_Dynamic_Topology> topology_;
-/*  friend class BasinExplorer;
-	typedef KMC_TopologyFeature * (*top_feature)(KMC_CoarseGrainSystem * sys, int siteId);
 
-	friend KMC_TopologyFeature * returnSite(KMC_CoarseGrainSystem * sys,int siteId);
-	friend KMC_TopologyFeature * returnCluster(KMC_CoarseGrainSystem * sys,int siteId);
-	friend KMC_TopologyFeature * createSiteSwitchFunctionPointer(KMC_CoarseGrainSystem * sys,int siteId);
-	struct DefaultFunc {
-		top_feature feature = &createSiteSwitchFunctionPointer;	
-	};
-
-	std::unordered_map<int,DefaultFunc> topology_features_func_;
-  std::unordered_map<int,KMC_TopologyFeature *> topology_features_;
-  /// Stores smart pointers to all the sites
-  std::unique_ptr<KMC_Site_Container> sites_;
-
-  /// Stores smart pointers to all the clusters
-  std::unique_ptr<KMC_Cluster_Container> clusters_;*/
-
-  void coarseGrainSiteIfNeeded_(KMC_Walker& walker);
+	void coarseGrainSiteIfNeeded_(KMC_Walker& walker);
 
   /**
    * \brief Determines if it is appropriate to coarsegrain the sites
