@@ -222,6 +222,10 @@ class KMC_CoarseGrainSystem {
  private:
 
 	KMC_Crude crude_;
+
+	// Crude implementation only stores the cummulitive probability dist but
+	// we need the actual probs in order coarse grain the clusters
+	std::unordered_map<int,std::unordered_map<int,double>> site_neigh_prob;
   /// Performance ratio
   double performance_ratio_;
 /*
@@ -307,6 +311,7 @@ class KMC_CoarseGrainSystem {
 		void (*run)(KMC_CoarseGrainSystem & CGSystem, int walker_id,KMC_Walker & walker) = runCrude;
 	};
 
+	friend class KMC_Cluster;
 	friend void runCrude(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
 	friend void runCoarse(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
 	std::unordered_map<int,DefaultSiteFunction> site_funct_;

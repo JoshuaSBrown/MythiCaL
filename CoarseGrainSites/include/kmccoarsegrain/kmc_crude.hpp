@@ -53,11 +53,14 @@ namespace kmccoarsegrain {
 			//std::unique_ptr<KMC_Dynamic_Topology> topology_;
 			
 			std::unordered_map<int,int> visit_freq_;
-			std::unordered_map<int,double> sojourn_times_;
+			std::unordered_map<int,double> time_constants_;
 			// Cummulitive probability distribution of hopping to neighbors 
 			std::unordered_map<int,std::vector<std::pair<int,double>>> 
 				cpd_neighbor_hop_;
 
+			std::unordered_map<int, std::unordered_map<int, double>> * rates_;
+	
+			friend class KMC_Cluster;
 			
 	};
 }

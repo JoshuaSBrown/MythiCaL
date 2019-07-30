@@ -43,12 +43,32 @@ int main(void){
 
   cout << "Testing: addSite" << endl;
   {
-    KMC_Site site;
-    site.setId(1);
-    double rate = 1.0;
-    unordered_map<int,double> rates;
-    rates[2] = rate;
-    site.setRatesToNeighbors(&rates);
+    Site site;
+		site.id = 1;
+		// Rate to neighbor id 2 is 1.0
+		unordered_map<int,double> rates;
+		rates[2] = 1.0;
+	
+		// Prob of hoping to neighbors	
+		unordered_map<int,double> prob;	
+		prob[2] = 1.0;
+
+		// Cummulitive prob
+		vector<pair<int,double>> cpd_neighbors;
+		cpd_neighbors.push_back(std::pair<int,double>(2,1.0));
+
+		// Occupation set
+		unordered_set<int> occupied;
+
+		// Time constant
+		unordered_map<int,double> time_constants;
+		time_constants[1] = 1/rates[1];
+
+		site.time_constant = &time_constants[1];	
+		site.occupied = &occupied;	
+		site.neigh_rates = &rates;
+		site.prob_neighbors = & prob;
+		site.cpd_neighbors = &cpd_neighbors.at(0);
     //site.addNeighRate(pair<int, double *>(2,&rate));
 
     KMC_Cluster cluster;

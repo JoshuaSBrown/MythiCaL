@@ -9,18 +9,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "../../include/kmccoarsegrain/kmc_crude/hpp"
 //#include "kmc_topology_feature.hpp"
 
 namespace kmccoarsegrain {
 
-	struct Site {
-		int id = -1;
-		int * visit_freq =nullptr;
-		double * sojourn_time = nullptr;	
-		std::unordered_set<int> * occupied = nullptr;
-		std::vector<std::pair<int,double>> * cpd_neighbors = nullptr;
-		std::unordered_map<int,double> * neigh_rates = nullptr;
-	};
 /**
  * \brief Coarse graining of sites is handled by the Cluster class
  *
@@ -54,7 +47,7 @@ class KMC_Cluster {
    * on creation. This is automated in the constructor. Such that every new
    * cluster will be given an integer id greater than the last one created.
    **/
-  KMC_Cluster();
+  KMC_Cluster(KMC_CoarseGrainSystem & CGSystem);
 
   /**
    * \brief Convergence Methods
@@ -104,8 +97,8 @@ class KMC_Cluster {
    *
    * \param[in] site a shared pointer to a site
    **/
-  void addSite(Site site);
-  void addSites(std::vector<Site> sites);
+  void addSite(const int& site_id);
+  void addSites(const std::vector<int> & site_ids);
 
   /**
    * \brief will update the probabilities and time constant stored in the
@@ -126,9 +119,7 @@ class KMC_Cluster {
    *
    * \return True if the site is in the cluster false otherwise
    **/
-  bool siteIsInCluster(const int siteId) const {
-    return sitesInCluster_.count(siteId);
-  }
+  bool siteIsInCluster(const int & siteId) const;
 
   /**
    * \brief Create a vector storing all the ids of the sites that are in the
@@ -136,7 +127,7 @@ class KMC_Cluster {
    *
    * \return A vector of shared pointers to the sites
    **/
-  std::vector<Site> getSitesInCluster() const;
+//  std::vector<int> getSitesInCluster() const;
 
   std::vector<int> getSiteIdsInCluster() const;
   std::vector<int> getSiteIdsNeighboringCluster() const;
@@ -187,7 +178,7 @@ class KMC_Cluster {
     // Must be greater than 1
     assert(resolution>=2.0); 
     resolution_ = resolution; 
-    time_increment_ = KMC_TopologyFeature::escape_time_constant_/static_cast<double>(resolution_);
+    time_increment_ = escape_time_constant_/static_cast<double>(resolution_);
   }
 
   double getResolution() const {
@@ -282,9 +273,11 @@ class KMC_Cluster {
 	int getId() const noexcept { return id_; }
 
 
-	void occupy(int siteId);                                                           
+	void occupy(const int & siteId);                                                           
 
 	void vacate(const int& siteId);
+
+	void removeWalker(const int& siteId);
 
 	bool isOccupied();                 
 
@@ -297,6 +290,15 @@ class KMC_Cluster {
 	double escape_time_constant_ = 0.0;
 	std::mt19937 random_engine_;
 	std::uniform_real_distribution<double> random_distribution_;
+
+	struct CrudePtrs{
+		std::unordered_map<int,int> * visit_freq =nullptr;
+		std::unordered_map<int,double> * time_constant = nullptr;	
+		std::unordered_set<int> * occupied = nullptr;
+		std::unordered_map<int,std::vector<std::pair<int,double>>> * cpd_neighbors = nullptr;
+		std::unordered_map<int,std::unordered_map<int,double>> * prob_neighbors = nullptr;
+		std::unordered_map<int,std::unordered_map<int,double>> * neigh_rates = nullptr;
+	} system_ptrs_;
 
   /************************************************************************
    * Local Cluster Variables
@@ -369,7 +371,7 @@ class KMC_Cluster {
   /**
    * \brief Stores the pointers to sites that are in the cluster
    **/
-  std::unordered_map<int, Site> sitesInCluster_;
+  std::vector<int> sitesInCluster_;
 
   std::unordered_map<int,double> probabilityHopOffInternalSite_;
   std::unordered_map<int,double> probabilityHopBetweenInternalSite_;
