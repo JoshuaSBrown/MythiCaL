@@ -25,9 +25,7 @@ namespace kmccoarsegrain {
     gv_largest_known.setStartingVertex(siteId);
 
     // Create the site if it does not exist
-    if(topology.siteExist(siteId)==false){
-      topology.features[siteId].feature(topology,siteId);
-    }
+   
     fastest_rate_ = topology.getFastestRateOffSite(siteId);
 
     if(topology.partOfCluster(siteId)){

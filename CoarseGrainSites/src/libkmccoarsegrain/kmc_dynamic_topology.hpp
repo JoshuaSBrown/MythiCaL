@@ -16,8 +16,8 @@ class KMC_Dynamic_Topology;
 class KMC_Cluster;
 
 //KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
-KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
-KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
+//KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
+//KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
 /**
  * \brief Class is in charge of the topology objects of the simulation
  *
@@ -31,18 +31,14 @@ class KMC_Dynamic_Topology {
   public:
     KMC_Dynamic_Topology() : seed_set_(false), seed_(0) {};
 
-		void reserveSites(size_t num_buckets) { sites_.reserve(num_buckets);}
     void setRates(std::unordered_map<int,std::unordered_map<int,double>> & rates);
 
     void setRandomSeed(const unsigned long seed);
 
     int getClusterIdOfSite(int siteId);
 
-    int getVisitFrequencyOfSite(int siteId);
-
     void addKMC_Cluster(KMC_Cluster & cluster);
 
-    KMC_Site & getKMC_Site(const int siteId);
     KMC_Cluster & getKMC_Cluster(const int clusterId);
 
     int getFavoredClusterId(std::vector<int> siteIds);
@@ -53,8 +49,6 @@ class KMC_Dynamic_Topology {
 
     void mergeClusters(int clusterId1, int clusterId2);
 
-		std::unordered_map<int,double> getRates(const int siteId);
-//		std::pair<int,double> getFastestRateAndSiteIdOffSite(const int siteId);
     double getFastestRateOffSite(const int siteId);
     double getFastestRateOffCluster(const int clusterId);
 
@@ -89,13 +83,16 @@ class KMC_Dynamic_Topology {
     std::unordered_map<int,std::unordered_map<int,double>> * rates_;
     //friend class BasinExplorer;
 
+    // site id and the cluster it belongs too
+    std::unordered_map<int,int> site_and_cluster_;
 //    friend KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
-    friend KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
-    friend KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
+//    friend KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
+//    friend KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
 
-		std::unordered_map<int,KMC_TopologyFeature *> features_;
+   
+//		std::unordered_map<int,KMC_TopologyFeature *> features_;
     /// Stores smart pointers to all the sites
-    KMC_Site_Container sites_;
+//    KMC_Site_Container sites_;
 
     /// Stores smart pointers to all the clusters
     KMC_Cluster_Container clusters_;

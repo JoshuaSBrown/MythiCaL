@@ -101,6 +101,17 @@ class KMC_CoarseGrainSystem {
    **/
   void initializeSystem(std::unordered_map<int, std::unordered_map<int, double>> &ratesOfAllSites);
 
+  
+  /**
+   * @brief Checks that detailed balance is satisfied
+   *
+   * Every rate off a site to a neighbor must be balanced by a rate from
+   * the neighbor to the site
+   *
+   * @param ratesOfAllSites
+   */
+  void checkRates(std::unordered_map<int, std::unordered_map<int, double>> &ratesOfAllSites);
+
   /**
    * \brief Initialize walker dwell times and future hop site id
    *
