@@ -11,13 +11,9 @@
 #include "../../include/kmccoarsegrain/kmc_constants.hpp"
 #include "../../include/kmccoarsegrain/kmc_walker.hpp"
 
-#include "topologyfeatures/kmc_topology_feature.hpp"
-#include "topologyfeatures/kmc_cluster.hpp"
-#include "topologyfeatures/kmc_site.hpp"
 #include "log.hpp"
 #include "kmc_basin_explorer.hpp"
 #include "kmc_graph_library_adapter.hpp"
-#include "kmc_site_container.hpp"
 #include "kmc_cluster_container.hpp"
 #include "kmc_dynamic_topology.hpp"
 
@@ -355,18 +351,8 @@ namespace kmccoarsegrain {
     KMC_Cluster cluster;
     cluster.setConvergenceMethod(KMC_Cluster::Method::converge_by_tolerance);
     cluster.setConvergenceTolerance(0.001);
-    vector<KMC_Site *> sites;
-    for (const int & siteId : siteIds){
-      if(topology_->siteExist(siteId)){
-        sites.push_back(&topology_->getKMC_Site(siteId));
-      } else {
-        topology_->features[siteId].feature(*topology_,siteId);
-        sites.push_back(&topology_->getKMC_Site(siteId));
-      }
-      // Change the default site function so that the coarse implementation is used
-			site_funct_[siteId].run = runCoarse;
-		}
-    cluster.addSites(sites);
+    
+    cluster.addSites(siteIds);
     cluster.updateProbabilitiesAndTimeConstant();
 
     double cluster_time_const = cluster.getTimeConstant();
@@ -391,7 +377,7 @@ namespace kmccoarsegrain {
   void KMC_CoarseGrainSystem::mergeSitesAndClusters_( unordered_map<int,int> sites_and_clusters,int favoredClusterId) {
 
     LOG("Merging sites to cluster", 1);
-    vector<KMC_Site *> isolated_sites;
+    vector<int> isolated_sites;
     unordered_set<int> cluster_ids;
 
     for (const pair<int,int> & site_and_cluster : sites_and_clusters) { 
@@ -399,7 +385,7 @@ namespace kmccoarsegrain {
       if(site_and_cluster.second != favoredClusterId){ 
 				cout << "T01" << endl;
         if (site_and_cluster.second == constants::unassignedId) {
-          isolated_sites.push_back(&topology_->getKMC_Site(site_and_cluster.first));
+          isolated_sites.push_back(site_and_cluster.first);
         } else {
           cluster_ids.insert(site_and_cluster.second);
         }
@@ -434,8 +420,7 @@ namespace kmccoarsegrain {
 
     double max_rate_off = 0; 
     for(const int & site_id : siteIds){
-      KMC_Site & site = topology_->getKMC_Site(site_id);
-      const unordered_map<int,double> & neigh_and_rates = site.getNeighborsAndRatesConst();
+      const unordered_map<int,double> & neigh_and_rates = rates_->at(site_id);
       for( const pair<int,double> & neigh_and_rate : neigh_and_rates){
         if(internal_sites.count(neigh_and_rate.first)==0){
           if((neigh_and_rate.second) > max_rate_off){

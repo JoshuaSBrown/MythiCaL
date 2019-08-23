@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "kmc_dynamic_topology.hpp"
-#include "kmc_site_container.hpp"
 #include "kmc_cluster_container.hpp"
 #include "../../../UGLY/include/ugly/graphvisitor/graphvisitor_largest_known_value.hpp"
 

@@ -44,10 +44,7 @@ namespace kmccoarsegrain {
       weak_ptr<Edge> next_edge = gv_largest_known.getNextEdge<Edge>();
 
       auto next_vertex = gv_largest_known.chooseTerminalVertex(next_edge);
-      if(topology.siteExist(next_vertex)==false){
-        topology.features[next_vertex].feature(topology,next_vertex);
-        
-      }
+     
       gv_largest_known.exploreEdge(next_edge);
       auto edges_tmp = convertASitesOutgoingRatesToSharedWeightedEdges<shared_edge_set>( topology.getSiteRates(next_vertex), next_vertex);
       

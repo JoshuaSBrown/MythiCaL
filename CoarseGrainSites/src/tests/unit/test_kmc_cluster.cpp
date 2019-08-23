@@ -40,7 +40,7 @@ int main(void){
     }
     assert(fail);
   }  
-
+/*
   cout << "Testing: addSite" << endl;
   {
     Site site;
@@ -597,6 +597,6 @@ int main(void){
     assert(visit_prob.at(2) < baseline_visit_prob.at(2)*1.2);
     assert(visit_prob.at(2) > baseline_visit_prob.at(2)*0.8);
   }
-
+*/
 	return 0;
 }

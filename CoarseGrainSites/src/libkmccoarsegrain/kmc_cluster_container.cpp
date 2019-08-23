@@ -12,7 +12,7 @@ namespace kmccoarsegrain {
       throw invalid_argument("Cannot add cluster as it is already stored in the"
           " container.");
     }
-    clusters_[cluster.getId()]=cluster; 
+    clusters_.insert( std::unordered_map<int,KMC_Cluster>::value_type(cluster.getId(), KMC_Cluster(cluster))); 
   }
 
 /*  void KMC_Cluster_Container::addKMC_Clusters(vector<KMC_Cluster>& clusters){
@@ -27,7 +27,7 @@ namespace kmccoarsegrain {
       throw invalid_argument("Cannot get cluster as it is not stored in the"
           " container.");
     }
-    return clusters_[clusterId];
+    return clusters_.at(clusterId);
   }
 
   bool KMC_Cluster_Container::exist(const int & clusterId) const{
@@ -52,21 +52,21 @@ namespace kmccoarsegrain {
     return clusters_.at(clusterId).isOccupied();
   }
 
-  void KMC_Cluster_Container::vacate(const int & clusterId){
+/*  void KMC_Cluster_Container::vacate(const int & clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot vacate cluster as it is not stored in the "
           "container.");
     }
     clusters_[clusterId].vacate();
-  }
+  }*/
 
-  void KMC_Cluster_Container::occupy(const int & clusterId){
+/*  void KMC_Cluster_Container::occupy(const int & clusterId){
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot occupy cluster as it is not stored in the "
           "container.");
     }
     clusters_[clusterId].occupy();
-  }
+  }*/
 
   vector<int> KMC_Cluster_Container::getClusterIds() const {
     vector<int> clusterids;
@@ -81,16 +81,16 @@ namespace kmccoarsegrain {
       throw invalid_argument("Cannot get cluster dwell time as it is not stored"
           " in the container.");
     }
-    return clusters_[clusterId].getDwellTime(walker_id);
+    return clusters_.at(clusterId).getDwellTime(walker_id);
   }
 
-  double KMC_Cluster_Container::getTimeConstant(const int & clusterId) const{
+/*  double KMC_Cluster_Container::getTimeConstant(const int & clusterId) const{
     if(exist(clusterId)==false){
       throw invalid_argument("Cannot get cluster time constant as it is not "
           "stored in the container.");
     }
     return clusters_.at(clusterId).getTimeConstant();
-  }
+  }*/
 
   double KMC_Cluster_Container::getFastestRateOffCluster(const int & clusterId) const {
     if(exist(clusterId)==false){

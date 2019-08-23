@@ -5,19 +5,13 @@
 #include <vector>
 
 #include "log.hpp"
-#include "kmc_rate_container.hpp"
-#include "kmc_site_container.hpp"
 #include "kmc_cluster_container.hpp"
-#include "topologyfeatures/kmc_site.hpp"
 
 namespace kmccoarsegrain {
 
 class KMC_Dynamic_Topology;
 class KMC_Cluster;
 
-//KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
-//KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
-//KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
 /**
  * \brief Class is in charge of the topology objects of the simulation
  *
@@ -66,34 +60,19 @@ class KMC_Dynamic_Topology {
     std::unordered_map<int,std::vector<int>> getClusters();
 
     std::unordered_map<int,int> getClustersOfSites(const std::vector<int> & siteIds);
-    typedef KMC_TopologyFeature * (*top_feature)(KMC_Dynamic_Topology & top, int siteId);
-
-    struct DefaultTopologyFeatureFunction {
-      top_feature feature = &createSite;
-    };
 
     std::unordered_map<int,double> getTimeIncrementOfClusters();
 
     double getTimeConstantFromSitesToNeighbors(const std::vector<int> & siteIds) const;
-    std::unordered_map<int,DefaultTopologyFeatureFunction> features;
   private:
 
     bool seed_set_;
     unsigned long seed_;
     std::unordered_map<int,std::unordered_map<int,double>> * rates_;
-    //friend class BasinExplorer;
 
     // site id and the cluster it belongs too
     std::unordered_map<int,int> site_and_cluster_;
-//    friend KMC_TopologyFeature * returnSite(KMC_Dynamic_Topology & dyn_top,int siteId);
-//    friend KMC_TopologyFeature * returnCluster(KMC_Dynamic_Topology & dyn_top,int siteId);
-//    friend KMC_TopologyFeature * createSite(KMC_Dynamic_Topology & dyn_top,int siteId);
-
    
-//		std::unordered_map<int,KMC_TopologyFeature *> features_;
-    /// Stores smart pointers to all the sites
-//    KMC_Site_Container sites_;
-
     /// Stores smart pointers to all the clusters
     KMC_Cluster_Container clusters_;
 };

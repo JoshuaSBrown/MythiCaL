@@ -5,8 +5,7 @@
 #include <vector>
 
 #include "log.hpp"
-#include "kmc_rate_container.hpp"
-#include "topologyfeatures/kmc_cluster.hpp"
+#include "kmc_cluster.hpp"
 
 namespace kmccoarsegrain {
 
@@ -20,7 +19,6 @@ class KMC_Cluster_Container {
 
     void addKMC_Cluster(KMC_Cluster& cluster);
 
-    //void addKMC_Clusters(std::vector<KMC_Cluster>& clusters);
     KMC_Cluster& getKMC_Cluster(const int & clusterId);
 
     size_t size() const { return clusters_.size();}
@@ -31,14 +29,14 @@ class KMC_Cluster_Container {
 
     bool isOccupied(const int & clusterId) const;
 
-    void vacate(const int & clusterId);
+   // void vacate(const int & clusterId);
 
-    void occupy(const int & clusterId);
+   // void occupy(const int & clusterId);
 
     std::vector<int> getClusterIds() const; 
     double getDwellTime(const int & walker_id, const int & clusterId);
 
-    double getTimeConstant(const int & clusterId) const;
+    //double getTimeConstant(const int & clusterId) const;
 
     double getFastestRateOffCluster(const int & clusterId) const;
     std::vector<int> getSiteIdsOfNeighbors(const int & clusterId) const;

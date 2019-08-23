@@ -7,7 +7,6 @@
 #include <string>
 
 #include "kmc_dynamic_topology.hpp"
-#include "kmc_site_container.hpp"
 #include "../../../UGLY/include/ugly/edge_directed_weighted.hpp"
 #include "../../../UGLY/include/ugly/graph_node.hpp"
 
