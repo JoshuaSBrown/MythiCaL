@@ -23,6 +23,10 @@ namespace kmccoarsegrain {
 	KMC_Crude::KMC_Crude() : distribution_(0.0,1.0) {}
 	KMC_Crude::~KMC_Crude() {}
 
+  const std::unordered_map<int,std::unordered_map<int,double>>& rates(){
+    return *rates_;
+  }
+
 	void KMC_Crude::initializeSystem(std::unordered_map<int, std::unordered_map<int, double>> &ratesOfAllSites) {
 
 		rates_ = &(ratesOfAllSites);

@@ -21,7 +21,7 @@ namespace kmccoarsegrain {
 
 			void initializeSystem(std::unordered_map<int, std::unordered_map<int, double>> &ratesOfAllSites);
 
-	
+      const std::unordered_map<int,std::unordered_map<int,double>> & rates();  
 			/**
 			 * @brief Initialize the walker and return global times each walker will 
 			 * spend on its current site. 

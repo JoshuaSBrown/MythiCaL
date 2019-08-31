@@ -91,9 +91,9 @@ namespace kmccoarsegrain {
 
   void KMC_CoarseGrainSystem::checkRates(unordered_map<int, unordered_map<int, double>>& ratesOfAllSites){
     vector<int> siteIds;
-    for ( pair<int,unordered_map<int,double>> & site_neigh_rates : ratesOfAllSites){
+    for (const pair<int,unordered_map<int,double>> & site_neigh_rates : rates()){
       siteIds.push_back(site_neigh_rates.first);
-      for ( pair<int,double> & neigh_rate : site_neigh_rates){
+      for (const pair<int,double> & neigh_rate : site_neigh_rates.second){
         siteIds.push_back(neigh_rate.first);
       } 
     }
@@ -102,7 +102,7 @@ namespace kmccoarsegrain {
     siteIds.erase(unique(siteIds.begin(),siteIds.end()), siteIds.end());
 
     for ( size_t index = 0; index < siteIds.size();++index) {
-      for( pair<int,double> & neigh_rate : ratesOfAllSites[siteIds.at(index)]){
+      for( const pair<int,double> & neigh_rate : rates().at(siteIds.at(index))){
         if(neigh_rate.first>siteIds.at(index)){
           if(!ratesOfAllSites.count(neigh_rate.first)){
             cerr << "No rate from " << neigh_rate.first << " to " << siteIds.at(index) << endl;
@@ -118,15 +118,15 @@ namespace kmccoarsegrain {
   }
 
   int KMC_CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){
-    if(!rates_.count(siteId)){
+    if(!rates().count(siteId)){
       throw invalid_argument("Site is not stored in the coarse grained system you"
           " cannot retrieve it's visit frequency.");                            
     }                                                                           
 
     int visits = crude_.getVisitFrequencyOfSite(siteId);                
-    if(topology_.partOfCluster(siteId)){                                           
-      int cluster_id = topology_.getClusterIdOfSite(siteId);                       
-      visits += topology_.getKMC_Cluster(cluster_id).getVisitFrequency(siteId); 
+    if(topology_->partOfCluster(siteId)){                                           
+      int cluster_id = topology_->getClusterIdOfSite(siteId);                       
+      visits += topology_->getKMC_Cluster(cluster_id).getVisitFrequency(siteId); 
     }                                                                           
     return visits;  
     
@@ -420,7 +420,7 @@ namespace kmccoarsegrain {
 
     double max_rate_off = 0; 
     for(const int & site_id : siteIds){
-      const unordered_map<int,double> & neigh_and_rates = rates_->at(site_id);
+      const unordered_map<int,double> & neigh_and_rates = rates()->at(site_id);
       for( const pair<int,double> & neigh_and_rate : neigh_and_rates){
         if(internal_sites.count(neigh_and_rate.first)==0){
           if((neigh_and_rate.second) > max_rate_off){

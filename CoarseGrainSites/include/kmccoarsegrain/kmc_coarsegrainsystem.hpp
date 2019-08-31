@@ -101,7 +101,8 @@ class KMC_CoarseGrainSystem {
    **/
   void initializeSystem(std::unordered_map<int, std::unordered_map<int, double>> &ratesOfAllSites);
 
-  
+  const std::unordered_map<int,std::unordered_map<int,double>> rates();
+
   /**
    * @brief Checks that detailed balance is satisfied
    *
