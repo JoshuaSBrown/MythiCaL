@@ -23,7 +23,7 @@ namespace kmccoarsegrain {
 	KMC_Crude::KMC_Crude() : distribution_(0.0,1.0) {}
 	KMC_Crude::~KMC_Crude() {}
 
-  const std::unordered_map<int,std::unordered_map<int,double>>& rates(){
+  const std::unordered_map<int,std::unordered_map<int,double>>& KMC_Crude::rates(){
     return *rates_;
   }
 
@@ -94,6 +94,15 @@ namespace kmccoarsegrain {
 		return walker_global_times;
 	}
 
+  void KMC_Crude::vacateSite(const int siteId){
+    assert(site_occupied_.count(siteId) == 0 && "Cannot vacate site is empty");
+    site_occupied_.erase(siteId);
+  }
+
+  void KMC_Crude::occupySite(const int siteId){
+    assert(site_occupied_.count(siteId)==0 && "Cannot occupy site already occupied");
+    site_occupied_.insert(siteId);
+  }
 	void KMC_Crude::setRandomSeed(const unsigned long seed){
 		rand_num_gen_ = mt19937(seed);
 	}
@@ -129,7 +138,30 @@ namespace kmccoarsegrain {
 			}
 		}
 	}
+/*
+	void KMC_Crude::hop_occupied(KMC_Walker& walker){
+		double random_number = distribution_(rand_num_gen_);
+		int current_siteId =walker.getIdOfSiteCurrentlyOccupying();
 
+		pot_siteId = current_siteId;
+		for(auto it = cpd_neighbor_hop_[pot_siteId].rbegin();
+				it!=cpd_neighbor_hop_[pot_siteId].rend();++it){
+
+			if(random_number > it->second){
+				int neighId = it->first;	
+				walker.setPotentialSite(neighId);
+				walker.occupySite(pot_siteId);
+				walker.setDwellTime(time_constants_[pot_siteId]*log(distribution_(rand_num_gen_))*-1.0);
+				site_occupied_.insert(pot_siteId);
+				if(visit_freq_.count(pot_siteId)){
+					++visit_freq_[pot_siteId];
+				}else{
+					visit_freq_[pot_siteId] =1;
+				}
+				break;
+			}
+		}
+	}*/
 	void KMC_Crude::removeWalkerFromSystem(std::pair<int,KMC_Walker>& walker){
 		removeWalkerFromSystem(walker.second);
 	}

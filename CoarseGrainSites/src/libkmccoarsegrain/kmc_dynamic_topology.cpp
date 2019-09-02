@@ -29,6 +29,13 @@ namespace kmccoarsegrain {
       return external_rates;
     }
 
+  void KMC_Dynamic_Topology::occupySite(int siteId){
+    clusters_.getKMC_Cluster(site_and_cluster_[siteId]).occupy(siteId);
+  }
+
+  void KMC_Dynamic_Topology::vacateSite(int siteId){
+    clusters_.getKMC_Cluster(site_and_cluster_[siteId]).vacate(siteId);
+  }
   void KMC_Dynamic_Topology::setRates(unordered_map<int,unordered_map<int,double>> & rates){
     rates_ = &rates;
   }
@@ -72,7 +79,7 @@ namespace kmccoarsegrain {
 
   double KMC_Dynamic_Topology::getFastestRateOffSite(const int siteId){
     double fastest_rate = 0.0; 
-    for ( pair<int, double> & neigh_rate : (*rates_)[siteId] ){
+    for ( const pair<int, double> & neigh_rate : rates_->at(siteId) ){
       if(neigh_rate.second>fastest_rate){
         fastest_rate = neigh_rate.second;
       }
@@ -95,6 +102,7 @@ namespace kmccoarsegrain {
       site_and_cluster_[siteId] = cluster.getId();  
     }
   }
+
   unordered_map<int,int> KMC_Dynamic_Topology::getClustersOfSites(const vector<int> & siteIds){
     unordered_map<int,int> sites_and_clusters;                                  
     for(auto siteId : siteIds){                                                 
@@ -107,24 +115,26 @@ namespace kmccoarsegrain {
     return sites_and_clusters;                                                  
   }
   
-double KMC_Dynamic_Topology::getTimeConstantFromSitesToNeighbors(
-    const vector<int> & siteIds) const {
+  double KMC_Dynamic_Topology::getTimeConstantFromSitesToNeighbors(
+      const vector<int> & siteIds) const {
 
-  LOG("Get the minimum time constant", 1);
-  set<int> internalSiteIds(siteIds.begin(), siteIds.end());
+    LOG("Get the minimum time constant", 1);
+    set<int> internalSiteIds(siteIds.begin(), siteIds.end());
 
-  double sumRates = 0.0;
-  for (const int & siteId : siteIds) {
-  for( const pair<int,double> & neigh_rate : rates->at(siteId) ){
-      if (!internalSiteIds.count(neigh_rate.first)) {
-        sumRates+= sites_.getRateToNeighborOfSite(siteId,neigh_rate.first);
+    double sumRates = 0.0;
+    for (const int & siteId : siteIds) {
+      for( const pair<int,double> & neigh_rate : rates_->at(siteId) ){
+        if (!internalSiteIds.count(neigh_rate.first)) {
+          //sumRates+= sites_.getRateToNeighborOfSite(siteId,neigh_rate.first);
+          sumRates+= rates_->at(siteId).at(neigh_rate.first);
+        }
+      }
     }
+    if (sumRates == 0.0){
+      return 0.0;
+    }
+    return 1.0/sumRates;
   }
-  if (sumRates == 0.0){
-    return 0.0;
-  }
-  return 1.0/sumRates;
-}
 
 unordered_map<int,vector<int>> KMC_Dynamic_Topology::getClusters(){
   return clusters_.getSiteIdsOfClusters();

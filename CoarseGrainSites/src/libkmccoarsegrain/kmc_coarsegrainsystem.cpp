@@ -68,6 +68,10 @@ namespace kmccoarsegrain {
     return time_resolution_; 
   }
 
+  const std::unordered_map<int,std::unordered_map<int,double>> KMC_CoarseGrainSystem::rates(){
+    return crude_.rates();
+  }
+
   void KMC_CoarseGrainSystem::setTimeResolution(double time_resolution){
     if(time_resolution<=0.0){
       throw invalid_argument("The time resolution must be a positive value.");
@@ -117,6 +121,8 @@ namespace kmccoarsegrain {
     }
   }
 
+  
+
   int KMC_CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){
     if(!rates().count(siteId)){
       throw invalid_argument("Site is not stored in the coarse grained system you"
@@ -150,8 +156,8 @@ namespace kmccoarsegrain {
 		crude_.setRandomSeed(seed);
   }
 
-  void KMC_CoarseGrainSystem::removeWalkerFromSystem(pair<int,KMC_Walker>& walker) {
-    removeWalkerFromSystem(walker.second);
+  void KMC_CoarseGrainSystem::removeWalkerFromSystem(std::pair<int,KMC_Walker>& walker){
+    crude_.removeWalkerFromSystem(walker);
   }
 
   void KMC_CoarseGrainSystem::removeWalkerFromSystem(KMC_Walker& walker) {
@@ -167,34 +173,51 @@ namespace kmccoarsegrain {
 		CGSystem.crude_.hop(walker);	
 	}
 
+  void runSiteOccupy(KMC_CoarseGrainSystem & CGSystem, int siteId){
+    CGSystem.crude_.occupySite(siteId);
+  }
+
+  void runClusterOccupy(KMC_CoarseGrainSystem & CGSystem, int siteId){
+    CGSystem.topology_->occupySite(siteId); 
+  }
+
+  void runSiteVacate(KMC_CoarseGrainSystem & CGSystem, int siteId){
+    CGSystem.crude_.vacateSite(siteId);
+  }
+
+  void runClusterVacate(KMC_CoarseGrainSystem & CGSystem, int siteId){
+    CGSystem.topology_->vacateSite(siteId); 
+  }
+
+
 	void runCoarse(KMC_CoarseGrainSystem & CGSystem, int walker_id,KMC_Walker & walker){
 		cout << "CGSystem hop" << endl;
 		const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
 		const int & siteToHopToId = walker.getPotentialSite();
-		KMC_TopologyFeature * feature = CGSystem.topology_->features[siteId].feature(*CGSystem.topology_,siteId);
-		cout << "Potential site " << endl;
-
-		if(!CGSystem.topology_->siteExist(siteToHopToId)){
-			cout << "Creating site does not exist" << endl;
-			CGSystem.topology_->features[siteToHopToId].feature(*CGSystem.topology_,siteToHopToId);
-		}
-		KMC_TopologyFeature * feature_to_hop_to = CGSystem.topology_->features[siteToHopToId].feature(*CGSystem.topology_,siteToHopToId);
-		cout << "Potential site done" << endl;
-    if(!feature_to_hop_to->isOccupied(siteToHopToId)){
+   
+    // Site is not occupied 
+    if(!CGSystem.crude_.siteOccupied(siteToHopToId)){
 			cout << "1" << endl;
-      feature->vacate(siteId);
-      feature_to_hop_to->occupy(siteToHopToId);
+      
+      CGSystem.site_vacate_funct_[siteId].run(CGSystem,siteId);
+      CGSystem.site_occupy_funct_[siteToHopToId].run(CGSystem,siteToHopToId);
+
+      const int cluster_id = CGSystem.topology_->getClusterIdOfSite(siteToHopToId);
+      KMC_Cluster & cluster = CGSystem.topology_->getKMC_Cluster(cluster_id);
 
       walker.occupySite(siteToHopToId);
-      walker.setDwellTime(feature_to_hop_to->getDwellTime(walker_id));
-      walker.setPotentialSite(feature_to_hop_to->pickNewSiteId(walker_id));
+      walker.setDwellTime(cluster.getDwellTime(walker_id));
+      walker.setPotentialSite(cluster.pickNewSiteId(walker_id));
     }else{
 			cout << "2" << endl;
-      feature->vacate(siteId);
-      feature->occupy(siteId);
 
-      walker.setDwellTime(feature->getDwellTime(walker_id));
-      walker.setPotentialSite(feature->pickNewSiteId(walker_id));
+      // Site is occupied
+      CGSystem.site_vacate_funct_[siteId].run(CGSystem,siteId);
+      CGSystem.site_occupy_funct_[siteId].run(CGSystem,siteId);
+      const int cluster_id = CGSystem.topology_->getClusterIdOfSite(siteId);
+      KMC_Cluster & cluster = CGSystem.topology_->getKMC_Cluster(cluster_id);
+      walker.setDwellTime(cluster.getDwellTime(walker_id));
+      walker.setPotentialSite(cluster.pickNewSiteId(walker_id));
     }
 
 		cout << "CGSystem hop done" << endl;
@@ -203,7 +226,11 @@ namespace kmccoarsegrain {
  void KMC_CoarseGrainSystem::hop(int walker_id,KMC_Walker& walker) {
     const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
 		const int & siteToHopToId = walker.getPotentialSite();
-		site_funct_[siteId].run(*this,walker_id,walker);
+
+    // Need to check if the site is occupied or not before calling
+    // the function pointer
+    site_funct_[siteId].run(*this,walker_id,walker);
+
     ++iteration_;
     if(iteration_ > iteration_threshold_){
       if(iteration_threshold_min_!=constants::inf_iterations){
@@ -257,10 +284,10 @@ namespace kmccoarsegrain {
 				// Determine if fastest rate is 3 orders of magnitude faster than second fastest rate
 				if(fastest_rate.second/second_fastest_rate.second>1E4){
 					// In turn check to see if the fastest rate off the site is back onto the cluster
-					if(!topology_->siteExist(fastest_rate.first)){
+					/*if(!topology_->siteExist(fastest_rate.first)){
 						topology_->features[fastest_rate.first].feature(*topology_,fastest_rate.first);
-					}
-					unordered_map<int,double> rates_from_potential_neighbor = topology_->getRates(fastest_rate.first);		
+					}*/
+					unordered_map<int,double> rates_from_potential_neighbor = crude_.rates().at(fastest_rate.first);		
 					unordered_map<int,double>::iterator iter2 = rates_from_potential_neighbor.begin(); 
 					pair<int,double> fastest_rate2(iter2->first,iter2->second);
 					pair<int,double> second_fastest_rate2 = fastest_rate2;
@@ -348,14 +375,14 @@ namespace kmccoarsegrain {
   int KMC_CoarseGrainSystem::createCluster_(vector<int> siteIds, double internal_time_limit) {
     LOG("Creating cluster from vector of sites", 1);
 
-    KMC_Cluster cluster;
-    cluster.setConvergenceMethod(KMC_Cluster::Method::converge_by_tolerance);
+    KMC_Cluster cluster(*this);
+    //cluster.setConvergenceMethod(KMC_Cluster::Method::converge_by_tolerance);
     cluster.setConvergenceTolerance(0.001);
     
     cluster.addSites(siteIds);
     cluster.updateProbabilitiesAndTimeConstant();
 
-    double cluster_time_const = cluster.getTimeConstant();
+    double cluster_time_const = cluster.getEscapeTimeConstant();
     // Cut the resolution in half from what it would otherwise be otherwise not worth doing
     double res = cluster_time_const/(2*internal_time_limit);
     double allowed_resolution = cluster_time_const/time_resolution_;
@@ -389,7 +416,11 @@ namespace kmccoarsegrain {
         } else {
           cluster_ids.insert(site_and_cluster.second);
         }
-        topology_->features[site_and_cluster.first].feature = returnCluster; 
+
+        site_funct_[site_and_cluster.first].run = runCoarse;
+        site_occupy_funct_[site_and_cluster.first].run = runClusterOccupy;
+        site_vacate_funct_[site_and_cluster.first].run = runClusterVacate;
+       // topology_->features[site_and_cluster.first].feature = returnCluster; 
 				cout << "T1" << endl;
 				topology_->setSitesClusterId(site_and_cluster.first,favoredClusterId);
 				cout << "T2" << endl;
@@ -420,7 +451,7 @@ namespace kmccoarsegrain {
 
     double max_rate_off = 0; 
     for(const int & site_id : siteIds){
-      const unordered_map<int,double> & neigh_and_rates = rates()->at(site_id);
+      const unordered_map<int,double> & neigh_and_rates = rates().at(site_id);
       for( const pair<int,double> & neigh_and_rate : neigh_and_rates){
         if(internal_sites.count(neigh_and_rate.first)==0){
           if((neigh_and_rate.second) > max_rate_off){

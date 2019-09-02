@@ -32,6 +32,19 @@ void KMC_Cluster::occupy(const int& siteId){
 	system_ptrs_.occupied->insert(siteId);
 }
 
+void KMC_Cluster::setRandomSeed(const unsigned long seed){
+  random_engine_ = mt19937(seed);
+}
+
+bool KMC_Cluster::isOccupied() const {
+  for( const int & siteId : sitesInCluster_ ){
+    if(system_ptrs_.occupied->count(siteId)){
+      return true;
+    }
+  }
+  return false;
+}
+
 bool KMC_Cluster::isOccupied(const int& siteId) const {
   assert(siteIsInCluster(siteId));
   return system_ptrs_.occupied->count(siteId);

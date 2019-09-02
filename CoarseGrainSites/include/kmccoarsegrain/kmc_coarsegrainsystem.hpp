@@ -25,6 +25,12 @@ class KMC_Walker;
 
 	void runCrude(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
 	void runCoarse(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
+  void runSiteOccupy(KMC_CoarseGrainSystem & CGsystem,int siteId);
+	void runClusterOccupy(KMC_CoarseGrainSystem & CGsystem,int siteId);
+	void runSiteVacate(KMC_CoarseGrainSystem & CGsystem,int siteId);
+	void runClusterVacate(KMC_CoarseGrainSystem & CGsystem,int siteId);
+
+
 /**
  * \brief Coarse Grain System allows abstraction of renormalization of sites
  *
@@ -184,7 +190,6 @@ class KMC_CoarseGrainSystem {
   void setMinCoarseGrainIterationThreshold(int threshold_min);
   int getMinCoarseGrainIterationThreshold();
 
-
   /**
    * @brief Return the clusters
    *
@@ -327,6 +332,23 @@ class KMC_CoarseGrainSystem {
 	friend void runCrude(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
 	friend void runCoarse(KMC_CoarseGrainSystem & CGsystem,int walker_id,KMC_Walker & walker);
 	std::unordered_map<int,DefaultSiteFunction> site_funct_;
+
+
+	struct DefaultOccupyFunction {
+		void (*run)(KMC_CoarseGrainSystem & CGSystem, int siteId) = runSiteOccupy;
+	};
+	friend void runSiteOccupy(KMC_CoarseGrainSystem & CGsystem,int siteId);
+	friend void runClusterOccupy(KMC_CoarseGrainSystem & CGsystem,int siteId);
+  std::unordered_map<int,DefaultOccupyFunction> site_occupy_funct_;
+
+  struct DefaultVacateFunction {
+		void (*run)(KMC_CoarseGrainSystem & CGSystem, int siteId) = runSiteVacate;
+	};
+	friend void runSiteVacate(KMC_CoarseGrainSystem & CGsystem,int siteId);
+	friend void runClusterVacate(KMC_CoarseGrainSystem & CGsystem,int siteId);
+
+  std::unordered_map<int,DefaultVacateFunction> site_vacate_funct_;
+
 
 
   bool coarseGrain_(int siteId);

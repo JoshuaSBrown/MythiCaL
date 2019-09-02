@@ -4,8 +4,8 @@
 #include <memory>
 #include <cmath>
 
-#include "../../libkmccoarsegrain/topologyfeatures/kmc_cluster.hpp"
-#include "../../libkmccoarsegrain/topologyfeatures/kmc_site.hpp"
+#include "../../libkmccoarsegrain/kmc_cluster.hpp"
+#include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
 
 using namespace std;
 using namespace kmccoarsegrain;
@@ -16,9 +16,10 @@ int main(void){
 
   cout << "Testing: Cluster constructor" << endl;
   {
-    KMC_Cluster cl;
+    KMC_CoarseGrainSystem CGSystem;
+    KMC_Cluster cl(CGSystem);
   }
-
+/*
   cout << "Testing: Cluster identity setter" << endl;
   {
     KMC_Cluster cl;
@@ -39,7 +40,7 @@ int main(void){
       fail = true;
     }
     assert(fail);
-  }  
+  }  */
 /*
   cout << "Testing: addSite" << endl;
   {

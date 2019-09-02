@@ -41,6 +41,9 @@ class KMC_Dynamic_Topology {
 
     void setSitesClusterId(int siteId, int clusterId);
 
+    void occupySite(int siteId);
+    void vacateSite(int siteId);
+
     void mergeClusters(int clusterId1, int clusterId2);
 
     double getFastestRateOffSite(const int siteId);

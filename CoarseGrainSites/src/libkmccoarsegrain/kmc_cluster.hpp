@@ -255,6 +255,9 @@ namespace kmccoarsegrain {
        **/
       double getProbabilityOfHoppingToNeighborOfCluster(const int neighId);
 
+      double getEscapeTimeConstant() const {
+        return escape_time_constant_;
+      }
       /**
        * \brief Returns the dwell time, each call will return a different value
        **/
@@ -275,6 +278,8 @@ namespace kmccoarsegrain {
       void setId(const int id) { id_ = id; }
       int getId() const noexcept { return id_; }
 
+
+      void setRandomSeed(const unsigned long seed);
 
       void occupy(const int & siteId);                                                           
 

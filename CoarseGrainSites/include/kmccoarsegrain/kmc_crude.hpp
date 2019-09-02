@@ -34,6 +34,8 @@ namespace kmccoarsegrain {
 
 			void setRandomSeed(const unsigned long seed);
 
+      void occupySite(const int siteId);
+      void vacateSite(const int siteId);
 
 			void hop(std::pair<const int, KMC_Walker>& walker);
 			void hop(KMC_Walker& walker);
@@ -42,9 +44,11 @@ namespace kmccoarsegrain {
 			void removeWalkerFromSystem(KMC_Walker& walker);
 
 			int getVisitFrequencyOfSite(int siteId);
-
+      
+      bool siteOccupied(int siteId) const { return site_occupied_.count(siteId); }
 		private:
 
+//      void hop_occupied(KMC_Walker& walker);
 			// Random number generator
 			std::unordered_set<int> site_occupied_;
 			std::mt19937 rand_num_gen_;
