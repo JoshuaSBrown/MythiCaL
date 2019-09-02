@@ -202,7 +202,7 @@ int main(int argc, char* argv[]){
             // reorder the walkers based on which one will move next
             if(new_x_pos==(distance-1)){
               cout << "a. Repetition " << rep << " final position " << electrons.at(0).second.getIdOfSiteCurrentlyOccupying() << endl;
-              CGsystem.removeWalkerFromSystem(walker_index,electron);
+              CGsystem.removeWalkerFromSystem(electron);
               walker_global_times.pop_front();
             }
           }
@@ -215,7 +215,7 @@ int main(int argc, char* argv[]){
 
         if(walker_global_times.size()!=0){
           cout << "b. Repetition " << rep << " final position " << electrons.at(0).second.getIdOfSiteCurrentlyOccupying() << endl;
-          CGsystem.removeWalkerFromSystem(electrons.at(0).first,electrons.at(0).second);
+          CGsystem.removeWalkerFromSystem(electrons.at(0).second);
           walker_global_times.pop_front();
         }
         

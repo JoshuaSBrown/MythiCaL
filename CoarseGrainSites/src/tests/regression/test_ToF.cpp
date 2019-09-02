@@ -323,7 +323,7 @@ int main(int argc, char* argv[]){
           walker_global_times.begin()->second += electron.getDwellTime();
           // reorder the walkers based on which one will move next
           if(new_x_pos==(distance-1)){
-            CGsystem.removeWalkerFromSystem(walker_index,electron);
+            CGsystem.removeWalkerFromSystem(electron);
             walker_global_times.pop_front();
           }
           walker_global_times.sort(compareSecondItemOfPair);
