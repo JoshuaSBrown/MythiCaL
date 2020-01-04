@@ -35,8 +35,13 @@ The library makes use of c++14 features so requires gcc 6 or a compiler with sim
     make install
 
 ## Tutorials and Further Documentation
-
-[Wiki](https://github.com/JoshuaSBrown/CoarseGrainSites/wiki)
+ 
+ * [Introduction](https://github.com/JoshuaSBrown/CoarseGrainSites/wiki/1.-I-Introduction)
+ * [Compiling with the library](https://github.com/JoshuaSBrown/CoarseGrainSites/wiki/1.-II-Compiling-with-the-library)
+ * [Tutorial I.a Background](https://github.com/JoshuaSBrown/CoarseGrainSites/wiki/2.-I.a-Tutorial-CTS-Background)
+ * [Tutorial I.b Implementation](https://github.com/JoshuaSBrown/CoarseGrainSites/wiki/2.-I.b-Tutorial-CTS-Implementation)
+ * [Tutorial I.c Implementation 2](https://github.com/JoshuaSBrown/CoarseGrainSites/wiki/2.-I.c-Tutorial-CTS-Implementation-2)
+ * [Common Errors](https://github.com/JoshuaSBrown/CoarseGrainSites/wiki/3.-Common-Errors)
 
 ## Developers
 
