@@ -1,4 +1,4 @@
-# Kinetic Monte Carlo Coarse Graining Library 
+# Kinetic Monte Carlo Coarse-Graining Library (MthyiCaL)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/142f5448ab0243acabe198e6632b8e84)](https://app.codacy.com/app/JoshuaSBrown/CoarseGrainSites?utm_source=github.com&utm_medium=referral&utm_content=JoshuaSBrown/CoarseGrainSites&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.com/JoshuaSBrown/CoarseGrainSites.svg?branch=master)](https://travis-ci.com/JoshuaSBrown/CoarseGrainSites)
