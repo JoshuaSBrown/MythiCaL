@@ -21,11 +21,17 @@ IF(CMAKE_BUILD_TYPE MATCHES "DEBUG")
   message("Building in Debug mode")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 ENDIF(CMAKE_BUILD_TYPE MATCHES "DEBUG")
+
+###########################
+# Include Extra Functions #
+###########################
+include(GNUInstallDirs)
+include(CheckIncludeFileCXX)
+include(CheckLibraryExists)
 ########################################################
 # Basic system tests (standard libraries, headers etc) #
 ########################################################
 
-include(CheckIncludeFileCXX)
 foreach(HEADER cmath cassert fstream functional iostream limits list map ostream sstream stack stdexcept string vector)
   check_include_file_cxx(${HEADER} FOUND_${HEADER})
   if(NOT FOUND_${HEADER})
@@ -35,7 +41,6 @@ endforeach(HEADER)
 
 set(MATH_LIBRARIES "m" CACHE STRING "math library")
 mark_as_advanced( MATH_LIBRARIES )
-include(CheckLibraryExists)
 foreach(FUNC sqrt)
   check_library_exists(${MATH_LIBRARIES} ${FUNC} "" FOUND_${FUNC}_${MATH_LIBRARIES})
   if(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
@@ -52,14 +57,6 @@ include_directories(CoarseGrainSites/include)
 include_directories(CoarseGrainSites/src)
 include_directories(UGLY/include)
 
-###################################################################
-# Grab headers and set the directory where they will be installed #
-###################################################################
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/mythical/*.hpp)
-install(FILES ${HEADERS} DESTINATION include/mythical)
-
-message( ${CMAKE_CURRENT_SOURCE_DIR} )
-
 ########################################################################
 # Grab source files and set the directory where they will be installed #
 ########################################################################
@@ -71,8 +68,9 @@ file(GLOB SOURCES_UGLY4 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisito
 file(GLOB SOURCES_UGLY5 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisitor/*.hpp)
 add_library(mythical ${SOURCES} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY3} ${SOURCES_UGLY4} ${SOURCES_UGLY5})
 set_target_properties(mythical PROPERTIES LINKER_LANGUAGE CXX)
-install(TARGETS mythical DESTINATION lib/${PROJECT_NAME})
 
+add_subdirectory(CoarseGrainSites/include/mythical)
+include(cmake/MythiCaLInstall.cmake)
 ###############################
 # Check if unit testing is on #
 ###############################
