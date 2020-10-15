@@ -7,8 +7,8 @@
 #include <string>
 
 #include "site_container.hpp"
-#include "../../../UGLY/include/ugly/edge_directed_weighted.hpp"
-#include "../../../UGLY/include/ugly/graph_node.hpp"
+#include "ugly/edge_directed_weighted.hpp"
+#include "ugly/graph_node.hpp"
 
 namespace mythical {
   

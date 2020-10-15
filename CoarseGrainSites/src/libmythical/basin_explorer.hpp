@@ -5,7 +5,7 @@
 
 #include "site_container.hpp"
 #include "cluster_container.hpp"
-#include "../../../UGLY/include/ugly/graphvisitor/graphvisitor_largest_known_value.hpp"
+#include "ugly/graphvisitor/graphvisitor_largest_known_value.hpp"
 
 namespace mythical {
 

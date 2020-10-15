@@ -1,5 +1,5 @@
 
-#include "../../include/mythical/queue.hpp"
+#include "mythical/queue.hpp"
 
 #include <algorithm>
 #include <iostream>

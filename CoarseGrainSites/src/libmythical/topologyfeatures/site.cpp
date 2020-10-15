@@ -6,7 +6,7 @@
 #include <cassert>
 
 #include "site.hpp"
-#include "../../../include/mythical/constants.hpp"
+#include "mythical/constants.hpp"
 
 using namespace std;
 

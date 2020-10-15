@@ -8,8 +8,8 @@
 #include <random>
 #include <vector>
 
-#include "../../../include/mythical/constants.hpp"
-#include "../identity.hpp"
+#include "mythical/constants.hpp"
+#include "libmythical/identity.hpp"
 
 namespace mythical {
 

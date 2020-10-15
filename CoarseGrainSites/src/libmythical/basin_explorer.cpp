@@ -3,7 +3,7 @@
 
 #include "basin_explorer.hpp"
 #include "graph_library_adapter.hpp"
-#include "../../../UGLY/include/ugly/graphvisitor/graphvisitor_largest_known_value.hpp"
+#include "ugly/graphvisitor/graphvisitor_largest_known_value.hpp"
 
 using namespace ugly;
 using namespace std;

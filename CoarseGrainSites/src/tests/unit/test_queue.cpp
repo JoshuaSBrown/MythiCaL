@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 
-#include "../../../include/mythical/queue.hpp"
+#include "mythical/queue.hpp"
 
 using namespace std;
 using namespace mythical;
