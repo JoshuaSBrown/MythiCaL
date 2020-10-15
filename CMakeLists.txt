@@ -49,6 +49,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical
 # Setup relative includes #
 ###########################
 include_directories(CoarseGrainSites/include)
+include_directories(CoarseGrainSites/src)
+include_directories(UGLY/include)
 
 ###################################################################
 # Grab headers and set the directory where they will be installed #

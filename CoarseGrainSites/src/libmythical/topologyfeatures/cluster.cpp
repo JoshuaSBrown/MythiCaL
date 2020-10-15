@@ -7,7 +7,7 @@
 
 #include "cluster.hpp"
 #include "site.hpp"
-#include "../log.hpp"
+#include "libmythical/log.hpp"
 
 using namespace std;
 
