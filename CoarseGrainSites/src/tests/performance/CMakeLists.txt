@@ -7,9 +7,9 @@ configure_file(test_script_compare_cluster_vs_nocluster.sh test_script_compare_c
 foreach(PROG test_kmc_coarsegrainsystem)
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(performance_${PROG} ${${PROG}_SOURCES})
-  target_link_libraries(performance_${PROG} kmccoarsegrain)
+  target_link_libraries(performance_${PROG} mythical)
   add_test(performance_${PROG} performance_${PROG})
-  set_tests_properties(performance_${PROG} PROPERTIES LABELS "kmccoarsegrain")
+  set_tests_properties(performance_${PROG} PROPERTIES LABELS "mythical")
 endforeach(PROG)
 
 foreach(PROG  
@@ -17,9 +17,9 @@ foreach(PROG
     test_crude_vs_coarsegrain_correlated)
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(performance_${PROG} ${${PROG}_SOURCES})
-  target_link_libraries(performance_${PROG} kmccoarsegrain)
+  target_link_libraries(performance_${PROG} mythical)
   add_test(performance_${PROG} performance_${PROG} 0.08 10 10 3 1000 0.001)
-  set_tests_properties(performance_${PROG} PROPERTIES LABELS "kmccoarsegrain")
+  set_tests_properties(performance_${PROG} PROPERTIES LABELS "mythical")
 endforeach(PROG)
 
 foreach(PROG  
@@ -27,9 +27,9 @@ foreach(PROG
     test_coarsegrain_cluster_vs_nocluster)
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(performance_${PROG} ${${PROG}_SOURCES})
-  target_link_libraries(performance_${PROG} kmccoarsegrain)
+  target_link_libraries(performance_${PROG} mythical)
   add_test(performance_${PROG} bash test_script_compare_cluster_vs_nocluster.sh)
-  set_tests_properties(performance_${PROG} PROPERTIES LABELS "kmccoarsegrain")
+  set_tests_properties(performance_${PROG} PROPERTIES LABELS "mythical")
 endforeach(PROG)
 
 
