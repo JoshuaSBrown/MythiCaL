@@ -45,6 +45,11 @@ endforeach(FUNC)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include )
 
+###########################
+# Setup relative includes #
+###########################
+include_directories(CoarseGrainSites/include)
+
 ###################################################################
 # Grab headers and set the directory where they will be installed #
 ###################################################################

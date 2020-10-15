@@ -1,4 +1,4 @@
-#include "../../include/mythical/walker.hpp"
+#include "mythical/walker.hpp"
 #include <cassert>
 #include <stdexcept>
 

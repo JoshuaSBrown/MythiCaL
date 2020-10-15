@@ -2,8 +2,8 @@
 #include <cmath>
 #include <iostream>
 
-#include "../../../include/mythical/constants.hpp"
-#include "../../../include/mythical/walker.hpp"
+#include "mythical/constants.hpp"
+#include "mythical/walker.hpp"
 
 using namespace std;
 using namespace mythical;
