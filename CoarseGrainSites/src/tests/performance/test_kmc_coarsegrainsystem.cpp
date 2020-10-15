@@ -4,17 +4,17 @@
 #include <memory>
 #include <chrono>
 
-#include "../../../include/kmccoarsegrain/kmc_constants.hpp"
-#include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
-#include "../../../include/kmccoarsegrain/kmc_walker.hpp"
+#include "../../../include/mythical/constants.hpp"
+#include "../../../include/mythical/coarsegrainsystem.hpp"
+#include "../../../include/mythical/walker.hpp"
 
 using namespace std;
 using namespace std::chrono;
-using namespace kmccoarsegrain;
+using namespace mythical;
 
 int main(void){
 
-  cout << "Testing: kmc_coarsegraingsystem" << endl;
+  cout << "Testing: coarsegraingsystem" << endl;
   cout << "This executable tests the coarsegraining performance of " << endl;
   cout << "code when it is able to identify a cluster during the " << endl;
   cout << "runtime and compares it to the code when a cluster is not " << endl;
@@ -137,14 +137,14 @@ int main(void){
     }
 
     
-    KMC_CoarseGrainSystem CGsystem;
+    CoarseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
     CGsystem.setPerformanceRatio(0.2);
     CGsystem.setTimeResolution(100.0);
     CGsystem.setMinCoarseGrainIterationThreshold(10000);
     CGsystem.initializeSystem(ratesToNeighbors);
     
-    class Electron : public KMC_Walker {};
+    class Electron : public Walker {};
     
     // Store the number of hops to each site 1-14
     vector<int> hopsToSites(14,0);  
@@ -160,11 +160,11 @@ int main(void){
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      vector<pair<int,KMC_Walker>> electrons;
-      electrons.push_back(pair<int,KMC_Walker>(0,electron));
+      vector<pair<int,Walker>> electrons;
+      electrons.push_back(pair<int,Walker>(0,electron));
       CGsystem.initializeWalkers(electrons);
       
-      KMC_Walker & electron1 = electrons.at(0).second;
+      Walker & electron1 = electrons.at(0).second;
       double totalTimeOnCluster = 0.0;
       int electronId = 0;
       while(electron1.getIdOfSiteCurrentlyOccupying()<6){
@@ -294,13 +294,13 @@ int main(void){
       ratesToNeighbors[idsOfEachSite.at(index)] = ratesFromSiteToNeighbors;
     }
 
-    KMC_CoarseGrainSystem CGsystem;
+    CoarseGrainSystem CGsystem;
     CGsystem.setRandomSeed(1);
     CGsystem.setTimeResolution(100.0);
     CGsystem.setMinCoarseGrainIterationThreshold(constants::inf_iterations);
     CGsystem.initializeSystem(ratesToNeighbors);
     
-    class Electron : public KMC_Walker {};
+    class Electron : public Walker {};
     
     // Store the number of hops to each site 1-14
     vector<int> hopsToSites(14,0);  
@@ -317,11 +317,11 @@ int main(void){
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron.occupySite(initialSite);
-      vector<pair<int,KMC_Walker>> electrons;
-      electrons.push_back(pair<int,KMC_Walker>(0,electron));
+      vector<pair<int,Walker>> electrons;
+      electrons.push_back(pair<int,Walker>(0,electron));
       CGsystem.initializeWalkers(electrons);
       double totalTimeOnCluster = 0.0;
-      KMC_Walker & electron1 = electrons.at(0).second;
+      Walker & electron1 = electrons.at(0).second;
       int electronId = electrons.at(0).first;
       while(electron1.getIdOfSiteCurrentlyOccupying()<6){
         CGsystem.hop(electronId,electron1);

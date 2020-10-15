@@ -11,12 +11,12 @@
 #include <cassert>
 #include <algorithm>
 
-#include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
-#include "../../../include/kmccoarsegrain/kmc_walker.hpp"
+#include "../../../include/mythical/coarsegrainsystem.hpp"
+#include "../../../include/mythical/walker.hpp"
 
 using namespace std;
 using namespace std::chrono;
-using namespace kmccoarsegrain;
+using namespace mythical;
 
 bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> & y){
   return x.second<y.second;
@@ -147,13 +147,13 @@ int main(int argc, char* argv[]){
       double current_time_sample_increment = cutoff_time/static_cast<double>(sample_rate);
       double sample_time = current_time_sample_increment;
 
-      KMC_CoarseGrainSystem CGsystem;
+      CoarseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
       CGsystem.setMinCoarseGrainIterationThreshold(threshold);
       CGsystem.setTimeResolution(sample_time);
       CGsystem.initializeSystem(rates);
 
-      class Electron : public KMC_Walker {};
+      class Electron : public Walker {};
       // Only a single electron is created but the simulation is repeated 
       // several times
       int repetitions = 8;
@@ -161,11 +161,11 @@ int main(int argc, char* argv[]){
       cout << "Repetitions " << repetitions << endl;
 
       for(int rep=0; rep<repetitions;++rep){
-        // Create the electrons using the KMC_Walker class
-        vector<pair<int,KMC_Walker>> electrons;        
+        // Create the electrons using the Walker class
+        vector<pair<int,Walker>> electrons;        
         Electron electron;
         int id = 0;
-        electrons.push_back(pair<int,KMC_Walker>(id,electron));
+        electrons.push_back(pair<int,Walker>(id,electron));
         int siteId = 0;
         electrons.at(0).second.occupySite(siteId);
         CGsystem.initializeWalkers(electrons);
@@ -190,7 +190,7 @@ int main(int argc, char* argv[]){
           while(!walker_global_times.empty() && walker_global_times.begin()->second<sample_time){
 
             auto walker_index = walker_global_times.begin()->first;
-            KMC_Walker& electron = electrons.at(walker_index).second; 
+            Walker& electron = electrons.at(walker_index).second; 
             int siteId = electron.getIdOfSiteCurrentlyOccupying();
             int old_x_pos = siteId;
             CGsystem.hop(walker_index,electron);

@@ -11,13 +11,13 @@
 #include <cassert>
 #include <algorithm>
 
-#include "../../../include/kmccoarsegrain/kmc_constants.hpp"
-#include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
-#include "../../../include/kmccoarsegrain/kmc_walker.hpp"
+#include "../../../include/mythical/constants.hpp"
+#include "../../../include/mythical/coarsegrainsystem.hpp"
+#include "../../../include/mythical/walker.hpp"
 
 using namespace std;
 using namespace std::chrono;
-using namespace kmccoarsegrain;
+using namespace mythical;
 
 int main(int argc, char* argv[]){
 
@@ -102,7 +102,7 @@ int main(int argc, char* argv[]){
   // Coarse Grained Monte Carlo with no clustering
   high_resolution_clock::time_point nocluster_time_start = high_resolution_clock::now();
   {
-    KMC_CoarseGrainSystem CGsystem;
+    gCoarseGrainSystem CGsystem;
     CGsystem.setRandomSeed(3);
     CGsystem.setMinCoarseGrainIterationThreshold(constants::inf_iterations);
     CGsystem.setTimeResolution(time_inc);
@@ -111,12 +111,12 @@ int main(int argc, char* argv[]){
     int startingSiteId = 4;
     for(int walker_index = 0; walker_index<walkers; ++walker_index){
 
-      class Electron : public KMC_Walker {};
-      vector<pair<int,KMC_Walker>> electrons; 
+      class Electron : public gWalker {};
+      vector<pair<int,gWalker>> electrons; 
       Electron elec;
       elec.occupySite(startingSiteId);
       int electronId = 0;
-      electrons.push_back(pair<int,KMC_Walker>(electronId,elec));
+      electrons.push_back(pair<int,gWalker>(electronId,elec));
 
       CGsystem.initializeWalkers(electrons);
       // Calculate Walker dwell times and sort 
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]){
       int site=4;
       while(site==4 || site==5){
         int walker_index = walker_global_times.begin()->first;
-        KMC_Walker& electron = electrons.at(walker_index).second; 
+        gWalker& electron = electrons.at(walker_index).second; 
         int electron_id = electrons.at(walker_index).first;
         CGsystem.hop(electron_id,electron);
         // Update the dwell time
@@ -150,7 +150,7 @@ int main(int argc, char* argv[]){
   high_resolution_clock::time_point cluster_time_start = high_resolution_clock::now();
   { // Run with clusters
     // Run the coarse grain simulation for as many walkers as specified
-    KMC_CoarseGrainSystem CGsystem;
+    gCoarseGrainSystem CGsystem;
     CGsystem.setRandomSeed(3);
     CGsystem.setMinCoarseGrainIterationThreshold(threshold);
     CGsystem.setTimeResolution(time_inc);
@@ -159,11 +159,11 @@ int main(int argc, char* argv[]){
     int startingSiteId = 4;
     for(int walker_index = 0; walker_index<walkers; ++walker_index){
 
-      class Electron : public KMC_Walker {};
-      vector<pair<int,KMC_Walker>> electrons; 
+      class Electron : public gWalker {};
+      vector<pair<int,gWalker>> electrons; 
       Electron elec;
       elec.occupySite(startingSiteId);
-      electrons.push_back(pair<int,KMC_Walker>(0,elec));
+      electrons.push_back(pair<int,gWalker>(0,elec));
 
       CGsystem.initializeWalkers(electrons);
       // Calculate Walker dwell times and sort 
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]){
       int site=4;
       while(site==4 || site==5){
         int walker_index = walker_global_times.begin()->first;
-        KMC_Walker& electron = electrons.at(walker_index).second; 
+        gWalker& electron = electrons.at(walker_index).second; 
         int electron_id = electrons.at(walker_index).first;
         CGsystem.hop(electron_id,electron);
         // Update the dwell time

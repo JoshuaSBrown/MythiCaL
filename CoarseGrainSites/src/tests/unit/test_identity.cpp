@@ -3,10 +3,10 @@
 #include <vector>
 #include <memory>
 
-#include "../../libkmccoarsegrain/identity.hpp"
+#include "../../libmythical/identity.hpp"
 
 using namespace std;
-using namespace kmccoarsegrain;
+using namespace mythical;
 
 int main(void){
 

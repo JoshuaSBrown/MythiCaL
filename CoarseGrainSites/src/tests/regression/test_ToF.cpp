@@ -11,12 +11,12 @@
 #include <cassert>
 #include <algorithm>
 
-#include "../../../include/kmccoarsegrain/kmc_coarsegrainsystem.hpp"
-#include "../../../include/kmccoarsegrain/kmc_walker.hpp"
+#include "../../../include/mythical/coarsegrainsystem.hpp"
+#include "../../../include/mythical/walker.hpp"
 
 using namespace std;
 using namespace std::chrono;
-using namespace kmccoarsegrain;
+using namespace mythical;
 
 /**
  * \brief class for converting 1d array to 3d and vice versa
@@ -250,15 +250,15 @@ int main(int argc, char* argv[]){
       }
     }*/
 
-    class Electron : public KMC_Walker {};
-    // Create the electrons using the KMC_Walker class
-    vector<pair<int,KMC_Walker>> electrons;        
+    class Electron : public Walker {};
+    // Create the electrons using the Walker class
+    vector<pair<int,Walker>> electrons;        
     {
       for(int walker_index = 0; walker_index<walkers; ++walker_index){
         Electron electron;
         int siteId = converter.to1D(walker_positions[walker_index]);
         electron.occupySite(siteId);
-        electrons.push_back(pair<int,KMC_Walker>(walker_index,electron));
+        electrons.push_back(pair<int,Walker>(walker_index,electron));
       }
     }
     
@@ -267,7 +267,7 @@ int main(int argc, char* argv[]){
       double current_time_sample_increment = cutoff_time/static_cast<double>(sample_rate);
       double sample_time = current_time_sample_increment;
 
-      KMC_CoarseGrainSystem CGsystem;
+      CoarseGrainSystem CGsystem;
       CGsystem.setRandomSeed(seed);
       CGsystem.setTimeResolution(sample_time);
       CGsystem.setMinCoarseGrainIterationThreshold(threshold);
@@ -296,7 +296,7 @@ int main(int argc, char* argv[]){
         double deltaX = 0.0;
         while(!walker_global_times.empty() && walker_global_times.begin()->second<sample_time){
           auto walker_index = walker_global_times.begin()->first;
-          KMC_Walker& electron = electrons.at(walker_index).second;
+          Walker& electron = electrons.at(walker_index).second;
           int siteId = electron.getIdOfSiteCurrentlyOccupying();
           int old_x_pos = converter.x(siteId);
           CGsystem.hop(walker_index,electron);
