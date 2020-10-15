@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 enable_language(CXX)
 
-project(kmccoarsegrain)
+project(mythical)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -43,28 +43,28 @@ foreach(FUNC sqrt)
   endif(NOT FOUND_${FUNC}_${MATH_LIBRARIES})
 endforeach(FUNC)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include )
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include )
 
 ###################################################################
 # Grab headers and set the directory where they will be installed #
 ###################################################################
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/kmccoarsegrain/*.hpp)
-install(FILES ${HEADERS} DESTINATION include/kmccoarsegrain)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/mythical/*.hpp)
+install(FILES ${HEADERS} DESTINATION include/mythical)
 
 message( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 ########################################################################
 # Grab source files and set the directory where they will be installed #
 ########################################################################
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*.cpp)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures/*.cpp)
 file(GLOB SOURCES_UGLY1 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/*.cpp)
 file(GLOB SOURCES_UGLY2 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.cpp)
 file(GLOB SOURCES_UGLY3 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.hpp)
 file(GLOB SOURCES_UGLY4 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisitor/*.cpp)
 file(GLOB SOURCES_UGLY5 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisitor/*.hpp)
-add_library(kmccoarsegrain ${SOURCES} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY3} ${SOURCES_UGLY4} ${SOURCES_UGLY5})
-set_target_properties(kmccoarsegrain PROPERTIES LINKER_LANGUAGE CXX)
-install(TARGETS kmccoarsegrain DESTINATION lib/${PROJECT_NAME})
+add_library(mythical ${SOURCES} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY3} ${SOURCES_UGLY4} ${SOURCES_UGLY5})
+set_target_properties(mythical PROPERTIES LINKER_LANGUAGE CXX)
+install(TARGETS mythical DESTINATION lib/${PROJECT_NAME})
 
 ###############################
 # Check if unit testing is on #
@@ -98,7 +98,7 @@ foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
   if(${FLAG_OPT} MATCHES "-coverage")
     find_program(GCOV_EXE gcov)
     if(GCOV_EXE)
-      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/kmccoarsegrain.dir/CoarseGrainSites/src/libkmccoarsegrain/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/kmccoarsegrain.dir/CoarseGrainSites/src/libkmccoarsegrain/topologyfeatures/*gcno)
+      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/mythical.dir/CoarseGrainSites/src/libmythical/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/mythical.dir/CoarseGrainSites/src/libmythical/topologyfeatures/*gcno)
       foreach(PROG ${COVERAGE_FILES})
         get_filename_component(NAME_FILE ${PROG} NAME)
         add_test(coverage_${NAME_FILE} gcov ${PROG})
