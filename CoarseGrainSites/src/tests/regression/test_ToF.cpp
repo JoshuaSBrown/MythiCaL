@@ -12,6 +12,7 @@
 #include <algorithm>
 
 #include "mythical/coarsegrainsystem.hpp"
+#include "mythical/version.hpp"
 #include "mythical/walker.hpp"
 
 using namespace std;
@@ -59,7 +60,7 @@ bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> &
 }
 
 int main(int argc, char* argv[]){
-
+  std::cout << "project name: " << PROJECT_NAME << " version: " << PROJECT_VER << std::endl;
   if(argc!=9){
     cerr << "To run the program correctly you must provide the " << endl;
     cerr << "following parameters: " << endl;
@@ -82,7 +83,7 @@ int main(int argc, char* argv[]){
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
-    cerr << "./performance_test_crude_vs_coarsegraining sigma distance ";
+    cerr << "./test_ToF sigma distance ";
     cerr << "seed walkers threshold time sample_rate field" << endl;
     cerr << endl;
     return -1;

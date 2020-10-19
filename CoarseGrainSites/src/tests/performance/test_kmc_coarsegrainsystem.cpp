@@ -6,6 +6,7 @@
 
 #include "mythical/constants.hpp"
 #include "mythical/coarsegrainsystem.hpp"
+#include "mythical/version.hpp"
 #include "mythical/walker.hpp"
 
 using namespace std;
@@ -13,7 +14,7 @@ using namespace std::chrono;
 using namespace mythical;
 
 int main(void){
-
+  std::cout << "project name: " << PROJECT_NAME << " version: " << PROJECT_VER << std::endl;
   cout << "Testing: coarsegraingsystem" << endl;
   cout << "This executable tests the coarsegraining performance of " << endl;
   cout << "code when it is able to identify a cluster during the " << endl;
