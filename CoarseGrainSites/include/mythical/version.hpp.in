@@ -1,0 +1,13 @@
+#ifndef MYTHICAL_CONSTANTS_HPP
+#define MYTHICAL_CONSTANTS_HPP
+
+#include <string>
+
+namespace mythical {
+  const std::string PROJECT_NAME = "@PROJECT_NAME@"
+  const std::string PROJECT_VER = "@PROJECT_VERSION@"
+  const int PROJECT_VER_MAJOR = "@PROJECT_VERSION_MAJOR@"
+  const int PROJECT_VER_MINOR = "@PROJECT_VERSION_MINOR@"
+  const int PROJECT_VER_PATCH = "@PROJECT_VERSION_PATCH@"
+}
+#endif // MYTHICAL_CONSTANTS_HPP
