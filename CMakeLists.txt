@@ -49,7 +49,7 @@ foreach(FUNC sqrt)
 endforeach(FUNC)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include )
-
+include_directories(${PROJECT_BINARY_DIR}/CoarseGrainSites/include) # Allow config file to be used
 ###########################
 # Setup relative includes #
 ###########################
@@ -60,6 +60,8 @@ include_directories(UGLY/include)
 ########################################################################
 # Grab source files and set the directory where they will be installed #
 ########################################################################
+add_subdirectory(CoarseGrainSites/include/mythical)
+
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures/*.cpp)
 file(GLOB SOURCES_UGLY1 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/*.cpp)
 file(GLOB SOURCES_UGLY2 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.cpp)
@@ -69,7 +71,6 @@ file(GLOB SOURCES_UGLY5 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisito
 add_library(mythical ${SOURCES} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY3} ${SOURCES_UGLY4} ${SOURCES_UGLY5})
 set_target_properties(mythical PROPERTIES LINKER_LANGUAGE CXX)
 
-add_subdirectory(CoarseGrainSites/include/mythical)
 include(cmake/MythiCaLInstall.cmake)
 ###############################
 # Check if unit testing is on #
