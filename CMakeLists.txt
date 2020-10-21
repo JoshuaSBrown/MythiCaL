@@ -63,13 +63,15 @@ message( ${CMAKE_CURRENT_SOURCE_DIR} )
 ########################################################################
 # Grab source files and set the directory where they will be installed #
 ########################################################################
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures/*.cpp)
+file(GLOB SOURCES1 ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/*.cpp)
+file(GLOB SOURCES2 ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures/*.cpp)
+file(GLOB SOURCES3 ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/charge_transport/*.cpp)
 file(GLOB SOURCES_UGLY1 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/*.cpp)
 file(GLOB SOURCES_UGLY2 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.cpp)
 file(GLOB SOURCES_UGLY3 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.hpp)
 file(GLOB SOURCES_UGLY4 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisitor/*.cpp)
 file(GLOB SOURCES_UGLY5 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/graphvisitor/*.hpp)
-add_library(mythical ${SOURCES} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY3} ${SOURCES_UGLY4} ${SOURCES_UGLY5})
+add_library(mythical ${SOURCES1} ${SOURCES2} ${SOURCES3} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY3} ${SOURCES_UGLY4} ${SOURCES_UGLY5})
 set_target_properties(mythical PROPERTIES LINKER_LANGUAGE CXX)
 install(TARGETS mythical DESTINATION lib/${PROJECT_NAME})
 
