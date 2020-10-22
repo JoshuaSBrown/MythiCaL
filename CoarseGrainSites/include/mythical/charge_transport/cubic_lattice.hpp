@@ -1,14 +1,14 @@
-#ifndef MYTHICAL_CUBIC_LATTICE_HPP
-#define MYTHICAL_CUBIC_LATTICE_HPP
+#ifndef MYTHICAL_CHARGE_TRANSPORT_CUBIC_LATTICE_HPP
+#define MYTHICAL_CHARGE_TRANSPORT_CUBIC_LATTICE_HPP
 
-#include "lattice.hpp"
+#include "boundarysettings.hpp"
 
 #include <random>
 #include <vector>
 
 namespace mythical {
 
-  namespace lattice {
+  namespace charge_transport {
    
     /**
      * \brief Cubic class is a support class meant to help with charge transport
@@ -58,10 +58,31 @@ namespace mythical {
 
         std::vector<int> getPosition(int index) const;
 
+        /**
+         * @brief Get all sites that are within the cutoff distance of **index**
+         *
+         * @param index - the index of the site
+         * @param cutoff - the distance in which a site has to be of **index** 
+         * to be considered a neighbor
+         *
+         * @return a vector of indices that are the neighbors
+         */
+        std::vector<int> getNeighbors(const int index, const double cutoff) const noexcept;
+
+        /**
+         * @brief Get the distance between two sites
+         *
+         * @param index1
+         * @param index2
+         *
+         * @return the distance 
+         */
+        double getDistance(const int index1, const int index2) const;
       private:
         int length_ = 0;
         int width_ = 0;
         int height_ = 0;
+        int total_ = 0;
         double inter_site_distance_ = 1.0; // nm nanometers
 
         std::uniform_int_distribution<int> distribution_x_;
@@ -77,9 +98,19 @@ namespace mythical {
         int getYPeriodic_( const int y ) const noexcept;
         int getZPeriodic_( const int z ) const noexcept;
 
+        void checkPosX_(const int x) const;
+        void checkPosY_(const int y) const;
+        void checkPosZ_(const int z) const;
         void checkBounds_() const;
+        void checkIndex_() const;
         void setDistributions_();
+        // Only call if the x, y and z are gauranteed to be within bounds
+        int getIndex_(const int x, const int y, const int z) const noexcept;
+
+        // Only call if indices have already been checked
+        double getDistance_(const int x1, const int y1, const int z1,
+            const int x2, const int y2, const int z2) const noexcept;
     };
   }
 }
-#endif  // MYTHICAL_CUBIC_LATTICE_HPP
+#endif  // MYTHICAL_CHARGE_TRANSPORT_CUBIC_LATTICE_HPP

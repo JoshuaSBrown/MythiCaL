@@ -10,6 +10,37 @@ namespace mythical {
 
   namespace lattice {
 
+    void checkPosX_(const int x) const {
+      if ( x < 0 ) {
+        throw std::invalid_argument("x position of site is negative, site must"
+            " be within bounds between 0 and " + to_string(length_-1));
+      } 
+      if ( x >= length_ ) {
+        throw std::invalid_argument("x position of site is too large, site must"
+            " be within bounds between 0 and " + to_string(length_-1));
+      } 
+    }
+    void checkPosY_(const int y) const {
+      if ( y < 0 ) {
+        throw std::invalid_argument("y position of site is negative, site must"
+            " be within bounds between 0 and " + to_string(width_-1));
+      }
+      if ( y >= width_ ) {
+        throw std::invalid_argument("y position of site is too large, site must"
+            " be within bounds between 0 and " + to_string(width_-1));
+      }
+    }
+    void checkPosZ_(const int z) const {
+      if ( z < 0 ) {
+        throw std::invalid_argument("z position of site is negative, site must"
+            " be within bounds between 0 and " + to_string(height_-1));
+      }
+      if ( z >= height_ ) {
+        throw std::invalid_argument("z position of site is too large, site must"
+            " be within bounds between 0 and " + to_string(height_-1));
+      }
+    }
+
     void Cubic::checkBounds_() const {
       if ( length_ < 0 ) {
         throw std::invalid_argument("Cannot initialize Cubic Lattice with "
@@ -23,6 +54,37 @@ namespace mythical {
         throw std::invalid_argument("Cannot initialize Cubic Lattice with "
             "a negative height");
       }
+    }
+    
+    void Cubic::checkIndex_(const int index) const {
+      if ( index < 0 ) {
+        throw std::invalid_argument("Cannot access index " + std::string(index) + 
+            " out of bounds, index must be a value between 0 and " + std::to_string(total_-1));
+      }
+      if ( index >= total_ ) {
+        throw std::invalid_argument("Cannot access index " + std::string(index) + 
+            " out of bounds, index must be a value between 0 and " + std::to_string(total_-1));
+      } 
+    }
+
+    int Cubic::getIndex_(const int x, const int y, const int z) const noexcept {
+      return (z_lattice_pos*length_*width_) + 
+        (y_lattice_pos*length_)+x_lattice_pos;  
+    }
+
+    double Cubic::getDistance_(const int x1, const int y1, const int z1,
+        const int x2, const int y2, const int z2) const noexcept {
+
+      int xdiff = x1-x2;
+      int ydiff = y1-y2;
+      int zdiff = z1-z2;
+
+      // Square
+      xdiff = xdiff*xdiff;
+      ydiff = ydiff*ydiff;
+      zdiff = zdiff*zdiff;
+      
+      return std::pow(static_cast<double>(xdiff+ydiff+zdiff), 0.5) * inter_site_distance_;
     }
 
     int Cubic::getXPeriodic_( const int x ) const noexcept{
@@ -53,7 +115,7 @@ namespace mythical {
     }
 
     Cubic::Cubic(const int length, const int width, const int height) : 
-      length_(length), width_(width), height_(height) {
+      length_(length), width_(width), height_(height), total_(length*width*height) {
         checkBounds_(); 
         setDistributions_();
       }
@@ -63,7 +125,8 @@ namespace mythical {
         const int height, 
         const double inter_site_distance) :
       length_(length), width_(width), height_(height),
-      inter_site_distance_(inter_site_distance) {
+      inter_site_distance_(inter_site_distance),
+      total_(length*width*height) {
         checkBounds_(); 
         setDistributions_();
       }
@@ -77,7 +140,8 @@ namespace mythical {
         const BoundarySetting z_bound) :
       length_(length), width_(width), height_(height),
       inter_site_distance_(inter_site_distance),
-      x_bound_(x_bound), y_bound_(y_bound), z_bound_(z_bound) {
+      x_bound_(x_bound), y_bound_(y_bound), z_bound_(z_bound),
+      total_(length*width*height) {
         checkBounds_();
         setDistributions_();
       }
@@ -90,18 +154,28 @@ namespace mythical {
       int x_lattice_pos = x;
       int y_lattice_pos = y;
       int z_lattice_pos = z;
+
       if ( x_bound_ == BoundarySetting::Periodic ) {
         x_lattice_pos = getXPeriodic_(x);
-      } 
+      } else {
+        checkPosX_(x_lattice_pos);
+      }
+
       if ( y_bound_ == BoundarySetting::Periodic ) {
         y_lattice_pos = getYPeriodic_(y);
+      } else {
+        checkPosY_(y_lattice_pos);
       }
+
       if ( z_bound_ == BoundarySetting::Periodic ) {
         z_lattice_pos = getZPeriodic_(z);
+      } else {
+        checkPosZ_(z_lattice_pos);
       }
-      return (z_lattice_pos*length_*width_) + 
-        (y_lattice_pos*length_)+x_lattice_pos;  
+
+      return getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);  
     }
+
 
     int Cubic::getIndex(const std::vector<int> & site_position) const {
       if ( site_position.size() != 3 ) {
@@ -162,5 +236,60 @@ namespace mythical {
       return vector<int>{x,y,z};
     }
 
+    std::vector<int> Cubic::getNeighbors(const int index, const double cutoff) const noexcept {
+      checkIndex_(index);
+      std::vector<int> pos_i = getPosition(index);
+
+      // Calculate the number of sites that will be within the cutoff 
+      int num_sites = static_cast<int>(std::floor(cutoff/inter_site_distance_));  
+
+      x_min = pos_i.at(0) - num_sites;
+      x_max = pos_i.at(0) + num_sites;
+      y_min = pos_i.at(1) - num_sites;
+      y_max = pos_i.at(1) + num_sites;
+      z_min = pos_i.at(2) - num_sites;
+      z_max = pos_i.at(2) + num_sites;
+
+      max_num_neigh =2*num_sites*2*num_sites*2*num_sites;
+      std::vector<int> neighbors();
+      neighbors.reserve(max_num_neigh);
+
+      for ( int x_ind = x_min; x_ind <= x_max; ++x_ind ) {
+        int x_lattice_pos = x_ind;
+        if ( x_bound_ == BoundarySetting::Periodic ) {
+          x_lattice_pos = getXPeriodic_(x);
+        }       
+        if ( x_lattice_pos >= 0 && x_lattice_pos < length_ ) {
+          for ( int y_ind = y_min; y_ind <= y_max; ++y_ind ) {
+            int y_lattice_pos = y_ind;
+            if ( y_bound_ == BoundarySetting::Periodic ) {
+              y_lattice_pos = getYPeriodic_(y);
+            }       
+            if ( y_lattice_pos >= 0 && y_lattice_pos < width_ ) {
+              for ( int z_ind = z_min; z_ind <= z_max; ++z_ind ){
+                int z_lattice_pos = z_ind;
+
+                if ( z_bound_ == BoundarzSetting::Periodic ) {
+                  z_lattice_pos = getZPeriodic_(z);
+                }       
+                if ( z_lattice_pos >= 0 && z_lattice_pos < height_ ) {
+                  double dist = getDistance_(x_lattice_pos, y_lattice_pos, z_lattice_pos, pos_i.at(0), pos_i.at(1), pos_i.at(2));
+                  if ( dist <= cutoff ) {
+                    neighbors.push_back(getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos));
+                  }
+                }
+              } // for z
+            }
+          } // for y
+        }
+      } // for x
+      return neighbors;
+    }
+
+    double getDistance(const int index1, const int index2) const {
+      checkIndex_(index1);
+      checkIndex_(index2);
+      return getDistance_(index1, index2);
+    }
   } // lattice
 } // mythical 

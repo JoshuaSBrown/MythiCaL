@@ -82,7 +82,7 @@ int main(int argc, char* argv[]){
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
-    cerr << "./performance_test_crude_vs_coarsegraining sigma distance ";
+    cerr << "./test_ToF sigma distance ";
     cerr << "seed walkers threshold time sample_rate field" << endl;
     cerr << endl;
     return -1;

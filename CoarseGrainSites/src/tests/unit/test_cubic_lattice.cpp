@@ -5,7 +5,7 @@
 
 using namespace std;
 using namespace mythical;
-using namespace mythical::lattice;
+using namespace mythical::charge_transport;
 
 int main(void) {
 
