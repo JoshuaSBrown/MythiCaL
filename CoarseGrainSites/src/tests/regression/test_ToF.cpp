@@ -252,13 +252,13 @@ int main(int argc, char* argv[]){
 
     class Electron : public Walker {};
     // Create the electrons using the Walker class
-    vector<pair<int,Walker>> electrons;        
+    vector<pair<int,std::shared_ptr<Walker>>> electrons;        
     {
       for(int walker_index = 0; walker_index<walkers; ++walker_index){
         Electron electron;
         int siteId = converter.to1D(walker_positions[walker_index]);
         electron.occupySite(siteId);
-        electrons.push_back(pair<int,Walker>(walker_index,electron));
+        electrons.emplace_back(walker_index,std::shared_ptr<Walker>(new Electron));
       }
     }
     
@@ -284,7 +284,7 @@ int main(int argc, char* argv[]){
         uniform_real_distribution<double> distribution(0.0,1.0);
 
         for(int walker_index=0; walker_index<walkers;++walker_index){
-          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).second.getDwellTime()));
+          walker_global_times.push_back(pair<int,double>(walker_index,electrons.at(walker_index).second->getDwellTime()));
         }
         walker_global_times.sort(compareSecondItemOfPair);
       }// Calculate walker dwell times and sort
@@ -296,15 +296,15 @@ int main(int argc, char* argv[]){
         double deltaX = 0.0;
         while(!walker_global_times.empty() && walker_global_times.begin()->second<sample_time){
           auto walker_index = walker_global_times.begin()->first;
-          Walker& electron = electrons.at(walker_index).second;
-          int siteId = electron.getIdOfSiteCurrentlyOccupying();
+          std::shared_ptr<Walker>& electron = electrons.at(walker_index).second;
+          int siteId = electron->getIdOfSiteCurrentlyOccupying();
           int old_x_pos = converter.x(siteId);
           CGsystem.hop(walker_index,electron);
-          siteId = electron.getIdOfSiteCurrentlyOccupying();
+          siteId = electron->getIdOfSiteCurrentlyOccupying();
           int new_x_pos = converter.x(siteId);
           deltaX+=static_cast<double>(new_x_pos-old_x_pos);
           // Update the dwell time
-          walker_global_times.begin()->second += electron.getDwellTime();
+          walker_global_times.begin()->second += electron->getDwellTime();
           // reorder the walkers based on which one will move next
           if(new_x_pos==(distance-1)){
             CGsystem.removeWalkerFromSystem(walker_index,electron);

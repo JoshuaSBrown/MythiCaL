@@ -112,26 +112,26 @@ int main(int argc, char* argv[]){
     for(int walker_index = 0; walker_index<walkers; ++walker_index){
 
       class Electron : public Walker {};
-      vector<pair<int,Walker>> electrons; 
+      vector<pair<int,std::shared_ptr<Walker>>> electrons; 
       Electron elec;
       elec.occupySite(startingSiteId);
       int electronId = 0;
-      electrons.push_back(pair<int,Walker>(electronId,elec));
+      electrons.emplace_back(electronId,std::shared_ptr<Walker>(new Electron));
 
       CGsystem.initializeWalkers(electrons);
       // Calculate Walker dwell times and sort 
       list<pair<int,double>> walker_global_times;
-      walker_global_times.push_back(pair<int,double>(0,electrons.at(0).second.getDwellTime()));
+      walker_global_times.push_back(pair<int,double>(0,electrons.at(0).second->getDwellTime()));
 
       int site=4;
       while(site==4 || site==5){
         int walker_index = walker_global_times.begin()->first;
-        Walker& electron = electrons.at(walker_index).second; 
+        std::shared_ptr<Walker>& electron = electrons.at(walker_index).second; 
         int electron_id = electrons.at(walker_index).first;
         CGsystem.hop(electron_id,electron);
         // Update the dwell time
-        walker_global_times.begin()->second += electron.getDwellTime();
-        site = electron.getPotentialSite();
+        walker_global_times.begin()->second += electron->getDwellTime();
+        site = electron->getPotentialSite();
       }
 
       CGsystem.removeWalkerFromSystem(electrons.at(0));

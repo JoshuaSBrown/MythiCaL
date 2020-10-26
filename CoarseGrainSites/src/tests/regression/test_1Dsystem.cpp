@@ -42,7 +42,7 @@ int main(int argc, char* argv[]){
     cerr << endl;
     cerr << "To run:" << endl;
     cerr << endl;
-    cerr << "./performance_test_crude_vs_coarsegraining distance seed threshold time sampe_rate field" << endl;
+    cerr << "./" << __FILE__ << " distance seed threshold time sampe_rate field" << endl;
     cerr << endl;
     return -1;
   }
@@ -162,12 +162,11 @@ int main(int argc, char* argv[]){
 
       for(int rep=0; rep<repetitions;++rep){
         // Create the electrons using the Walker class
-        vector<pair<int,Walker>> electrons;        
-        Electron electron;
+        vector<pair<int,std::shared_ptr<Walker>>> electrons;        
         int id = 0;
-        electrons.push_back(pair<int,Walker>(id,electron));
+        electrons.emplace_back(id,std::shared_ptr<Walker>(new Electron));
         int siteId = 0;
-        electrons.at(0).second.occupySite(siteId);
+        electrons.back().second->occupySite(siteId);
         CGsystem.initializeWalkers(electrons);
 
         vector<double> transient_current(sample_rate,0.0);
@@ -179,7 +178,7 @@ int main(int argc, char* argv[]){
           random_number_generator.seed(3);
           uniform_real_distribution<double> distribution(0.0,1.0);
 
-          walker_global_times.push_back(pair<int,double>(id,electrons.at(0).second.getDwellTime()));
+          walker_global_times.push_back(pair<int,double>(id,electrons.at(0).second->getDwellTime()));
           walker_global_times.sort(compareSecondItemOfPair);
         }// Calculate walker dwell times and sort
         assert(walker_global_times.begin()->second<cutoff_time);
@@ -190,18 +189,18 @@ int main(int argc, char* argv[]){
           while(!walker_global_times.empty() && walker_global_times.begin()->second<sample_time){
 
             auto walker_index = walker_global_times.begin()->first;
-            Walker& electron = electrons.at(walker_index).second; 
-            int siteId = electron.getIdOfSiteCurrentlyOccupying();
+            std::shared_ptr<Walker>& electron = electrons.at(walker_index).second; 
+            int siteId = electron->getIdOfSiteCurrentlyOccupying();
             int old_x_pos = siteId;
             CGsystem.hop(walker_index,electron);
-            siteId = electron.getIdOfSiteCurrentlyOccupying();
+            siteId = electron->getIdOfSiteCurrentlyOccupying();
             int new_x_pos = siteId;
             deltaX+=static_cast<double>(new_x_pos-old_x_pos);
             // Update the dwell time
-            walker_global_times.begin()->second += electron.getDwellTime();
+            walker_global_times.begin()->second += electron->getDwellTime();
             // reorder the walkers based on which one will move next
             if(new_x_pos==(distance-1)){
-              cout << "a. Repetition " << rep << " final position " << electrons.at(0).second.getIdOfSiteCurrentlyOccupying() << endl;
+              cout << "a. Repetition " << rep << " final position " << electrons.at(0).second->getIdOfSiteCurrentlyOccupying() << endl;
               CGsystem.removeWalkerFromSystem(walker_index,electron);
               walker_global_times.pop_front();
             }
@@ -214,7 +213,7 @@ int main(int argc, char* argv[]){
         }
 
         if(walker_global_times.size()!=0){
-          cout << "b. Repetition " << rep << " final position " << electrons.at(0).second.getIdOfSiteCurrentlyOccupying() << endl;
+          cout << "b. Repetition " << rep << " final position " << electrons.at(0).second->getIdOfSiteCurrentlyOccupying() << endl;
           CGsystem.removeWalkerFromSystem(electrons.at(0).first,electrons.at(0).second);
           walker_global_times.pop_front();
         }

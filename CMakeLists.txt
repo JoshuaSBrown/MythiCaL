@@ -56,7 +56,9 @@ include_directories(UGLY/include)
 # Grab headers and set the directory where they will be installed #
 ###################################################################
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/mythical/*.hpp)
+file(GLOB HEADERS2 ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/include/mythical/charge_transport/*.hpp)
 install(FILES ${HEADERS} DESTINATION include/mythical)
+install(FILES ${HEADERS2} DESTINATION include/mythical/charge_transport)
 
 message( ${CMAKE_CURRENT_SOURCE_DIR} )
 

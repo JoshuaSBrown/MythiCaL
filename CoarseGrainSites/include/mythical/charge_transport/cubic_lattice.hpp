@@ -4,6 +4,7 @@
 #include "boundarysettings.hpp"
 
 #include <random>
+#include <unordered_map>
 #include <vector>
 
 namespace mythical {
@@ -22,9 +23,9 @@ namespace mythical {
       public:
 
         enum class Plane {
-          X,
-          Y,
-          Z
+          XY,
+          YZ,
+          XZ
         };
 
         Cubic() = default;
@@ -58,6 +59,10 @@ namespace mythical {
 
         std::vector<int> getPosition(int index) const;
 
+        int getX(int index) const;
+        int getY(int index) const;
+        int getZ(int index) const;
+
         /**
          * @brief Get all sites that are within the cutoff distance of **index**
          *
@@ -67,7 +72,18 @@ namespace mythical {
          *
          * @return a vector of indices that are the neighbors
          */
-        std::vector<int> getNeighbors(const int index, const double cutoff) const noexcept;
+        std::vector<int> getNeighbors(const int index, const double cutoff) const;
+        std::vector<std::pair<int,double>> getNeighborDistances(const int index, const double cutoff) const;
+        std::vector<std::pair<int,double>> getNeighborDistances(const std::vector<int> lattice_pos, const double cutoff) const;
+
+        /**
+         * @brief Get Neighbor Distances within cutoff for the whole lattice
+         *
+         * @param cutoff
+         *
+         * @return 
+         */
+        std::unordered_map<int, std::unordered_map<int, double>> getNeighborDistances(const double cutoff) const;
 
         /**
          * @brief Get the distance between two sites
@@ -78,21 +94,22 @@ namespace mythical {
          * @return the distance 
          */
         double getDistance(const int index1, const int index2) const;
+
       private:
-        int length_ = 0;
-        int width_ = 0;
-        int height_ = 0;
-        int total_ = 0;
-        double inter_site_distance_ = 1.0; // nm nanometers
+        int length_;
+        int width_;
+        int height_;
+        int total_;
+        double inter_site_distance_; // nm nanometers
 
         std::uniform_int_distribution<int> distribution_x_;
         std::uniform_int_distribution<int> distribution_y_;
         std::uniform_int_distribution<int> distribution_z_;
         std::default_random_engine generator_;
 
-        BoundarySetting x_bound_ = BoundarySetting::Fixed;
-        BoundarySetting y_bound_ = BoundarySetting::Fixed;
-        BoundarySetting z_bound_ = BoundarySetting::Fixed;
+        BoundarySetting x_bound_;
+        BoundarySetting y_bound_;
+        BoundarySetting z_bound_;
 
         int getXPeriodic_( const int x ) const noexcept;
         int getYPeriodic_( const int y ) const noexcept;
@@ -102,14 +119,19 @@ namespace mythical {
         void checkPosY_(const int y) const;
         void checkPosZ_(const int z) const;
         void checkBounds_() const;
-        void checkIndex_() const;
+        void checkIndex_(const int index) const;
         void setDistributions_();
         // Only call if the x, y and z are gauranteed to be within bounds
         int getIndex_(const int x, const int y, const int z) const noexcept;
 
+        std::vector<int> getPos_(int index) const noexcept;
         // Only call if indices have already been checked
         double getDistance_(const int x1, const int y1, const int z1,
             const int x2, const int y2, const int z2) const noexcept;
+
+        std::vector<std::pair<int,double>> getNeighborDistances_(const std::vector<int> lattice_pos, const double cutoff) const;
+
+
     };
   }
 }
