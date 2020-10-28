@@ -13,6 +13,7 @@
 
 #include "mythical/constants.hpp"
 #include "mythical/coarsegrainsystem.hpp"
+#include "mythical/version.hpp"
 #include "mythical/walker.hpp"
 
 using namespace std;
