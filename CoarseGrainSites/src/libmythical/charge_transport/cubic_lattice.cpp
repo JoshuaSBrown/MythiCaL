@@ -261,7 +261,7 @@ namespace mythical {
       int y_lattice_pos = plane_index;
       int z_lattice_pos = plane_index;
       if ( plane == Plane::YZ ) {
-        if (x_lattice_pos >=0 && x_lattice_pos < length_ ) {
+        if (x_lattice_pos < 0 && x_lattice_pos >= length_ ) {
           std::string error_msg = "Cannot call " + std::string(__FUNCTION__) + ", "
             "with x pos " + to_string(plane_index) + " when the x"
             "bounds are 0 to " + to_string(length_-1);
@@ -270,7 +270,7 @@ namespace mythical {
         y_lattice_pos = distribution_y_(generator_);
         z_lattice_pos = distribution_z_(generator_);
       } else if ( plane == Plane::XZ ) {
-        if (y_lattice_pos >=0 && y_lattice_pos < width_ ) {
+        if (y_lattice_pos < 0 && y_lattice_pos >= width_ ) {
           std::string error_msg = "Cannot call " + std::string(__FUNCTION__) + ", "
             "with y pos " + to_string(plane_index) + " when the y"
             "bounds are 0 to " + to_string(width_-1);
@@ -279,7 +279,7 @@ namespace mythical {
         x_lattice_pos = distribution_x_(generator_);
         z_lattice_pos = distribution_z_(generator_);
       } else {
-        if (z_lattice_pos >=0 && z_lattice_pos < height_ ) {
+        if (z_lattice_pos < 0 && z_lattice_pos >= height_ ) {
           std::string error_msg = "Cannot call " + std::string(__FUNCTION__) + ", "
             "with z pos " + to_string(plane_index) + " when the z"
             "bounds are 0 to " + to_string(height_-1);
@@ -415,12 +415,13 @@ namespace mythical {
 
       // Calculate the number of sites that will be within the cutoff 
       int num_sites = static_cast<int>(std::floor(cutoff/inter_site_distance_));  
-
+      
+      int total_num_sites = length_*width_*height_;
       // So as not to return redundant info, only provide distance if the 
       // neighbor has a smaller index
       std::unordered_map<int, std::unordered_map<int, double>> neigh_distances;
 
-      for ( int index = 0; index < num_sites; ++index ) {
+      for ( int index = 0; index < total_num_sites; ++index ) {
         
         std::vector<int> pos_i = getPos_(index);
         const int x = pos_i.at(0);
@@ -456,8 +457,10 @@ namespace mythical {
                     double dist = getDistance_(x_lattice_pos, y_lattice_pos, z_lattice_pos, pos_i.at(0), pos_i.at(1), pos_i.at(2));
                     if ( dist <= cutoff ) {
                       int neigh_index = getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);
-                      neigh_distances[neigh_index][index] = dist;
-                      assert( neigh_index < index && "Error in neigh distances calculation, we assumed index will always be greater than neigh_index");  
+                      if ( neigh_index != index ) {
+                        neigh_distances[neigh_index][index] = dist;
+                        assert( neigh_index < index && "Error in neigh distances calculation, we assumed index will always be greater than neigh_index");  
+                      }
                     }
                   }
                 } // for z

@@ -145,13 +145,18 @@ namespace mythical {
           "You must first initialize the system before you "
           "can initialize the walkers");
     }
-
     for ( size_t index = 0; index<walkers.size(); ++index){
       int siteId = walkers.at(index).second->getIdOfSiteCurrentlyOccupying();
       if (siteId == constants::unassignedId) {
         throw runtime_error(
             "You must first place the walker on a known site"
             " before the walker can be initialized.");
+      }
+
+      if (topology_features_.count(siteId) == 0 ) {
+        throw runtime_error(
+            "Missing topology feature for site " + to_string(siteId) + " be sure
+            that when initizeSystem was called that this site existed within the rates parameter.");
       }
       topology_features_[siteId]->occupy();
 
