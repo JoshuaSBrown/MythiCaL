@@ -171,7 +171,10 @@ int main() {
 
   // Write to file
   std::ofstream fid;
-  fid.open ("transient_current.txt");
+  fid.open("transient_current.txt");
+  if( !fid.is_open() ){
+    throw std::runtime_error("Error opening transient_current.txt file to write too");
+  } 
   fid << "Transient Current" << std::endl;
   fid << transient_current.size() << std::endl;
   sample_time = 0.0;
