@@ -155,8 +155,9 @@ namespace mythical {
 
       if (topology_features_.count(siteId) == 0 ) {
         throw runtime_error(
-            "Missing topology feature for site " + to_string(siteId) + " be sure
-            that when initizeSystem was called that this site existed within the rates parameter.");
+            "Missing topology feature for site " + to_string(siteId) + " be "
+            "sure that when initizeSystem was called that this site existed "
+            "within the rates parameter.");
       }
       topology_features_[siteId]->occupy();
 
