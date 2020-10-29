@@ -146,18 +146,24 @@ namespace mythical {
           "can initialize the walkers");
     }
     for ( size_t index = 0; index<walkers.size(); ++index){
-      int siteId = walkers.at(index).second->getIdOfSiteCurrentlyOccupying();
-      if (siteId == constants::unassignedId) {
-        throw runtime_error(
-            "You must first place the walker on a known site"
-            " before the walker can be initialized.");
+      int siteId;
+      try {
+        siteId = walkers.at(index).second->getIdOfSiteCurrentlyOccupying();
+      } catch(...) {
+        string error_msg = std::string(__FILE__) + ":" + to_string(__LINE__) +
+          " Unable to get site id of walker at index " + to_string(index) +
+          " make sure the walker has been placed on a known site."; 
+        throw runtime_error(error_msg);
       }
 
       if (topology_features_.count(siteId) == 0 ) {
-        throw runtime_error(
-            "Missing topology feature for site " + to_string(siteId) + " be "
-            "sure that when initizeSystem was called that this site existed "
-            "within the rates parameter.");
+        string error_msg = std::string(__FILE__) + ":" + to_string(__LINE__) +
+          " Walker at index " + to_string(index) +
+          " is found to occupy site " + to_string(siteId) + " but an associated"
+          " topology feature is missing for that site, be sure that when "
+          "initizeSystem was called that this site existed "
+          "within the rates parameter.";
+        throw runtime_error(error_msg);
       }
       topology_features_[siteId]->occupy();
 

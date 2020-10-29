@@ -157,12 +157,11 @@ int main(void){
     cout << "Cluster performance test starting" << endl;
     clusterStart = high_resolution_clock::now();
     for(int i=0; i<NumberElectrons;++i){
-      Electron electron;
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite);
       vector<pair<int,std::shared_ptr<Walker>>> electrons;
       electrons.emplace_back(0,std::shared_ptr<Walker>(new Electron));
+      electrons.back().second->occupySite(initialSite);
       CGsystem.initializeWalkers(electrons);
       
       std::shared_ptr<Walker> & electron1 = electrons.at(0).second;
