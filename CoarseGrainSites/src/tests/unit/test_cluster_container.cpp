@@ -1,3 +1,5 @@
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -7,7 +9,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: Cluster Container","[unit]"){
 
   cout << "Testing: Constructor" << endl;
   {
@@ -168,5 +170,4 @@ int main(void){
     cluster_container.vacate(1);
     assert(cluster_container.isOccupied(1)==false); 
   }
-  return 0;
 }

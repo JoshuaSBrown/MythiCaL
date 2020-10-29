@@ -1,3 +1,5 @@
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 
 #include <iostream>
 #include <list>
@@ -10,7 +12,7 @@ using namespace std;
 using namespace ugly;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: graph library adapter","[unit]"){
 
   cout << "Testing: convertSitesOutgoingRatesToUniqueWeightedEdges" << endl;
   {
@@ -99,5 +101,4 @@ int main(void){
       assert(found_edge2_3);
     }
   }
-  return 0;
 }

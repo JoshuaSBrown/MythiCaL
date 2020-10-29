@@ -1,3 +1,6 @@
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+
 #include <iostream>
 #include <cassert>
 #include <vector>
@@ -8,7 +11,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: Site","[unit]"){
 
   cout << "Testing: Site constructor" << endl;
   {
@@ -262,6 +265,4 @@ int main(void){
     cout << site << endl;
 
   }
-
-	return 0;
 }

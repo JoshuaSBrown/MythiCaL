@@ -15,7 +15,7 @@ foreach(PROG
 
   file(GLOB ${PROG}_SOURCES ${PROG}.cpp)
   add_executable(unit_${PROG} ${${PROG}_SOURCES})
-  target_link_libraries(unit_${PROG} mythical)
+  target_link_libraries(unit_${PROG} mythical Catch2::Catch2)
   add_test(unit_${PROG} unit_${PROG})
   set_tests_properties(unit_${PROG} PROPERTIES LABELS "mythical")
 endforeach(PROG)

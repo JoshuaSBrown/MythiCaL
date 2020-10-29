@@ -1,3 +1,7 @@
+
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -8,7 +12,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void) {
+TEST_CASE("Testing: walker","[unit]") {
 
   cout << "Testing: Walker constructor" << endl;
   { Walker walker; }
@@ -64,5 +68,4 @@ int main(void) {
     walker.setDwellTime(124.0);
     assert(static_cast<int>(round(walker.getDwellTime())) == 124);
   }
-  return 0;
 }
