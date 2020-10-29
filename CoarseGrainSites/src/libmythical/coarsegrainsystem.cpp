@@ -74,7 +74,7 @@ namespace mythical {
     return time_resolution_; 
   }
 
-  void CoarseGrainSystem::setTimeResolution(double time_resolution){
+  void CoarseGrainSystem::setTimeResolution(const double time_resolution){
     if(time_resolution<=0.0){
       throw invalid_argument("The time resolution must be a positive value.");
     }
@@ -122,7 +122,7 @@ namespace mythical {
     }
   }
 
-  int CoarseGrainSystem::getVisitFrequencyOfSite(int siteId){
+  int CoarseGrainSystem::getVisitFrequencyOfSite(const int siteId){
     if(sites_->exist(siteId)==false){
       throw invalid_argument("Site is not stored in the coarse grained system you"
           " cannot retrieve it's visit frequency.");
@@ -136,7 +136,7 @@ namespace mythical {
     return visits;
   }
 
-  void CoarseGrainSystem::initializeWalkers(vector<pair<int,Walker>>& walkers) {
+  void CoarseGrainSystem::initializeWalkers(vector<pair<int,std::shared_ptr<Walker>>>& walkers) {
 
     LOG("Initializeing walkers", 1);
 
@@ -145,24 +145,36 @@ namespace mythical {
           "You must first initialize the system before you "
           "can initialize the walkers");
     }
-
     for ( size_t index = 0; index<walkers.size(); ++index){
-      int siteId = walkers.at(index).second.getIdOfSiteCurrentlyOccupying();
-      if (siteId == constants::unassignedId) {
-        throw runtime_error(
-            "You must first place the walker on a known site"
-            " before the walker can be initialized.");
+      int siteId;
+      try {
+        siteId = walkers.at(index).second->getIdOfSiteCurrentlyOccupying();
+      } catch(...) {
+        string error_msg = std::string(__FILE__) + ":" + to_string(__LINE__) +
+          " Unable to get site id of walker at index " + to_string(index) +
+          " make sure the walker has been placed on a known site."; 
+        throw runtime_error(error_msg);
+      }
+
+      if (topology_features_.count(siteId) == 0 ) {
+        string error_msg = std::string(__FILE__) + ":" + to_string(__LINE__) +
+          " Walker at index " + to_string(index) +
+          " is found to occupy site " + to_string(siteId) + " but an associated"
+          " topology feature is missing for that site, be sure that when "
+          "initizeSystem was called that this site existed "
+          "within the rates parameter.";
+        throw runtime_error(error_msg);
       }
       topology_features_[siteId]->occupy();
 
       auto hopTime = topology_features_[siteId]->getDwellTime(walkers.at(index).first);
       int newId = topology_features_[siteId]->pickNewSiteId(walkers.at(index).first);
-      walkers.at(index).second.setDwellTime(hopTime);
-      walkers.at(index).second.setPotentialSite(newId);
+      walkers.at(index).second->setDwellTime(hopTime);
+      walkers.at(index).second->setPotentialSite(newId);
     }
   }
 
-  void CoarseGrainSystem::setMinCoarseGrainIterationThreshold(int threshold_min) {
+  void CoarseGrainSystem::setMinCoarseGrainIterationThreshold(const int threshold_min) {
     LOG("Setting minimum coarse graining threshold", 1);
     iteration_threshold_min_ = threshold_min;
     iteration_threshold_ = threshold_min;
@@ -178,27 +190,27 @@ namespace mythical {
     seed_set_ = true;
   }
 
-  void CoarseGrainSystem::removeWalkerFromSystem(pair<int,Walker>& walker) {
+  void CoarseGrainSystem::removeWalkerFromSystem(pair<int,std::shared_ptr<Walker>>& walker) {
     removeWalkerFromSystem(walker.first,walker.second);
   }
 
-  void CoarseGrainSystem::removeWalkerFromSystem(int & walker_id, Walker& walker) {
+  void CoarseGrainSystem::removeWalkerFromSystem(int walker_id, std::shared_ptr<Walker>& walker) {
     LOG("Walker is being removed from system", 1);
-    auto siteId = walker.getIdOfSiteCurrentlyOccupying();
+    auto siteId = walker->getIdOfSiteCurrentlyOccupying();
     topology_features_[siteId]->removeWalker(walker_id,siteId);
   }
 
-  int CoarseGrainSystem::getClusterIdOfSite(int siteId) {
+  int CoarseGrainSystem::getClusterIdOfSite(const int siteId) {
     return sites_->getClusterIdOfSite(siteId);
   }
 
-  void CoarseGrainSystem::hop(pair<const int,Walker>& walker) {
+  void CoarseGrainSystem::hop(pair<int,std::shared_ptr<Walker>>& walker) {
     hop(walker.first,walker.second);
   }
 
-  void CoarseGrainSystem::hop(const int & walker_id, Walker & walker) {
-    const int & siteId = walker.getIdOfSiteCurrentlyOccupying();
-    const int & siteToHopToId = walker.getPotentialSite();
+  void CoarseGrainSystem::hop(int walker_id, std::shared_ptr<Walker> & walker) {
+    const int & siteId = walker->getIdOfSiteCurrentlyOccupying();
+    const int & siteToHopToId = walker->getPotentialSite();
     TopologyFeature * feature = topology_features_[siteId];
     TopologyFeature * feature_to_hop_to = topology_features_[siteToHopToId];
 
@@ -206,15 +218,15 @@ namespace mythical {
       feature->vacate(siteId);
       feature_to_hop_to->occupy(siteToHopToId);
 
-      walker.occupySite(siteToHopToId);
-      walker.setDwellTime(feature_to_hop_to->getDwellTime(walker_id));
-      walker.setPotentialSite(feature_to_hop_to->pickNewSiteId(walker_id));
+      walker->occupySite(siteToHopToId);
+      walker->setDwellTime(feature_to_hop_to->getDwellTime(walker_id));
+      walker->setPotentialSite(feature_to_hop_to->pickNewSiteId(walker_id));
     }else{
       feature->vacate(siteId);
       feature->occupy(siteId);
 
-      walker.setDwellTime(feature->getDwellTime(walker_id));
-      walker.setPotentialSite(feature->pickNewSiteId(walker_id));
+      walker->setDwellTime(feature->getDwellTime(walker_id));
+      walker->setPotentialSite(feature->pickNewSiteId(walker_id));
     }
 
     ++iteration_;

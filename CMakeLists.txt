@@ -62,7 +62,9 @@ include_directories(UGLY/include)
 ########################################################################
 add_subdirectory(CoarseGrainSites/include/mythical)
 
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures/*.cpp)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/*.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/charge_transport/*.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CoarseGrainSites/src/libmythical/topologyfeatures/*.cpp)
 file(GLOB SOURCES_UGLY1 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/*.cpp)
 file(GLOB SOURCES_UGLY2 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.cpp)
 file(GLOB SOURCES_UGLY3 ${CMAKE_CURRENT_SOURCE_DIR}/UGLY/src/libugly/edge/*.hpp)

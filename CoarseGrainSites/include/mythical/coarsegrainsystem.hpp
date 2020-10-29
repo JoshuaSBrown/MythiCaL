@@ -109,7 +109,7 @@ class CoarseGrainSystem {
    *
    * \param[in] walkers a vector of pointers to the walkers
    **/
-  void initializeWalkers(std::vector<std::pair<int,Walker>>& walkers);
+  void initializeWalkers(std::vector<std::pair<int,std::shared_ptr<Walker>>>& walkers);
 
   /**
    * \brief Define the seed for the random number generator
@@ -132,15 +132,15 @@ class CoarseGrainSystem {
    *
    * \param[in] walker
    **/
-  void hop(std::pair<const int, Walker>& walker);
-  void hop(const int & walker_id, Walker& walker);
+  void hop(std::pair<int, std::shared_ptr<Walker>>& walker);
+  void hop(int walker_id, std::shared_ptr<Walker>& walker);
   //void hop(Walker& walker);
 
   /**
    * \brief Remove the walker from the system
    **/
-  void removeWalkerFromSystem(std::pair<int,Walker>& walker);
-  void removeWalkerFromSystem(int & walker_id,Walker& walker);
+  void removeWalkerFromSystem(std::pair<int,std::shared_ptr<Walker>>& walker);
+  void removeWalkerFromSystem(const int walker_id,std::shared_ptr<Walker>& walker);
 
   /**
    * \brief Determine if the site is part of a cluster
@@ -152,9 +152,9 @@ class CoarseGrainSystem {
    *
    * \return clusterId
    **/
-  int getClusterIdOfSite(int siteId);
+  int getClusterIdOfSite(const int siteId);
 
-  int getVisitFrequencyOfSite(int siteId);
+  int getVisitFrequencyOfSite(const int siteId);
 
   /**
    * \brief Determines how often to check for coarse graining
@@ -166,7 +166,7 @@ class CoarseGrainSystem {
    *
    * \param[in] thershold
    **/
-  void setMinCoarseGrainIterationThreshold(int threshold_min);
+  void setMinCoarseGrainIterationThreshold(const int threshold_min);
   int getMinCoarseGrainIterationThreshold();
 
 
@@ -189,7 +189,7 @@ class CoarseGrainSystem {
    * the resolution allows the cluster algorithm to perform better.
    **/
   double getTimeResolution();
-  void setTimeResolution(double time_resolution);
+  void setTimeResolution(const double time_resolution);
 
   /**
    * @brief Adjusts how easy it is to create a cluster.
@@ -213,7 +213,7 @@ class CoarseGrainSystem {
    *
    * @param double
    */
-  void setPerformanceRatio(double performance_ratio) { 
+  void setPerformanceRatio(const double performance_ratio) { 
     performance_ratio_ = performance_ratio;
   }
  private:
@@ -256,7 +256,7 @@ class CoarseGrainSystem {
   /// Stores smart pointers to all the clusters
   std::unique_ptr<Cluster_Container> clusters_;
 
-  void coarseGrainSiteIfNeeded_(Walker& walker);
+  void coarseGrainSiteIfNeeded_(std::shared_ptr<Walker>& walker);
 
   /**
    * \brief Determines if it is appropriate to coarsegrain the sites

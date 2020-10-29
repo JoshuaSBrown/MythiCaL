@@ -17,10 +17,12 @@ Walker::Walker() {
 
 int Walker::getIdOfSiteCurrentlyOccupying() const {
   if (current_site_ == constants::unassignedId) {
-    throw runtime_error(
-        "Cannot get current site as it has not yet been "
-        "assigned. You many need to first initialize the walker. "
-        "You can do this by calling the occupySite method.");
+    std::string error_msg = std::string(__FILE__) + ":" + 
+      to_string(__LINE__) + " Walker cannot get current site "
+      "as it has not yet been assigned. You many need to first"
+      " initialize the walker. You can do this by calling the "
+      "occupySite method.";
+    throw runtime_error(error_msg);
   }
   return current_site_;
 }
