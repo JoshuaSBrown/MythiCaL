@@ -318,7 +318,7 @@ int main(void){
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
       electron->occupySite(initialSite);
-      vector<pair<int,Walker>> electrons;
+      vector<pair<int,std::shared_ptr<Walker>>> electrons;
       electrons.emplace_back(0,electron);
       CGsystem.initializeWalkers(electrons);
       double totalTimeOnCluster = 0.0;
@@ -327,7 +327,7 @@ int main(void){
       while(electron1->getIdOfSiteCurrentlyOccupying()<6){
         CGsystem.hop(electronId,electron1);
         hopsToSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)++;
-        timeOnSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
+        timeOnSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)+=electron1->getDwellTime();
         totalTimeOnCluster+=electron1->getDwellTime(); 
       }
 
