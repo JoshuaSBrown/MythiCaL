@@ -10,6 +10,9 @@ if(CODE_COVERAGE)
   SET(GCC_COVERAGE_LINK_FLAGS    "--coverage")
 endif()
 
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
+SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
+
 function(add_coverage_label tests )
   if( CODE_COVERAGE )
     foreach( CHECK_TEST ${tests})

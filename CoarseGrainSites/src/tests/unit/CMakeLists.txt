@@ -19,4 +19,5 @@ foreach(PROG
   target_link_libraries(unit_${PROG} mythical)
   add_test(unit_${PROG} unit_${PROG})
   set_tests_properties(unit_${PROG} PROPERTIES LABELS "mythical")
+  add_coverage_label(unit_${PROG})
 endforeach(PROG)

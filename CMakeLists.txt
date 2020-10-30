@@ -102,6 +102,7 @@ endif(CXXTEST_ADD_PERFORMANCE)
 #####################################
 # Check if code coverage is enabled #
 #####################################
+create_coverage_targets()
 
 #foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
 #  if(${FLAG_OPT} MATCHES "-coverage")
