@@ -2,6 +2,7 @@
 #include "mythical/charge_transport/cubic_lattice.hpp"
 
 #include <cassert>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -11,6 +12,9 @@ namespace mythical {
 
   namespace charge_transport {
 
+    /**************************************************************************
+     * Internal Methods
+     *************************************************************************/
     void Cubic::checkPosX_(const int x) const {
       if ( x < 0 ) {
         throw std::invalid_argument("x position of site is negative, site must"
@@ -103,6 +107,7 @@ namespace mythical {
       const int x = pos_i.at(0);
       const int y = pos_i.at(1);
       const int z = pos_i.at(2);
+      const int index = getIndex_(x, y, z);
       const int x_min = pos_i.at(0) - num_sites;
       const int x_max = pos_i.at(0) + num_sites;
       const int y_min = pos_i.at(1) - num_sites;
@@ -117,25 +122,28 @@ namespace mythical {
       for ( int x_ind = x_min; x_ind <= x_max; ++x_ind ) {
         int x_lattice_pos = x_ind;
         if ( x_bound_ == BoundarySetting::Periodic ) {
-          x_lattice_pos = getXPeriodic_(x);
+          x_lattice_pos = getXPeriodic_(x_ind);
         }       
         if ( x_lattice_pos >= 0 && x_lattice_pos < length_ ) {
           for ( int y_ind = y_min; y_ind <= y_max; ++y_ind ) {
             int y_lattice_pos = y_ind;
             if ( y_bound_ == BoundarySetting::Periodic ) {
-              y_lattice_pos = getYPeriodic_(y);
+              y_lattice_pos = getYPeriodic_(y_ind);
             }       
             if ( y_lattice_pos >= 0 && y_lattice_pos < width_ ) {
               for ( int z_ind = z_min; z_ind <= z_max; ++z_ind ){
                 int z_lattice_pos = z_ind;
 
                 if ( z_bound_ == BoundarySetting::Periodic ) {
-                  z_lattice_pos = getZPeriodic_(z);
+                  z_lattice_pos = getZPeriodic_(z_ind);
                 }       
                 if ( z_lattice_pos >= 0 && z_lattice_pos < height_ ) {
-                  double dist = getDistance_(x_lattice_pos, y_lattice_pos, z_lattice_pos, pos_i.at(0), pos_i.at(1), pos_i.at(2));
+                  double dist = getDistance_(x_ind, y_ind, z_ind, pos_i.at(0), pos_i.at(1), pos_i.at(2));
                   if ( dist <= cutoff ) {
-                    neighbors.emplace_back(getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos), dist);
+                    int neigh_ind = getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);
+                    if( neigh_ind != index ) {
+                      neighbors.emplace_back(neigh_ind, dist);
+                    }
                   }
                 }
               } // for z
@@ -149,21 +157,21 @@ namespace mythical {
 
     int Cubic::getXPeriodic_( const int x ) const noexcept{
       if(x<0){
-        return x+(x/length_)*-1*length_+length_;
+        return x+length_;
       }
       return x % length_;
     }
 
     int Cubic::getYPeriodic_( const int y ) const noexcept{
       if(y<0){
-        return y+(y/width_)*-1*width_+width_;
+        return y+width_;
       }
       return y % width_;
     }
 
     int Cubic::getZPeriodic_( const int z ) const noexcept{
       if(z<0){
-        return z+(z/height_)*-1*height_+height_;
+        return z+height_;
       }
       return z % height_;
     }
@@ -174,6 +182,9 @@ namespace mythical {
       distribution_z_ = std::uniform_int_distribution<int>(0,height_-1);
     }
 
+    /**************************************************************************
+     * Public Methods
+     *************************************************************************/
     Cubic::Cubic(const int length, const int width, const int height) : 
       length_(length), width_(width), height_(height), 
       total_(length*width*height),
@@ -220,6 +231,22 @@ namespace mythical {
     int Cubic::getLength() const noexcept { return length_; }
     int Cubic::getWidth() const noexcept { return width_; } 
     int Cubic::getHeight() const noexcept { return height_; }
+
+    bool Cubic::isXPeriodic() const noexcept {
+      return x_bound_ == BoundarySetting::Periodic; 
+    }
+
+    bool Cubic::isYPeriodic() const noexcept {
+      return y_bound_ == BoundarySetting::Periodic; 
+    }
+
+    bool Cubic::isZPeriodic() const noexcept {
+      return z_bound_ == BoundarySetting::Periodic; 
+    }
+
+    double Cubic::getLatticeSpacing() const noexcept { 
+      return inter_site_distance_;
+    }
 
     int Cubic::getIndex(const int x, const int y, const int z) const {
       int x_lattice_pos = x;
@@ -342,7 +369,6 @@ namespace mythical {
     std::vector<int> Cubic::getNeighbors(const int index, const double cutoff) const {
       checkIndex_(index);
       std::vector<int> pos_i = getPosition(index);
-
       // Calculate the number of sites that will be within the cutoff 
       int num_sites = static_cast<int>(std::floor(cutoff/inter_site_distance_));  
 
@@ -363,25 +389,28 @@ namespace mythical {
       for ( int x_ind = x_min; x_ind <= x_max; ++x_ind ) {
         int x_lattice_pos = x_ind;
         if ( x_bound_ == BoundarySetting::Periodic ) {
-          x_lattice_pos = getXPeriodic_(x);
+          x_lattice_pos = getXPeriodic_(x_ind);
         }       
         if ( x_lattice_pos >= 0 && x_lattice_pos < length_ ) {
           for ( int y_ind = y_min; y_ind <= y_max; ++y_ind ) {
             int y_lattice_pos = y_ind;
             if ( y_bound_ == BoundarySetting::Periodic ) {
-              y_lattice_pos = getYPeriodic_(y);
+              y_lattice_pos = getYPeriodic_(y_ind);
             }       
             if ( y_lattice_pos >= 0 && y_lattice_pos < width_ ) {
               for ( int z_ind = z_min; z_ind <= z_max; ++z_ind ){
                 int z_lattice_pos = z_ind;
 
                 if ( z_bound_ == BoundarySetting::Periodic ) {
-                  z_lattice_pos = getZPeriodic_(z);
+                  z_lattice_pos = getZPeriodic_(z_ind);
                 }       
                 if ( z_lattice_pos >= 0 && z_lattice_pos < height_ ) {
-                  double dist = getDistance_(x_lattice_pos, y_lattice_pos, z_lattice_pos, pos_i.at(0), pos_i.at(1), pos_i.at(2));
+                  double dist = getDistance_(x_ind, y_ind, z_ind, pos_i.at(0), pos_i.at(1), pos_i.at(2));
                   if ( dist <= cutoff ) {
-                    neighbors.push_back(getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos));
+                    int neigh_ind = getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);
+                    if( neigh_ind != index ) {
+                      neighbors.push_back(neigh_ind);
+                    }
                   }
                 }
               } // for z
@@ -438,23 +467,23 @@ namespace mythical {
         for ( int x_ind = x_min; x_ind <= x_max; ++x_ind ) {
           int x_lattice_pos = x_ind;
           if ( x_bound_ == BoundarySetting::Periodic ) {
-            x_lattice_pos = getXPeriodic_(x);
+            x_lattice_pos = getXPeriodic_(x_ind);
           }       
           if ( x_lattice_pos >= 0 && x_lattice_pos < length_ ) {
             for ( int y_ind = y_min; y_ind <= y_max; ++y_ind ) {
               int y_lattice_pos = y_ind;
               if ( y_bound_ == BoundarySetting::Periodic ) {
-                y_lattice_pos = getYPeriodic_(y);
+                y_lattice_pos = getYPeriodic_(y_ind);
               }       
               if ( y_lattice_pos >= 0 && y_lattice_pos < width_ ) {
                 for ( int z_ind = z_min; z_ind <= z_max; ++z_ind ){
                   int z_lattice_pos = z_ind;
 
                   if ( z_bound_ == BoundarySetting::Periodic ) {
-                    z_lattice_pos = getZPeriodic_(z);
+                    z_lattice_pos = getZPeriodic_(z_ind);
                   }       
                   if ( z_lattice_pos >= 0 && z_lattice_pos < height_ ) {
-                    double dist = getDistance_(x_lattice_pos, y_lattice_pos, z_lattice_pos, pos_i.at(0), pos_i.at(1), pos_i.at(2));
+                    double dist = getDistance_(x_ind, y_ind, z_ind, pos_i.at(0), pos_i.at(1), pos_i.at(2));
                     if ( dist <= cutoff ) {
                       int neigh_index = getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);
                       if ( neigh_index != index ) {
@@ -472,12 +501,37 @@ namespace mythical {
       return neigh_distances;
     }
 
-    double Cubic::getDistance(const int index1, const int index2) const {
+    double Cubic::getSmallestDistance(const int index1, const int index2) const {
       checkIndex_(index1);
       checkIndex_(index2);
 
       std::vector<int> pos_1 = getPos_(index1);
       std::vector<int> pos_2 = getPos_(index2);
+      // Move the second point if a smaller distance can be found
+      const int x1 = pos_1.at(0);
+      const int x2 = pos_2.at(0);
+      if ( x_bound_ == BoundarySetting::Periodic ){
+        const int diff1 = abs(x2 - x1 + length_);
+        const int diff2 = abs(x2 - x1 - length_);
+        const int diff = min(diff1, diff2); 
+        pos_2.at(0) = min(diff,abs(x2 - x1));
+      }
+      const int y1 = pos_1.at(1);
+      const int y2 = pos_2.at(1);
+      if ( y_bound_ == BoundarySetting::Periodic ){
+        const int diff1 = abs(y2 - y1 + width_);
+        const int diff2 = abs(y2 - y1 - width_);
+        const int diff = min(diff1, diff2); 
+        pos_2.at(1) = min(diff,abs(y2 - y1));
+      }
+      const int z1 = pos_1.at(1);
+      const int z2 = pos_2.at(1);
+      if ( z_bound_ == BoundarySetting::Periodic ){
+        const int diff1 = abs(z2 - z1 + height_);
+        const int diff2 = abs(z2 - z1 - height_);
+        const int diff = min(diff1, diff2); 
+        pos_2.at(2) = min(diff,abs(z2 - z1));
+      }
       return getDistance_(pos_1.at(0), pos_1.at(1), pos_1.at(2), pos_2.at(0), pos_2.at(1), pos_2.at(2));
     }
   } // lattice
