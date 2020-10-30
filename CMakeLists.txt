@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.12)
 
 enable_language(CXX)
 
@@ -89,6 +89,7 @@ if(ENABLE_TESTING)
     else()
       message(STATUS "found system installed Catch2 will not download")
     endif()
+    include(ParseAndAddCatchTests)
     add_subdirectory(CoarseGrainSites/src/tests/unit)
   ENDIF(CMAKE_BUILD_TYPE MATCHES "RELEASE")
   add_subdirectory(CoarseGrainSites/src/tests/regression)
