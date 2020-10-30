@@ -8,4 +8,4 @@ if (NOT EXISTS ${mythical_SOURCE_DIR}/external/Catch2/single_include)
 endif()
 
 add_subdirectory(${mythical_SOURCE_DIR}/external/Catch2)
-list(APPEND CMAKE_MODULE_PATH "${mythical_SOURCE_DIR}/external/Catch2/contrib")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/external/Catch2/contrib")
