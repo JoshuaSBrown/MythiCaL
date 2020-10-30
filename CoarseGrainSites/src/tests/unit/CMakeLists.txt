@@ -6,6 +6,7 @@ foreach(PROG
     test_cluster_container
     test_coarsegrainsystem
     test_coarsegrainsystem2
+    test_cubic_lattice
     test_graph_library_adapter
     test_queue
     test_walker

@@ -266,13 +266,12 @@ TEST_CASE("Testing: CoarseGrainSystem","[unit]"){
 
       class Electron : public Walker {};
 
-      Electron electron;
       // Place the electron on site 1
       int siteId = 1;
-      electron.occupySite(siteId);
 
-      vector<pair<int,Walker>> electrons;
-      electrons.push_back(pair<int,Walker>(1,electron));
+      vector<pair<int,std::shared_ptr<Walker>>> electrons;
+      electrons.emplace_back(1,std::shared_ptr<Walker>(new Electron));
+      electrons.back().second->occupySite(siteId);
 
       CGsystem.initializeWalkers(electrons);
 
@@ -281,14 +280,14 @@ TEST_CASE("Testing: CoarseGrainSystem","[unit]"){
 
       double time = 0.0;
       int hop_count = 0;
-      Walker& electron1 = electrons.at(0).second;
+      std::shared_ptr<Walker>& electron1 = electrons.at(0).second;
       int id = electrons.at(0).first;
       while(time<time_limit){
         CGsystem.hop(id,electron1);
-        time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
-          electron1.getDwellTime();
-        hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
-        time +=electron1.getDwellTime();
+        time_spent_on_sites.at(electron1->getIdOfSiteCurrentlyOccupying()-1) =
+          electron1->getDwellTime();
+        hops_made_to_sites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)++;
+        time +=electron1->getDwellTime();
         ++hop_count;
       }    
 
@@ -323,13 +322,12 @@ TEST_CASE("Testing: CoarseGrainSystem","[unit]"){
 
       class Electron : public Walker {};
 
-      Electron electron;
       // Place the electron on site 1
       int siteId = 1;
-      electron.occupySite(siteId);
 
-      vector<pair<int,Walker>> electrons;
-      electrons.push_back(pair<int,Walker>(0,electron));
+      vector<pair<int,std::shared_ptr<Walker>>> electrons;
+      electrons.emplace_back(1,std::shared_ptr<Walker>(new Electron));
+      electrons.back().second->occupySite(siteId);
 
       CGsystem.initializeWalkers(electrons);
 
@@ -338,14 +336,14 @@ TEST_CASE("Testing: CoarseGrainSystem","[unit]"){
 
       double time = 0.0;
       int hop_count = 0;
-      Walker& electron1 = electrons.at(0).second;
+      shared_ptr<Walker>& electron1 = electrons.at(0).second;
       int id = electrons.at(0).first;
       while(time<time_limit){
         CGsystem.hop(id,electron1);
-        time_spent_on_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1) =
-          electron1.getDwellTime();
-        hops_made_to_sites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
-        time += electron1.getDwellTime();
+        time_spent_on_sites.at(electron1->getIdOfSiteCurrentlyOccupying()-1) =
+          electron1->getDwellTime();
+        hops_made_to_sites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)++;
+        time += electron1->getDwellTime();
         ++hop_count;
       }    
 
@@ -518,21 +516,20 @@ TEST_CASE("Testing: CoarseGrainSystem","[unit]"){
 
 
       for(int i=0; i<NumberElectrons;++i){
-        Electron electron;
         int id = 1;
         // Alternate placing electrons on sites 1-5
         int initialSite =  (i%5)+1;
-        electron.occupySite(initialSite);
-        vector<pair<int,Walker>> electrons;
-        electrons.push_back(pair<int,Walker>(id,electron));
+        vector<pair<int,shared_ptr<Walker>>> electrons;
+        electrons.emplace_back(id,shared_ptr<Walker>(new Electron));
+        electrons.back().second->occupySite(initialSite);
         CGsystem.initializeWalkers(electrons);
         double totalTimeOnCluster = 0.0;
-        Walker & electron1 = electrons.at(0).second;
+        shared_ptr<Walker> & electron1 = electrons.at(0).second;
 
-        while(electron1.getIdOfSiteCurrentlyOccupying()<6){
+        while(electron1->getIdOfSiteCurrentlyOccupying()<6){
           CGsystem.hop(id,electron1);
-          timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
-          totalTimeOnCluster+=electron1.getDwellTime(); 
+          timeOnSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)+=electron1->getDwellTime();
+          totalTimeOnCluster+=electron1->getDwellTime(); 
         }
 
         CGsystem.removeWalkerFromSystem(id,electron1);
@@ -671,22 +668,21 @@ TEST_CASE("Testing: CoarseGrainSystem","[unit]"){
 
 
         for(int i=0; i<NumberElectrons;++i){
-          Electron electron;
           int id = 1;
           // Alternate placing electrons on sites 1-5
           int initialSite =  (i%5)+1;
-          electron.occupySite(initialSite);
-          vector<pair<int,Walker>> electrons;
-          electrons.push_back(pair<int,Walker>(id,electron));
+          vector<pair<int,shared_ptr<Walker>>> electrons;
+          electrons.emplace_back(id,shared_ptr<Walker>( new Electron));
+          electrons.back().second->occupySite(initialSite);
           CGsystem.initializeWalkers(electrons);
           double totalTimeOnCluster = 0.0;
           // First hop is ignored 
-          Walker & electron1 = electrons.at(0).second;
+          shared_ptr<Walker> & electron1 = electrons.at(0).second;
           CGsystem.hop(id,electron1);
 
-          while(electron1.getIdOfSiteCurrentlyOccupying()<6){
-            timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
-            totalTimeOnCluster+=electron1.getDwellTime(); 
+          while(electron1->getIdOfSiteCurrentlyOccupying()<6){
+            timeOnSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)+=electron1->getDwellTime();
+            totalTimeOnCluster+=electron1->getDwellTime(); 
             CGsystem.hop(id,electron1);
           }
 

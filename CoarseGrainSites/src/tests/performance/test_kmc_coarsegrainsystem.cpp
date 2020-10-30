@@ -157,23 +157,22 @@ int main(void){
     cout << "Cluster performance test starting" << endl;
     clusterStart = high_resolution_clock::now();
     for(int i=0; i<NumberElectrons;++i){
-      Electron electron;
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite);
-      vector<pair<int,Walker>> electrons;
-      electrons.push_back(pair<int,Walker>(0,electron));
+      vector<pair<int,std::shared_ptr<Walker>>> electrons;
+      electrons.emplace_back(0,std::shared_ptr<Walker>(new Electron));
+      electrons.back().second->occupySite(initialSite);
       CGsystem.initializeWalkers(electrons);
       
-      Walker & electron1 = electrons.at(0).second;
+      std::shared_ptr<Walker> & electron1 = electrons.at(0).second;
       double totalTimeOnCluster = 0.0;
       int electronId = 0;
-      while(electron1.getIdOfSiteCurrentlyOccupying()<6){
+      while(electron1->getIdOfSiteCurrentlyOccupying()<6){
 
         CGsystem.hop(electronId,electron1);
-        hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
-        timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
-        totalTimeOnCluster+=electron1.getDwellTime(); 
+        hopsToSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)++;
+        timeOnSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)+=electron1->getDwellTime();
+        totalTimeOnCluster+=electron1->getDwellTime(); 
       }
 
       CGsystem.removeWalkerFromSystem(electronId,electron1);
@@ -314,21 +313,21 @@ int main(void){
     cout << "Site performance test starting" << endl;
     siteStart = high_resolution_clock::now();
     for(int i=0; i<NumberElectrons;++i){
-      Electron electron;
+      std::shared_ptr<Walker> electron = std::shared_ptr<Walker>(new Electron);
       // Alternate placing electrons on sites 1-5
       int initialSite =  (i%5)+1;
-      electron.occupySite(initialSite);
-      vector<pair<int,Walker>> electrons;
-      electrons.push_back(pair<int,Walker>(0,electron));
+      electron->occupySite(initialSite);
+      vector<pair<int,std::shared_ptr<Walker>>> electrons;
+      electrons.emplace_back(0,electron);
       CGsystem.initializeWalkers(electrons);
       double totalTimeOnCluster = 0.0;
-      Walker & electron1 = electrons.at(0).second;
+      std::shared_ptr<Walker> & electron1 = electrons.at(0).second;
       int electronId = electrons.at(0).first;
-      while(electron1.getIdOfSiteCurrentlyOccupying()<6){
+      while(electron1->getIdOfSiteCurrentlyOccupying()<6){
         CGsystem.hop(electronId,electron1);
-        hopsToSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)++;
-        timeOnSites.at(electron1.getIdOfSiteCurrentlyOccupying()-1)+=electron1.getDwellTime();
-        totalTimeOnCluster+=electron1.getDwellTime(); 
+        hopsToSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)++;
+        timeOnSites.at(electron1->getIdOfSiteCurrentlyOccupying()-1)+=electron1->getDwellTime();
+        totalTimeOnCluster+=electron1->getDwellTime(); 
       }
 
       CGsystem.removeWalkerFromSystem(electronId,electron1);
