@@ -89,8 +89,5 @@ script:
   - cmake "${COMPILE_FLAGS}" "-DCODE_COVERAGE=${CODE_COVERAGE}"  ..
   - make
   - make test ARGS="-V"
-
-
-after_success:
   - echo "CODE COVERAGE ${CODE_COVERAGE}"
   - test ${CODE_COVERAGE} = "ON" && make coverage && make coverage-upload
