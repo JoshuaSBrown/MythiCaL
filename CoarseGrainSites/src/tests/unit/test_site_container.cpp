@@ -1,3 +1,4 @@
+#include <catch2/catch.hpp>
 
 #include <cassert>
 #include <iostream>
@@ -7,7 +8,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: Site Container","[unit]"){
 
   cout << "Testing: Constructor" << endl;
   {
@@ -242,5 +243,4 @@ int main(void){
     assert(site_container.getRateToNeighborOfSite(2,1)==rate2_1);
 
   }
-  return 0;
 }

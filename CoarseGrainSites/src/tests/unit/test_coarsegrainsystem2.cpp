@@ -1,3 +1,5 @@
+#include <catch2/catch.hpp>
+
 #include <iostream>
 #include <cassert>
 #include <vector>
@@ -10,7 +12,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: CoarseGrainSystem2","[unit]"){
 
   cout << "Testing: mergeCluster" << endl;
   {
@@ -269,7 +271,4 @@ int main(void){
 
     } // With cluster formation
   }
-
-
-	return 0;
 }
