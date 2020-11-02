@@ -18,5 +18,10 @@ list( APPEND TEST_SOURCES
 add_executable(unit_tests ${TEST_SOURCES})
 target_link_libraries(unit_tests PUBLIC mythical Catch2::Catch2)
 ParseAndAddCatchTests(unit_tests)
-add_coverage_label(unit_tests)
+
+get_property(ALL_TESTS DIRECTORY . PROPERTY TESTS)
+
+# Add all the listed unit tests to coverage, exclude any test
+# containing the performance label
+add_coverage_label("${ALL_TESTS}" "performance")
  
