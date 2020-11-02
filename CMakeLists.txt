@@ -10,6 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(BUILD_SHARED_LIBS "Build shared libs" ON)
 option(ENABLE_TESTING "Build and enable unit testing" OFF)
+option(CODE_COVERAGE "Build with code coverage" OFF)
 ########################################################
 # Compiler Flags                                       #
 ########################################################
@@ -77,13 +78,13 @@ include(cmake/MythiCaLInstall.cmake)
 ###############################
 # Check if unit testing is on #
 ###############################
+include(cmake/CodeCov.cmake)
 if(ENABLE_TESTING)
   enable_testing()
   message("testing enabled")
   IF(CMAKE_BUILD_TYPE MATCHES "RELEASE")
     message("Cannot build unit tests with release mode")  
   ELSE(CMAKE_BUILD_TYPE MATCHES "RELEASE")
-    include(cmake/CodeCov.cmake)
     add_subdirectory(CoarseGrainSites/src/tests/unit)
   ENDIF(CMAKE_BUILD_TYPE MATCHES "RELEASE")
   add_subdirectory(CoarseGrainSites/src/tests/regression)
@@ -102,20 +103,7 @@ endif(CXXTEST_ADD_PERFORMANCE)
 #####################################
 # Check if code coverage is enabled #
 #####################################
-create_coverage_targets()
+if( "${CODE_COVERAGE}" )
+  create_coverage_targets()
+endif()
 
-#foreach(FLAG_OPT ${CMAKE_CXX_FLAGS})
-#  if(${FLAG_OPT} MATCHES "-coverage")
-#    find_program(GCOV_EXE gcov)
-#    if(GCOV_EXE)
-#      file(GLOB COVERAGE_FILES ${PROJECT_BINARY_DIR}/CMakeFiles/mythical.dir/CoarseGrainSites/src/libmythical/*gcno ${PROJECT_BINARY_DIR}/CMakeFiles/mythical.dir/CoarseGrainSites/src/libmythical/topologyfeatures/*gcno)
-#      foreach(PROG ${COVERAGE_FILES})
-#        get_filename_component(NAME_FILE ${PROG} NAME)
-#        add_test(coverage_${NAME_FILE} gcov ${PROG})
-#      endforeach()
-#
-#    elseif(NOT GCOV_EXE)
-#      message("Unable to find gcov")
-#    endif(GCOV_EXE)
-#  endif(${FLAG_OPT} MATCHES "-coverage")
-#endforeach()

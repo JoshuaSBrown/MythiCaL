@@ -20,7 +20,7 @@ matrix:
             - gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCMAKE_CXX_FLAGS=-coverage"
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCODE_COVERAGE=ON"
     - os: linux
       addons:
         apt:
@@ -31,7 +31,7 @@ matrix:
             - gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCMAKE_CXX_FLAGS=-coverage"
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCODE_COVERAGE=ON"
     - os: linux
       addons:
         apt:
@@ -83,5 +83,9 @@ script:
   - make
   - make test ARGS="-V"
 
+
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - if [[ "${CODE_COVERAGE}" == "ON" ]]; then
+    make coverage
+    make coverage-upload
+    fi
