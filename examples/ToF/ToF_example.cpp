@@ -20,7 +20,7 @@ namespace my = mythical;
 namespace myct = mythical::charge_transport;
 
 int main() {
-  
+
   const double nm_to_m = 1E-9; // m/nm
 
   // Define the dimensions of our system in terms of lattice sites
@@ -38,7 +38,7 @@ int main() {
   const double mean = -1.2;
   const double std_deviation = 0.07;
   std::normal_distribution<double> distribution(mean, std_deviation);
- 
+
   // Randomly assign energies from our DOS to our lattice sites
   std::default_random_engine generator;
   std::vector<double> site_energies(total_num_sites);
@@ -138,27 +138,26 @@ int main() {
   std::cout << "Transient Current" << std::endl;
 
   int current_index = 0; 
-  while(!walker_global_times.size() && walker_global_times.begin()->second<cutoff_time){
+  while(!walker_global_times.size() && walker_global_times.at(0).second<cutoff_time){
     double deltaX = 0.0;
-    while(!walker_global_times.empty() && walker_global_times.begin()->second<sample_time){
-      auto walker_index = walker_global_times.begin()->first;
-      std::shared_ptr<my::Walker>& hole = holes.at(walker_index).second;
+    while(walker_global_times.size() && walker_global_times.at(0)->second < sample_time){
+      pair<int,double> walker = walker_global_times.pop_front();
+      std::shared_ptr<my::Walker>& hole = holes.at(walker.first).second;
       int siteId = hole->getIdOfSiteCurrentlyOccupying();
       int old_x_pos = lattice.getX(siteId);
-      CGsystem.hop(walker_index,hole);
+      CGsystem.hop(walker.first,hole);
       siteId = hole->getIdOfSiteCurrentlyOccupying();
       int new_x_pos = lattice.getX(siteId);
       deltaX+=static_cast<double>(new_x_pos-old_x_pos);
-//      std::cout << "new x pos " << new_x_pos << " delta X " << deltaX <<  std::endl;
       // Update the dwell time
-      walker_global_times.begin()->second += hole->getDwellTime();
+      walker.second += hole->getDwellTime();
       // reorder the walkers based on which one will move next
-      if(new_x_pos == lattice.getLength()-1){
-        std::cout << "Removing walker" << walker_index << std::endl;
+      if(new_x_pos < lattice.getLength()){
+        walker_global_times.sortedAdd(walker);
+      } else {
+        std::cout << "Removing walker" << walker.first << std::endl;
         CGsystem.removeWalkerFromSystem(walker_index,hole);
-        walker_global_times.pop_front();
       }
-      walker_global_times.sort(compareSecondItemOfPair);
     }
     transient_current.at(current_index) = deltaX*nm_to_m/current_time_sample_increment;
     std::cout << sample_time << " " << transient_current.at(current_index) << std::endl;
