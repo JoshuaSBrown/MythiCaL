@@ -16,5 +16,5 @@ list( APPEND TEST_SOURCES
     test_site_container.cpp)
 
   add_executable(unit_tests ${TEST_SOURCES})
-  target_link_libraries(unit_tests mythical Catch2::Catch2)
+  target_link_libraries(unit_tests PUBLIC mythical Catch2::Catch2)
   ParseAndAddCatchTests(unit_tests)

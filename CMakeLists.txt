@@ -57,6 +57,20 @@ include_directories(CoarseGrainSites/include)
 include_directories(CoarseGrainSites/src)
 include_directories(UGLY/include)
 
+########################
+# Catch2 Configuration #
+########################
+if(ENABLE_TESTING)
+  if( NOT CMAKE_BUILD_TYPE MATCHES "RELEASE")
+    find_package(Catch2)
+    if( NOT Catch2_FOUND )
+      include(cmake/InstallCatch2.cmake)
+    endif()
+    include(Catch)
+    include(ParseAndAddCatchTests)
+  endif()
+endif(ENABLE_TESTING)
+
 ########################################################################
 # Grab source files and set the directory where they will be installed #
 ########################################################################
@@ -74,22 +88,15 @@ add_library(mythical ${SOURCES} ${SOURCES_UGLY1} ${SOURCES_UGLY2} ${SOURCES_UGLY
 set_target_properties(mythical PROPERTIES LINKER_LANGUAGE CXX)
 
 include(cmake/MythiCaLInstall.cmake)
+
 ###############################
 # Check if unit testing is on #
 ###############################
 if(ENABLE_TESTING)
   enable_testing()
-  message("testing enabled")
   IF(CMAKE_BUILD_TYPE MATCHES "RELEASE")
     message("Cannot build unit tests with release mode")  
   ELSE(CMAKE_BUILD_TYPE MATCHES "RELEASE")
-    find_package(Catch2)
-    if( NOT Catch2 )
-      include(${mythical_SOURCE_DIR}/cmake/InstallCatch2.cmake)
-    else()
-      message(STATUS "found system installed Catch2 will not download")
-    endif()
-    include(ParseAndAddCatchTests)
     add_subdirectory(CoarseGrainSites/src/tests/unit)
   ENDIF(CMAKE_BUILD_TYPE MATCHES "RELEASE")
   add_subdirectory(CoarseGrainSites/src/tests/regression)
@@ -101,7 +108,6 @@ endif(ENABLE_TESTING)
 
 if(CXXTEST_ADD_PERFORMANCE)
   enable_testing()
-  message("Performance testing enabled")
   add_subdirectory(CoarseGrainSites/src/tests/performance)
 endif(CXXTEST_ADD_PERFORMANCE)
 
