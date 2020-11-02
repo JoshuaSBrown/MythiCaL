@@ -35,7 +35,9 @@ class Queue {
 
   void sort(); 
 
-  std::size_t size();
+  std::size_t size() const noexcept ;
+
+  const std::pair<int,double> & at(int index) const;
  private:
   /**
    * The interger in the pair is the id of the walker and the double is global
