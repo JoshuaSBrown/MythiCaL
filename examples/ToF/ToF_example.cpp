@@ -1,4 +1,5 @@
 
+#include <mythical/queue.hpp>
 #include <mythical/walker.hpp>
 #include <mythical/charge_transport/cubic_lattice.hpp>
 #include <mythical/charge_transport/marcus.hpp>
@@ -17,10 +18,6 @@ using namespace std;
 
 namespace my = mythical;
 namespace myct = mythical::charge_transport;
-
-bool compareSecondItemOfPair(const pair<int,double> &x, const pair<int,double> & y){
-  return x.second<y.second;
-}
 
 int main() {
   
@@ -121,7 +118,7 @@ int main() {
 
   vector<double> transient_current(data_samples,0.0);
   // Calculate Walker dwell times and sort 
-  list<pair<int,double>> walker_global_times;
+  my::Queue walker_global_times;
   {
 
     mt19937 random_number_generator;
@@ -131,17 +128,17 @@ int main() {
     std::cout << "Dwell times" << std::endl;
     for(int walker_index=0; walker_index < num_charges; ++walker_index){
       std::cout << holes.at(walker_index).second->getDwellTime() << std::endl;
-      walker_global_times.push_back(pair<int,double>(walker_index,holes.at(walker_index).second->getDwellTime()));
+      walker_global_times.add(pair<int,double>(walker_index,holes.at(walker_index).second->getDwellTime()));
     }
-    walker_global_times.sort(compareSecondItemOfPair);
+    walker_global_times.sort();
   }// Calculate walker dwell times and sort
-  assert(walker_global_times.begin()->second<cutoff_time);
+  assert(walker_global_times.at(0)->second<cutoff_time);
 
   std::cout << std::endl;
   std::cout << "Transient Current" << std::endl;
 
   int current_index = 0; 
-  while(!walker_global_times.empty() && walker_global_times.begin()->second<cutoff_time){
+  while(!walker_global_times.size() && walker_global_times.begin()->second<cutoff_time){
     double deltaX = 0.0;
     while(!walker_global_times.empty() && walker_global_times.begin()->second<sample_time){
       auto walker_index = walker_global_times.begin()->first;
