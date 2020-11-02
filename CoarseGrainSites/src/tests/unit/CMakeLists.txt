@@ -23,5 +23,6 @@ get_property(ALL_TESTS DIRECTORY . PROPERTY TESTS)
 
 # Add all the listed unit tests to coverage, exclude any test
 # containing the performance label
+message("Adding tests to coverage label ${ALL_TESTS}")
 add_coverage_label("${ALL_TESTS}" "performance")
  
