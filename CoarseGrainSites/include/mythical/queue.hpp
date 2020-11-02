@@ -12,7 +12,7 @@ namespace mythical {
  **/
 class Queue {
  public:
-  Queue() {};
+  Queue() : sorted_(true) {};
 
   /**
    * \brief get the walker at the front of the queue also removes from the list
