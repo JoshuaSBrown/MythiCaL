@@ -21,6 +21,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
         - COMPILE_FLAGS="-DENABLE_TESTING=ON"
+        - BUILD_TYPE="Debug"
         - CODE_COVERAGE="ON"
     - os: linux
       addons:
@@ -33,6 +34,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
         - COMPILE_FLAGS="-DENABLE_TESTING=ON"
+        - BUILD_TYPE="Debug"
         - CODE_COVERAGE="ON"
     - os: linux
       addons:
@@ -44,7 +46,8 @@ matrix:
             - gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON -DCMAKE_BUILD_TYPE=Release"
+        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON"
+        - BUILD_TYPE="Release"
     - os: linux
       addons:
         apt:
@@ -55,7 +58,8 @@ matrix:
             - gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON -DCMAKE_BUILD_TYPE=Release"
+        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON"
+        - BUILD_TYPE="Release"
 
 before_script:
   - sudo apt-get install build-essential
@@ -86,7 +90,7 @@ script:
   - mkdir build
   - cd build
   - pwd
-  - cmake "${COMPILE_FLAGS}" "-DCODE_COVERAGE=${CODE_COVERAGE}"  ..
+  - cmake "${COMPILE_FLAGS}" "-DCODE_COVERAGE=${CODE_COVERAGE}" "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"  ..
   - make
   - make test ARGS="-V"
   - echo "CODE COVERAGE ${CODE_COVERAGE}"
