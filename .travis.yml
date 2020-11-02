@@ -59,7 +59,8 @@ matrix:
 
 before_script:
   - sudo apt-get install build-essential
-  - if [[ "${CODE_COVERAGE}" = "ON" ]]; then
+  - |
+    if [[ "${CODE_COVERAGE}" = "ON" ]]; then
     sudo apt-get install lcov
     fi
   - cmake --version
