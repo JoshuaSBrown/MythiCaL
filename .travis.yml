@@ -86,7 +86,7 @@ script:
 
 
 after_success:
-  - if [[ "${CODE_COVERAGE}" == "ON" ]]; then
+  - if [[ "${CODE_COVERAGE}" = "ON" ]]; then
     make coverage
     make coverage-upload
     fi
