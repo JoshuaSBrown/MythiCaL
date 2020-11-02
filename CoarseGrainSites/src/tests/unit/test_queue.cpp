@@ -1,3 +1,6 @@
+
+#include <catch2/catch.hpp>
+
 #include <cassert>
 #include <iostream>
 
@@ -6,7 +9,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void) {
+TEST_CASE("Testing: Queue","[unit]"){
 
   cout << "Testing: Queue constructor" << endl;
   { Queue kmc_queue; }
@@ -52,5 +55,4 @@ int main(void) {
     assert(pr==pr1);
     assert(kmc_queue.size()==0);
   }
-  return 0;
 }

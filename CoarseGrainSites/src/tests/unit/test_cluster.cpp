@@ -1,3 +1,5 @@
+#include <catch2/catch.hpp>
+
 #include <iostream>
 #include <cassert>
 #include <vector>
@@ -10,7 +12,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: Cluster","[unit]"){
 
 //  Site site;
 
@@ -507,6 +509,4 @@ int main(void){
     assert(visit_prob.at(2) < baseline_visit_prob.at(2)*1.2);
     assert(visit_prob.at(2) > baseline_visit_prob.at(2)*0.8);
   }
-
-	return 0;
 }

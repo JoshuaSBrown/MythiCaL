@@ -1,4 +1,6 @@
 
+#include <catch2/catch.hpp>
+
 #include <iostream>
 #include <cassert>
 
@@ -7,7 +9,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: Constructor","[unit]"){
   cout << "Testing: Constructor" << endl;
   {
     Rate_Container rate_container;
@@ -219,6 +221,5 @@ int main(void){
     assert(sinks.at(0)==2);
 
   }
-  return 0;
 }
 

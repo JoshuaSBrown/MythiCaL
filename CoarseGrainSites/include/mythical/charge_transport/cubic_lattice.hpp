@@ -30,6 +30,17 @@ namespace mythical {
 
         Cubic() = default;
 
+
+        /**
+         * @brief Creat Cubic lattice
+         *
+         * @param length - of lattice in terms of sites
+         * @param width - of lattice in terms of sites
+         * @param height - height in terms of sites
+         *
+         * lattice spacing by default is set to 1.0
+         * x, y, and z bounds are set to fixed (NOT periodic)
+         */
         Cubic(const int length, const int width, const int height);
 
         Cubic(const int length, 
@@ -50,6 +61,8 @@ namespace mythical {
         int getLength() const noexcept;
         int getWidth() const noexcept;
         int getHeight() const noexcept; 
+        
+        double getLatticeSpacing() const noexcept;
 
         int getIndex(const int x, const int y, const int z) const;
 
@@ -63,6 +76,9 @@ namespace mythical {
         int getY(int index) const;
         int getZ(int index) const;
 
+        bool isXPeriodic() const noexcept;
+        bool isYPeriodic() const noexcept;
+        bool isZPeriodic() const noexcept;
         /**
          * @brief Get all sites that are within the cutoff distance of **index**
          *
@@ -93,7 +109,7 @@ namespace mythical {
          *
          * @return the distance 
          */
-        double getDistance(const int index1, const int index2) const;
+        double getSmallestDistance(const int index1, const int index2) const;
 
       private:
         int length_;

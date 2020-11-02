@@ -1,3 +1,6 @@
+
+#include <catch2/catch.hpp>
+
 #include <iostream>
 #include <cassert>
 #include <vector>
@@ -8,7 +11,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: Identity","[unit]"){
 
   cout << "Testing: Identity constructor" << endl;
   {
@@ -36,6 +39,4 @@ int main(void){
     }
     assert(fail);
   }
-
-	return 0;
 }

@@ -1,3 +1,4 @@
+#include <catch2/catch.hpp>
 
 #include <iostream>
 #include <list>
@@ -9,7 +10,7 @@
 using namespace std;
 using namespace mythical;
 
-int main(void){
+TEST_CASE("Testing: findBasin","[unit]"){
 
   cout << "Testing: findBasin" << endl;
   cout << "Test 1" << endl;
@@ -325,6 +326,4 @@ int main(void){
     }
 
   }
-
-  return 0;
 }
