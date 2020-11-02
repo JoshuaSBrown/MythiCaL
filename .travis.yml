@@ -65,7 +65,7 @@ before_script:
   - sudo apt-get install build-essential
   - |
     if [[ "${CODE_COVERAGE}" = "ON" ]]; then
-    sudo apt-get install lcov
+    sudo apt-get install lcov gcov
     fi
   - cmake --version
   - eval "${MATRIX_EVAL}"
