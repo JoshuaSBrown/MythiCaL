@@ -94,4 +94,8 @@ script:
   - make
   - make test ARGS="-V"
   - echo "CODE COVERAGE ${CODE_COVERAGE}"
-  - test ${CODE_COVERAGE} = "ON" && make coverage && make coverage-upload
+  - |
+    if [[ "${CODE_COVERAGE}" == "ON" ]]; then
+    make coverage
+    make coverage-upload
+    fi
