@@ -17,4 +17,4 @@ done
 
 mkdir -p "${WORKING_PATH}/CombinedCoverage"
 echo "COMMAND args $COMMAND_ARGS"
-command ${LCOV} $COMMAND_ARGS --output-file "${WORKING_PATH}/CombinedCoverage/report.combined.all"
+command ${LCOV} $COMMAND_ARGS "--output-file" "${WORKING_PATH}/CombinedCoverage/report.combined.all"
