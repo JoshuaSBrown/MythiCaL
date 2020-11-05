@@ -487,6 +487,7 @@ namespace mythical {
                       int neigh_index = getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);
                       if ( neigh_index != index ) {
                         neigh_distances[neigh_index][index] = dist;
+                        neigh_distances[index][neigh_index] = dist;
                       }
                     }
                   }
