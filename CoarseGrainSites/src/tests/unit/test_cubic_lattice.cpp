@@ -74,6 +74,13 @@ TEST_CASE("Testing: Cubic lattice constructors and getters","[unit]") {
     CHECK( pos.at(0) == 1 );
     CHECK( pos.at(1) == 2 );
     CHECK( pos.at(2) == 3 );
+
+    CHECK( lattice.getX(lattice.getIndex(1,0,0)) == 1 );
+    CHECK( lattice.getX(lattice.getIndex(0,0,0)) == 0 );
+    CHECK( lattice.getY(lattice.getIndex(1,2,0)) == 2 );
+    CHECK( lattice.getY(lattice.getIndex(0,0,1)) == 0 );
+    CHECK( lattice.getZ(lattice.getIndex(1,2,0)) == 0 );
+    CHECK( lattice.getZ(lattice.getIndex(0,0,3)) == 3 );
   }
 }
 
@@ -86,6 +93,21 @@ TEST_CASE("Testing: Cubic lattice neighbors and distances","[unit]") {
 
       neighbors = lattice.getNeighbors(4*5*7-1, 1.0); 
       CHECK( neighbors.size() == 3);
+
+      // Ensure that the positions of neighbors are accurate because it is
+      // a corner 
+      int x_at_2 = 0;
+      int y_at_3 = 0;
+      int z_at_5 = 0;
+      for ( int neigh_ind : neighbors ) {
+        auto pos = lattice.getPosition(neigh_ind);
+        if( pos.at(0) == 2 ) x_at_2++;
+        if( pos.at(1) == 3 ) y_at_3++;
+        if( pos.at(2) == 5 ) z_at_5++;
+      }
+      CHECK( x_at_2 == 1 );
+      CHECK( y_at_3 == 1 );
+      CHECK( z_at_5 == 1 );
     }
   }
 

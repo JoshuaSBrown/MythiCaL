@@ -1,7 +1,6 @@
 
 #include "mythical/charge_transport/cubic_lattice.hpp"
 
-#include <cassert>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -488,7 +487,7 @@ namespace mythical {
                       int neigh_index = getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);
                       if ( neigh_index != index ) {
                         neigh_distances[neigh_index][index] = dist;
-                        assert( neigh_index < index && "Error in neigh distances calculation, we assumed index will always be greater than neigh_index");  
+                        neigh_distances[index][neigh_index] = dist;
                       }
                     }
                   }
