@@ -136,7 +136,6 @@ void printTransientCurrent(
 }
 
 int main() {
-  const double nm_to_m = 1E-9; // m/nm
   const double nm_to_cm = 1E-7; // cm/nm
 
   // Define the dimensions of our system in terms of lattice sites
