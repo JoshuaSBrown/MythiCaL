@@ -50,7 +50,7 @@ calculateRates(const myct::Cubic & lattice, std::vector<double> site_energies) {
   double A = 8; // eV
   auto marcus = myct::Marcus(lambda, Temp);
  
-  double electric_field = 0.03; // eV/nm
+  double electric_field = 0.1; // eV/nm
   double charge = 1.0; // q because hole
 
   unordered_map<int,unordered_map<int,double>> distances = lattice.getNeighborDistances(cutoff_dist);
@@ -140,9 +140,9 @@ int main() {
   const double nm_to_cm = 1E-7; // cm/nm
 
   // Define the dimensions of our system in terms of lattice sites
-  const int len = 100;
+  const int len = 200;
   const int wid = 80;
-  const int hei = 50;
+  const int hei = 80;
   const double inter_site_dist = 1; // nm
   const int total_num_sites = len * wid * hei; 
   myct::BoundarySetting x_b = myct::BoundarySetting::Fixed;
@@ -159,8 +159,8 @@ int main() {
   auto holes = populateLattice(num_charges, lattice);
 
 //  int data_samples = 400; // The number of times we want to measure the current 
-  double cutoff_time = 1.5E-8; // seconds 
-  double current_time_sample_increment = 0.5E-8/static_cast<double>(300);
+  double cutoff_time = 0.4E-8; // seconds 
+  double current_time_sample_increment = 2E-9/static_cast<double>(300);
   double sample_time = current_time_sample_increment;
   
   int random_number_seed = 1943;
@@ -173,8 +173,8 @@ int main() {
   my::Queue walker_global_times = createQueue(holes, cutoff_time);
   vector<double> transient_current;
   vector<double> charges_left;
-  transient_current.reserve(300*3);
-  charges_left.reserve(300*3);
+  transient_current.reserve(300*2);
+  charges_left.reserve(300*2);
   // Calculate Walker dwell times and sort 
 
   std::cout << "- Beginning loop." << std::endl;
