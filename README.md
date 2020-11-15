@@ -11,7 +11,7 @@ This library is still under development.
 
 ## Documentation
  
-[MythiCaL Home](https://joshuasbrown.github.io/docs/MythiCaL/mythical_home.html)on-Errors)
+[MythiCaL Home](https://joshuasbrown.github.io/docs/MythiCaL/mythical_home.html)
 
 ## Developers
 
