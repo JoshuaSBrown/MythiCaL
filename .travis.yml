@@ -2,7 +2,7 @@ sudo: required
 
 language: cpp
 
-dist: trusty
+dist: xenial
 
 env:
   global:
@@ -20,7 +20,9 @@ matrix:
             - gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCODE_COVERAGE=ON"
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON"
+        - BUILD_TYPE="Debug"
+        - CODE_COVERAGE="ON"
     - os: linux
       addons:
         apt:
@@ -31,7 +33,9 @@ matrix:
             - gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-        - COMPILE_FLAGS="-DENABLE_TESTING=ON -DCODE_COVERAGE=ON"
+        - COMPILE_FLAGS="-DENABLE_TESTING=ON"
+        - BUILD_TYPE="Debug"
+        - CODE_COVERAGE="ON"
     - os: linux
       addons:
         apt:
@@ -42,7 +46,8 @@ matrix:
             - gcc-7
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON -DCMAKE_BUILD_TYPE=Release"
+        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON"
+        - BUILD_TYPE="Release"
     - os: linux
       addons:
         apt:
@@ -53,10 +58,15 @@ matrix:
             - gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON -DCMAKE_BUILD_TYPE=Release"
+        - COMPILE_FLAGS="-DCXXTEST_ADD_PERFORMANCE=ON"
+        - BUILD_TYPE="Release"
 
 before_script:
   - sudo apt-get install build-essential
+  - |
+    if [[ "${CODE_COVERAGE}" = "ON" ]]; then
+    sudo apt-get install lcov
+    fi
   - cmake --version
   - eval "${MATRIX_EVAL}"
   
@@ -69,24 +79,18 @@ install:
   - git branch -a
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    CMAKE_URL="http://www.cmake.org/files/v3.4/cmake-3.4.1.tar.gz"
-    mkdir cmake && wget ${CMAKE_URL} && tar -xzf cmake-3.4.1.tar.gz && cd cmake-3.4.1/ && ./configure >/dev/null && make >/dev/null && sudo make install >/dev/null
-    fi
 
 script:
   - cd "${TRAVIS_BUILD_DIR}"
   - mkdir build
   - cd build
   - pwd
-  - cmake "${COMPILE_FLAGS}" ..
+  - cmake "${COMPILE_FLAGS}" "-DCODE_COVERAGE=${CODE_COVERAGE}" "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"  ..
   - make
   - make test ARGS="-V"
-
-
-after_success:
-  - if [[ "${CODE_COVERAGE}" = "ON" ]]; then
+  - echo "CODE COVERAGE ${CODE_COVERAGE}"
+  - |
+    if [[ "${CODE_COVERAGE}" == "ON" ]]; then
     make coverage
     make coverage-upload
     fi

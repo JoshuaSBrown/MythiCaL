@@ -12,13 +12,13 @@ namespace mythical {
   namespace charge_transport {
    
     /**
-     * \brief Cubic class is a support class meant to help with charge transport
+     * \brief Cuboid class is a support class meant to help with charge transport
      * simulations.
      *
      * This class provides a hopefully useful interface to the user for mapping
      * the positions of sites to their indices when using a cubic lattice.
      **/
-    class Cubic { 
+    class Cuboid { 
 
       public:
 
@@ -28,11 +28,11 @@ namespace mythical {
           XZ
         };
 
-        Cubic() = default;
+        Cuboid() = default;
 
 
         /**
-         * @brief Creat Cubic lattice
+         * @brief Creat Cuboid lattice
          *
          * @param length - of lattice in terms of sites
          * @param width - of lattice in terms of sites
@@ -41,14 +41,14 @@ namespace mythical {
          * lattice spacing by default is set to 1.0
          * x, y, and z bounds are set to fixed (NOT periodic)
          */
-        Cubic(const int length, const int width, const int height);
+        Cuboid(const int length, const int width, const int height);
 
-        Cubic(const int length, 
+        Cuboid(const int length, 
             const int width, 
             const int height, 
             const double inter_site_distance);
 
-        Cubic(const int length, 
+        Cuboid(const int length, 
             const int width, 
             const int height, 
             const double inter_site_distance,
@@ -56,7 +56,7 @@ namespace mythical {
             const BoundarySetting y_bound,
             const BoundarySetting z_bound);
 
-        ~Cubic(){};
+        ~Cuboid(){};
 
         int getLength() const noexcept;
         int getWidth() const noexcept;

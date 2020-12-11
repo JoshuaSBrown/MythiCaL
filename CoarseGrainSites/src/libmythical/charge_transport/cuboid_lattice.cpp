@@ -1,5 +1,5 @@
 
-#include "mythical/charge_transport/cubic_lattice.hpp"
+#include "mythical/charge_transport/cuboid_lattice.hpp"
 
 #include <iostream>
 #include <string>
@@ -14,7 +14,7 @@ namespace mythical {
     /**************************************************************************
      * Internal Methods
      *************************************************************************/
-    void Cubic::checkPosX_(const int x) const {
+    void Cuboid::checkPosX_(const int x) const {
       if ( x < 0 ) {
         throw std::invalid_argument("x position of site is negative, site must"
             " be within bounds between 0 and " + to_string(length_-1));
@@ -24,7 +24,7 @@ namespace mythical {
             " be within bounds between 0 and " + to_string(length_-1));
       } 
     }
-    void Cubic::checkPosY_(const int y) const {
+    void Cuboid::checkPosY_(const int y) const {
       if ( y < 0 ) {
         throw std::invalid_argument("y position of site is negative, site must"
             " be within bounds between 0 and " + to_string(width_-1));
@@ -34,7 +34,7 @@ namespace mythical {
             " be within bounds between 0 and " + to_string(width_-1));
       }
     }
-    void Cubic::checkPosZ_(const int z) const {
+    void Cuboid::checkPosZ_(const int z) const {
       if ( z < 0 ) {
         throw std::invalid_argument("z position of site is negative, site must"
             " be within bounds between 0 and " + to_string(height_-1));
@@ -45,7 +45,7 @@ namespace mythical {
       }
     }
 
-    std::vector<int> Cubic::getPos_(int index) const noexcept {
+    std::vector<int> Cuboid::getPos_(int index) const noexcept {
       int z = index / (length_*width_);
       index -= (length_*width_*z);
       int y = index / (length_);
@@ -53,22 +53,22 @@ namespace mythical {
       return vector<int>{x,y,z};
     }
 
-    void Cubic::checkBounds_() const {
+    void Cuboid::checkBounds_() const {
       if ( length_ < 0 ) {
-        throw std::invalid_argument("Cannot initialize Cubic Lattice with "
+        throw std::invalid_argument("Cannot initialize Cuboid Lattice with "
             "a negative length");
       } 
       if ( width_ < 0 ) {
-        throw std::invalid_argument("Cannot initialize Cubic Lattice with "
+        throw std::invalid_argument("Cannot initialize Cuboid Lattice with "
             "a negative width");
       }
       if ( height_ < 0 ) {
-        throw std::invalid_argument("Cannot initialize Cubic Lattice with "
+        throw std::invalid_argument("Cannot initialize Cuboid Lattice with "
             "a negative height");
       }
     }
     
-    void Cubic::checkIndex_(const int index) const {
+    void Cuboid::checkIndex_(const int index) const {
       if ( index < 0 ) {
         throw std::invalid_argument("Cannot access index " + std::to_string(index) + 
             " out of bounds, index must be a value between 0 and " + std::to_string(total_-1));
@@ -79,11 +79,11 @@ namespace mythical {
       } 
     }
 
-    int Cubic::getIndex_(const int x, const int y, const int z) const noexcept {
+    int Cuboid::getIndex_(const int x, const int y, const int z) const noexcept {
       return (z*length_*width_) + (y*length_)+x;  
     }
 
-    double Cubic::getDistance_(const int x1, const int y1, const int z1,
+    double Cuboid::getDistance_(const int x1, const int y1, const int z1,
         const int x2, const int y2, const int z2) const noexcept {
 
       int xdiff = x1-x2;
@@ -98,7 +98,7 @@ namespace mythical {
       return std::pow(static_cast<double>(xdiff+ydiff+zdiff), 0.5) * inter_site_distance_;
     }
 
-    std::vector<std::pair<int,double>> Cubic::getNeighborDistances_(const std::vector<int> pos_i, const double cutoff) const {
+    std::vector<std::pair<int,double>> Cuboid::getNeighborDistances_(const std::vector<int> pos_i, const double cutoff) const {
 
       // Calculate the number of sites that will be within the cutoff 
       int num_sites = static_cast<int>(std::floor(cutoff/inter_site_distance_));  
@@ -154,28 +154,28 @@ namespace mythical {
     }
 
 
-    int Cubic::getXPeriodic_( const int x ) const noexcept{
+    int Cuboid::getXPeriodic_( const int x ) const noexcept{
       if(x<0){
         return x+length_;
       }
       return x % length_;
     }
 
-    int Cubic::getYPeriodic_( const int y ) const noexcept{
+    int Cuboid::getYPeriodic_( const int y ) const noexcept{
       if(y<0){
         return y+width_;
       }
       return y % width_;
     }
 
-    int Cubic::getZPeriodic_( const int z ) const noexcept{
+    int Cuboid::getZPeriodic_( const int z ) const noexcept{
       if(z<0){
         return z+height_;
       }
       return z % height_;
     }
 
-    void Cubic::setDistributions_() {
+    void Cuboid::setDistributions_() {
       distribution_x_ = std::uniform_int_distribution<int>(0,length_-1);
       distribution_y_ = std::uniform_int_distribution<int>(0,width_-1);
       distribution_z_ = std::uniform_int_distribution<int>(0,height_-1);
@@ -184,7 +184,7 @@ namespace mythical {
     /**************************************************************************
      * Public Methods
      *************************************************************************/
-    Cubic::Cubic(const int length, const int width, const int height) : 
+    Cuboid::Cuboid(const int length, const int width, const int height) : 
       length_(length), width_(width), height_(height), 
       total_(length*width*height),
       inter_site_distance_(1.0),
@@ -196,7 +196,7 @@ namespace mythical {
       setDistributions_();
     }
 
-    Cubic::Cubic(const int length, 
+    Cuboid::Cuboid(const int length, 
         const int width, 
         const int height, 
         const double inter_site_distance) :
@@ -211,7 +211,7 @@ namespace mythical {
         setDistributions_();
       }
 
-    Cubic::Cubic(const int length, 
+    Cuboid::Cuboid(const int length, 
         const int width, 
         const int height, 
         const double inter_site_distance,
@@ -227,27 +227,27 @@ namespace mythical {
         setDistributions_();
       }
 
-    int Cubic::getLength() const noexcept { return length_; }
-    int Cubic::getWidth() const noexcept { return width_; } 
-    int Cubic::getHeight() const noexcept { return height_; }
+    int Cuboid::getLength() const noexcept { return length_; }
+    int Cuboid::getWidth() const noexcept { return width_; } 
+    int Cuboid::getHeight() const noexcept { return height_; }
 
-    bool Cubic::isXPeriodic() const noexcept {
+    bool Cuboid::isXPeriodic() const noexcept {
       return x_bound_ == BoundarySetting::Periodic; 
     }
 
-    bool Cubic::isYPeriodic() const noexcept {
+    bool Cuboid::isYPeriodic() const noexcept {
       return y_bound_ == BoundarySetting::Periodic; 
     }
 
-    bool Cubic::isZPeriodic() const noexcept {
+    bool Cuboid::isZPeriodic() const noexcept {
       return z_bound_ == BoundarySetting::Periodic; 
     }
 
-    double Cubic::getLatticeSpacing() const noexcept { 
+    double Cuboid::getLatticeSpacing() const noexcept { 
       return inter_site_distance_;
     }
 
-    int Cubic::getIndex(const int x, const int y, const int z) const {
+    int Cuboid::getIndex(const int x, const int y, const int z) const {
       int x_lattice_pos = x;
       int y_lattice_pos = y;
       int z_lattice_pos = z;
@@ -273,7 +273,7 @@ namespace mythical {
       return getIndex_(x_lattice_pos, y_lattice_pos, z_lattice_pos);  
     }
 
-    int Cubic::getIndex(const std::vector<int> & site_position) const {
+    int Cuboid::getIndex(const std::vector<int> & site_position) const {
       if ( site_position.size() != 3 ) {
         throw std::invalid_argument("Unable to get index, vector must have "
             "3 dimensions, the provided vector has " + std::to_string(site_position.size()));
@@ -282,7 +282,7 @@ namespace mythical {
           site_position.at(1), site_position.at(2)); 
     }
 
-    int Cubic::getRandomSite(const Plane plane, const int plane_index) {
+    int Cuboid::getRandomSite(const Plane plane, const int plane_index) {
       int x_lattice_pos = plane_index;
       int y_lattice_pos = plane_index;
       int z_lattice_pos = plane_index;
@@ -317,7 +317,7 @@ namespace mythical {
       return getIndex(x_lattice_pos,y_lattice_pos,z_lattice_pos);
     }
 
-    std::vector<int> Cubic::getPosition(int index) const {
+    std::vector<int> Cuboid::getPosition(int index) const {
       if ( index >= length_ * width_ * height_ ) {
         std::string error_msg = "Cannot call " + std::string(__FUNCTION__) + ", "
           "with index " + to_string(index) + " index is out of bounds"
@@ -328,7 +328,7 @@ namespace mythical {
       return getPos_(index);
     }
 
-    int Cubic::getX(int index) const {
+    int Cuboid::getX(int index) const {
       if ( index >= length_ * width_ * height_ ) {
         std::string error_msg = "Cannot call " + std::string(__FUNCTION__) + ", "
           "with index " + to_string(index) + " index is out of bounds"
@@ -341,7 +341,7 @@ namespace mythical {
       return index % length_;
     }
 
-    int Cubic::getY(int index) const {
+    int Cuboid::getY(int index) const {
       if ( index >= length_ * width_ * height_ ) {
         std::string error_msg = "Cannot call " + std::string(__FUNCTION__) + ", "
           "with index " + to_string(index) + " index is out of bounds"
@@ -354,7 +354,7 @@ namespace mythical {
       return index / (length_);
     }
 
-    int Cubic::getZ(int index) const {
+    int Cuboid::getZ(int index) const {
       if ( index >= length_ * width_ * height_ ) {
         std::string error_msg = "Cannot call " + std::string(__FUNCTION__) + ", "
           "with index " + to_string(index) + " index is out of bounds"
@@ -365,7 +365,7 @@ namespace mythical {
       return index / (length_*width_);
     }
 
-    std::vector<int> Cubic::getNeighbors(const int index, const double cutoff) const {
+    std::vector<int> Cuboid::getNeighbors(const int index, const double cutoff) const {
       checkIndex_(index);
       std::vector<int> pos_i = getPosition(index);
       // Calculate the number of sites that will be within the cutoff 
@@ -420,14 +420,14 @@ namespace mythical {
       return neighbors;
     }
 
-    std::vector<std::pair<int,double>> Cubic::getNeighborDistances(const int index, const double cutoff) const {
+    std::vector<std::pair<int,double>> Cuboid::getNeighborDistances(const int index, const double cutoff) const {
       checkIndex_(index);
       std::vector<int> pos_i = getPosition(index);
 
       return getNeighborDistances_(pos_i, cutoff);
     }
 
-    std::vector<std::pair<int,double>> Cubic::getNeighborDistances(const std::vector<int> pos, const double cutoff) const {
+    std::vector<std::pair<int,double>> Cuboid::getNeighborDistances(const std::vector<int> pos, const double cutoff) const {
       if ( pos.size() != 3 ) {
         throw std::invalid_argument("Unable to get NeighborDistances, vector must have "
             "3 dimensions, the provided position vector has " + std::to_string(pos.size()));
@@ -439,7 +439,7 @@ namespace mythical {
       return getNeighborDistances_(pos, cutoff);
     }
 
-    std::unordered_map<int, std::unordered_map<int,double>> Cubic::getNeighborDistances(const double cutoff) const {
+    std::unordered_map<int, std::unordered_map<int,double>> Cuboid::getNeighborDistances(const double cutoff) const {
 
       // Calculate the number of sites that will be within the cutoff 
       int num_sites = static_cast<int>(std::floor(cutoff/inter_site_distance_));  
@@ -500,7 +500,7 @@ namespace mythical {
       return neigh_distances;
     }
 
-    double Cubic::getSmallestDistance(const int index1, const int index2) const {
+    double Cuboid::getSmallestDistance(const int index1, const int index2) const {
       checkIndex_(index1);
       checkIndex_(index2);
 
