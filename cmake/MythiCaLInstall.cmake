@@ -1,3 +1,6 @@
+
+set_target_properties(mythical PROPERTIES VERSION ${mythical_VERSION} SOVERSION ${SOVERSION})
+
 target_include_directories(mythical PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/libmythical>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/mythical>
